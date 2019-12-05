@@ -1,0 +1,1 @@
+Defines the annotations used by `copy_with_extension_gen` to generate `copyWith` extensions.

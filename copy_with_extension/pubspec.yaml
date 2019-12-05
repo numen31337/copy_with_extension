@@ -1,0 +1,12 @@
+name: copy_with_extension
+version: 1.0.0
+description: Annotation for generating `copyWith` extensions code using `copy_with_extension_gen`
+homepage: https://github.com/numen31337/copy_with_extension/copy_with_extension
+repository: https://github.com/numen31337/copy_with_extension
+issue_tracker: https://github.com/numen31337/copy_with_extension/issues
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dev_dependencies:
+  test: "<2.0.0"

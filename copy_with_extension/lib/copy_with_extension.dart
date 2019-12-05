@@ -1,0 +1,3 @@
+class CopyWith {
+  const CopyWith();
+}
