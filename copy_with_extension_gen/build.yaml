@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      copy_with_extension_gen|copy_with_extension:
+        enabled: true
+
+builders:
+  copy_with_extension_gen:
+    target: ":copy_with_extension_gen"
+    import: "package:copy_with_extension_gen/builder.dart"
+    builder_factories: ["copyWith"]
+    build_extensions: {".dart": ["copy_with_extension_gen.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
