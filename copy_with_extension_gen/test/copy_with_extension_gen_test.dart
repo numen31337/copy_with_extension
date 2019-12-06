@@ -16,7 +16,7 @@ void main() {
   });
 }
 
-Builder get builder => PartBuilder([CopyWithGenerator()], '.g.dart');
+Builder get _builder => PartBuilder([CopyWithGenerator()], '.g.dart');
 
 Future<String> _generate(String source) async {
   final srcs = <String, String>{
@@ -31,7 +31,7 @@ Future<String> _generate(String source) async {
 
   final writer = InMemoryAssetWriter();
   await testBuilder(
-    builder,
+    _builder,
     srcs,
     rootPackage: pkgName,
     writer: writer,
