@@ -5,6 +5,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:source_gen/source_gen.dart'
     show GeneratorForAnnotation, ConstantReader;
 
+/// A `Generator` for `package:build_runner`
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   @override
   String generateForAnnotatedElement(
@@ -36,12 +37,12 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final constructor = element.unnamedConstructor;
     if (constructor is! ConstructorElement) {
-      throw "Default constructor is missing";
+      throw "Default ${element.name} constructor is missing";
     }
 
     final parameters = constructor.parameters;
-    if (parameters is! List<ParameterElement> || parameters.length <= 0) {
-      throw "Constructor has no parameters";
+    if (parameters is! List<ParameterElement> || parameters.isEmpty) {
+      throw "Unnamed constructor for ${element.name} has no parameters";
     }
 
     final fields = parameters.map((v) => _FieldInfo(v)).toList();

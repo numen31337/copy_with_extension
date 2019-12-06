@@ -1,6 +1,6 @@
 [![Pub Package](https://img.shields.io/pub/v/copy_with_extension_gen.svg)](https://pub.dev/packages/copy_with_extension_gen)
 
-Provides Dart Build System builder for generating `copyWith` extensions for annotated classes.
+Provides [Dart Build System](https://pub.dev/packages/build) builder for generating `copyWith` extensions for classes annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension).
 
 ## Usage
 
