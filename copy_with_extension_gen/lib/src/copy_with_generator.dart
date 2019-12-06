@@ -45,6 +45,11 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       throw "Unnamed constructor for ${element.name} has no parameters";
     }
 
+    parameters.forEach((parameter) {
+      if (!parameter.isNamed)
+        throw "Unnamed constructor for ${element.name} contains unnamed parameter. Only named parameters are supported.";
+    });
+
     final fields = parameters.map((v) => _FieldInfo(v)).toList();
     fields.sort((lhs, rhs) => lhs.name.compareTo(rhs.name));
 
