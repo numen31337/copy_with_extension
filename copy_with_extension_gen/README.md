@@ -68,3 +68,10 @@ extension CopyWithExtension on BasicClass {
   }
 }
 ```
+
+#### Launch code generation:
+
+```
+flutter pub run build_runner build
+```
+
