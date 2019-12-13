@@ -8,7 +8,7 @@ Provides [Dart Build System](https://pub.dev/packages/build) builder for generat
 - Add to `dependencies` section `copy_with_extension: ">=1.0.0 <2.0.0"`
 - Add to `dev_dependencies` section `copy_with_extension_gen: ">=1.0.0 <2.0.0"`
 - Add to `dev_dependencies` section `build_runner: ">=1.0.0 <2.0.0"`
-- Set `environment` to at least Dart 2.6.0 version like so: `">=2.6.0 <3.0.0"`
+- Set `environment` to at least Dart 2.7.0 version like so: `">=2.7.0 <3.0.0"`
 
 Your `pubspec.yaml` should look like so:
 
@@ -18,7 +18,7 @@ description: project description
 version: 1.0.0
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: ">=2.7.0 <3.0.0"
 
 dependencies:
   ...
