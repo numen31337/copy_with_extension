@@ -1,4 +1,4 @@
-## 1.0.5 Minor corrections
+## 1.0.6 Minor corrections
 
 * Minor metadata and description corractions.
 
