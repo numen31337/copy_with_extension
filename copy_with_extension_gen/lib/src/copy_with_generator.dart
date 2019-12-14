@@ -25,7 +25,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       (r, v) => "$r ${v.name}: ${v.name} ?? this.${v.name},",
     );
 
-    return '''extension CopyWithExtension on ${classElement.name} {
+    return '''extension ${classElement.name}CopyWithExtension on ${classElement.name} {
       ${classElement.name} copyWith({$constructorInput}) {
         return ${classElement.name}($paramsInput);
       }
