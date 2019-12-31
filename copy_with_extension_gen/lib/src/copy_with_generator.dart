@@ -24,12 +24,22 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       "",
       (r, v) => "$r ${v.name}: ${v.name} ?? this.${v.name},",
     );
-    final typeParameters =
-        classElement.typeParameters.fold("", (r, v) => "$r ${v.name},").trim();
-    String typeParametersInput = typeParameters.isEmpty
+    final extensionTypeParameters = classElement.typeParameters
+        .fold(
+            "",
+            (r, v) =>
+                "$r ${v.name}" +
+                (v.bound == null ? "," : " extends ${v.bound},"))
+        .trim();
+    final extensionTypeParametersInput = extensionTypeParameters.isEmpty
         ? ""
-        : "<${typeParameters.substring(0, typeParameters.length - 1)}>";
-    return '''extension ${classElement.name}CopyWithExtension$typeParametersInput on ${classElement.name}$typeParametersInput {
+        : "<${extensionTypeParameters.substring(0, extensionTypeParameters.length - 1)}>";
+    final onTypeParameters =
+        classElement.typeParameters.fold("", (r, v) => "$r ${v.name},").trim();
+    String onTypeParametersInput = onTypeParameters.isEmpty
+        ? ""
+        : "<${onTypeParameters.substring(0, onTypeParameters.length - 1)}>";
+    return '''extension ${classElement.name}CopyWithExtension$extensionTypeParametersInput on ${classElement.name}$onTypeParametersInput {
       ${classElement.name} copyWith({$constructorInput}) {
         return ${classElement.name}($paramsInput);
       }
