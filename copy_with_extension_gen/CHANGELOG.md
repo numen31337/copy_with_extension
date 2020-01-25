@@ -1,3 +1,7 @@
+## 1.0.8 Analyzer rules
+
+* Suppresses some of the analyzer's rules as we do not support generic types yet.
+
 ## 1.0.7 Extension name fix
 
 * Creates a unique extension name for each class.
