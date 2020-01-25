@@ -28,7 +28,9 @@ part of 'basic_class.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-extension CopyWithExtension on BasicClass {
+// ignore_for_file: argument_type_not_assignable, implicit_dynamic_type, always_specify_types
+
+extension BasicClassCopyWithExtension on BasicClass {
   BasicClass copyWith({
     String id,
   }) {
