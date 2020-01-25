@@ -7,6 +7,8 @@ import 'package:source_gen/source_gen.dart';
 import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
 import 'constants.dart';
 
+//Run the tests with `pub run test` as we don't use the flutter dependencies here
+
 void main() {
   group('generator', () {
     test('produces correct output for correct input', () async {
