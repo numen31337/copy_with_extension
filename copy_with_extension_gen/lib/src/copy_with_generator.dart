@@ -25,11 +25,20 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       (r, v) => "$r ${v.name}: ${v.name} ?? this.${v.name},",
     );
 
-    return '''extension ${classElement.name}CopyWithExtension on ${classElement.name} {
+    //Since we do not support generic types, we must suppress these checks
+    final ignored_analyzer_rules = '''
+    // ignore_for_file: argument_type_not_assignable, implicit_dynamic_type, always_specify_types
+    ''';
+
+    return '''
+    $ignored_analyzer_rules
+
+    extension ${classElement.name}CopyWithExtension on ${classElement.name} {
       ${classElement.name} copyWith({$constructorInput}) {
         return ${classElement.name}($paramsInput);
       }
-    }''';
+    }
+    ''';
   }
 
   List<_FieldInfo> _sortedConstructorFields(ClassElement element) {
