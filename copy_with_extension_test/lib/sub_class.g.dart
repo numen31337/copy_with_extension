@@ -40,4 +40,26 @@ extension SubClassCopyWithExtension on SubClass {
       privateField: privateField ?? this.privateField,
     );
   }
+
+  SubClass copyWithNull({
+    bool aString = false,
+    bool date = false,
+    bool id = false,
+    bool listWithGenericType = false,
+    bool listWithType = false,
+    bool listWithTypedType = false,
+    bool privateField = false,
+  }) {
+    return SubClass(
+      aString: aString == true ? null : this.aString,
+      date: date == true ? null : this.date,
+      id: id == true ? null : this.id,
+      listWithGenericType:
+          listWithGenericType == true ? null : this.listWithGenericType,
+      listWithType: listWithType == true ? null : this.listWithType,
+      listWithTypedType:
+          listWithTypedType == true ? null : this.listWithTypedType,
+      privateField: privateField == true ? null : this.privateField,
+    );
+  }
 }

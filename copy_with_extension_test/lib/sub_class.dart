@@ -22,7 +22,7 @@ mixin TestMixin on BasicBaseClass {
 }
 
 @immutable
-@CopyWith()
+@CopyWith(generateCopyWithNull: true)
 class SubClass<T, U extends String> extends BasicBaseClass
     with TestMixin
     implements AClass {
