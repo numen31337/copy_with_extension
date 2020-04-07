@@ -5,7 +5,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 part 'basic_class.g.dart';
 
 @immutable
-@CopyWith()
+@CopyWith(generateCopyWithNull: true)
 class BasicClass {
   final String id;
 
