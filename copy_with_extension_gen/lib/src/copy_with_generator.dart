@@ -31,7 +31,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     );
     final nullParamsInput = fields.fold(
       "",
-      (r, v) => "$r ${v.name}: ${v.name} ? null : this.${v.name},",
+      (r, v) => "$r ${v.name}: ${v.name} == true ? null : this.${v.name},",
     );
 
     //Since we do not support generic types, we must suppress these checks
@@ -47,7 +47,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         return ${classElement.name}($paramsInput);
       }
 
-      ${classElement.name} copyWithNulls({$nullConstructorInput}) {
+      ${classElement.name} copyWithNull({$nullConstructorInput}) {
         return ${classElement.name}($nullParamsInput);
       }
     }
