@@ -16,4 +16,12 @@ extension BasicClassCopyWithExtension on BasicClass {
       id: id ?? this.id,
     );
   }
+
+  BasicClass copyWithNull({
+    bool id = false,
+  }) {
+    return BasicClass(
+      id: id == true ? null : this.id,
+    );
+  }
 }
