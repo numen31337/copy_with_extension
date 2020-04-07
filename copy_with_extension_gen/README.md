@@ -75,3 +75,6 @@ extension CopyWithExtension on BasicClass {
 flutter pub run build_runner build
 ```
 
+#### Nullifying the class fields:
+
+The `copyWith` method ignores any `null` values that are passed to it. In order to nullify the class fields, an additional `copyWithNull` function can be generated. To achieve this, simply pass an additional parameter to your class annotation `@CopyWith(generateCopyWithNull: true)`.
