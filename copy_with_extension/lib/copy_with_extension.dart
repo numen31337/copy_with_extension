@@ -5,5 +5,8 @@ library copy_with_extension;
 /// Annotation used to indicate that the `copyWith` extension should be generated.
 class CopyWith {
   /// Creates a new [CopyWith] instance.
-  const CopyWith();
+  const CopyWith({this.generateCopyWithNull = false})
+      : assert(generateCopyWithNull is bool);
+
+  final bool generateCopyWithNull;
 }
