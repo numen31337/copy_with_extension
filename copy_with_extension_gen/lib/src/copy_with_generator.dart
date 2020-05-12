@@ -107,5 +107,5 @@ class _FieldInfo {
 
   _FieldInfo(ParameterElement element)
       : this.name = element.name,
-        this.type = element.type.name;
+        this.type = element.type.getDisplayString();
 }
