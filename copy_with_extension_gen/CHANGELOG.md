@@ -1,3 +1,7 @@
+## 1.1.0 copyWithNull
+
+* Introducing the `copyWithNull` function.
+
 ## 1.0.8 Analyzer rules
 
 * Suppresses some of the analyzer's rules as we do not support generic types yet.

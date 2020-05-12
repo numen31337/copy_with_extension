@@ -14,25 +14,11 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     BuildStep buildStep,
   ) {
     if (element is! ClassElement) throw "$element is not a ClassElement";
-    final classElement = element as ClassElement;
-    final fields = _sortedConstructorFields(classElement);
-    final constructorInput = fields.fold(
-      "",
-      (r, v) => "$r ${v.type} ${v.name},",
-    );
-    final paramsInput = fields.fold(
-      "",
-      (r, v) => "$r ${v.name}: ${v.name} ?? this.${v.name},",
-    );
-
-    final nullConstructorInput = fields.fold(
-      "",
-      (r, v) => "$r bool ${v.name} = false,",
-    );
-    final nullParamsInput = fields.fold(
-      "",
-      (r, v) => "$r ${v.name}: ${v.name} ? null : this.${v.name},",
-    );
+    final ClassElement classElement = element as ClassElement;
+    final List<_FieldInfo> sortedFields =
+        _sortedConstructorFields(classElement);
+    final bool generateCopyWithNull =
+        annotation.read("generateCopyWithNull").boolValue;
 
     //Since we do not support generic types, we must suppress these checks
     final ignored_analyzer_rules = '''
@@ -43,14 +29,49 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     $ignored_analyzer_rules
 
     extension ${classElement.name}CopyWithExtension on ${classElement.name} {
-      ${classElement.name} copyWith({$constructorInput}) {
-        return ${classElement.name}($paramsInput);
-      }
+      ${_copyWithPart(classElement, sortedFields)}
+      ${generateCopyWithNull ? _copyWithNullPart(classElement, sortedFields) : ""}
+    }
+    ''';
+  }
 
-      ${classElement.name} copyWithNulls({$nullConstructorInput}) {
+  String _copyWithPart(
+    ClassElement classElement,
+    List<_FieldInfo> sortedFields,
+  ) {
+    final constructorInput = sortedFields.fold(
+      "",
+      (r, v) => "$r ${v.type} ${v.name},",
+    );
+    final paramsInput = sortedFields.fold(
+      "",
+      (r, v) => "$r ${v.name}: ${v.name} ?? this.${v.name},",
+    );
+
+    return '''
+        ${classElement.name} copyWith({$constructorInput}) {
+          return ${classElement.name}($paramsInput);
+        }
+    ''';
+  }
+
+  String _copyWithNullPart(
+    ClassElement classElement,
+    List<_FieldInfo> sortedFields,
+  ) {
+    final nullConstructorInput = sortedFields.fold(
+      "",
+      (r, v) => "$r bool ${v.name} = false,",
+    );
+    final nullParamsInput = sortedFields.fold(
+      "",
+      (r, v) => "$r ${v.name}: ${v.name} == true ? null : this.${v.name},",
+    );
+
+    return '''
+      ${classElement.name} copyWithNull({$nullConstructorInput}) {
         return ${classElement.name}($nullParamsInput);
       }
-    }
     ''';
   }
 

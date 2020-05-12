@@ -1,3 +1,7 @@
+## 1.1.0 copyWithNull
+
+* Introducing the `copyWithNull` function.
+
 ## 1.0.7 Extension name fix
 
 * Creates a unique extension name for each class.
