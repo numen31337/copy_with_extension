@@ -22,12 +22,12 @@ environment:
 
 dependencies:
   ...
-  copy_with_extension: ">=1.1.0 <2.0.0"
+  copy_with_extension: ">=1.2.0 <2.0.0"
   
 dev_dependencies:
   ...
   build_runner: ">=1.0.0 <2.0.0"
-  copy_with_extension_gen: ">=1.1.0 <2.0.0"
+  copy_with_extension_gen: ">=1.2.0 <2.0.0"
 ```
 
 #### Annotate your class with `CopyWith` annotation:
