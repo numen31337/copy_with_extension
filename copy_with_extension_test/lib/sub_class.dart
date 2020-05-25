@@ -22,8 +22,17 @@ mixin TestMixin on BasicBaseClass {
 }
 
 @immutable
+@CopyWith()
+class BasicBaseSubClass<T> extends BasicBaseClass {
+  final String id;
+  final T item;
+
+  BasicBaseSubClass({this.id, this.item});
+}
+
+@immutable
 @CopyWith(generateCopyWithNull: true)
-class SubClass<T, U extends String> extends BasicBaseClass
+class SubClass<T, U extends String> extends BasicBaseSubClass<T>
     with TestMixin
     implements AClass {
   final DateTime date;
@@ -33,6 +42,7 @@ class SubClass<T, U extends String> extends BasicBaseClass
   final List<T> listWithGenericType;
   final List<Iterable<U>> listWithTypedType;
   final List<int> listWithType;
+  final T item;
 
   SubClass({
     String id,
@@ -42,6 +52,7 @@ class SubClass<T, U extends String> extends BasicBaseClass
     this.listWithGenericType,
     this.listWithTypedType,
     this.listWithType,
+    this.item,
   }) : super(id: id);
 
   SubClass.secondConstructor({String id})

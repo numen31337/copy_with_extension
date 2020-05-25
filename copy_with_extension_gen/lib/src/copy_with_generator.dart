@@ -20,23 +20,47 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final bool generateCopyWithNull =
         annotation.read("generateCopyWithNull").boolValue;
 
-    //Since we do not support generic types, we must suppress these checks
-    final ignored_analyzer_rules = '''
-    // ignore_for_file: argument_type_not_assignable, implicit_dynamic_type, always_specify_types
-    ''';
+    final String typeParametersAnnotation =
+        _typeParametersAnnotation(classElement);
+    final String typeParametersNames = _typeParametersNames(classElement);
+    final String typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
-    $ignored_analyzer_rules
-
-    extension ${classElement.name}CopyWithExtension on ${classElement.name} {
-      ${_copyWithPart(classElement, sortedFields)}
-      ${generateCopyWithNull ? _copyWithNullPart(classElement, sortedFields) : ""}
+    extension ${classElement.name}CopyWithExtension$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
+      ${_copyWithPart(typeAnnotation, sortedFields)}
+      ${generateCopyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields) : ""}
     }
     ''';
   }
 
+  String _typeParametersNames(ClassElement classElement) {
+    final String names =
+        classElement.typeParameters.map((e) => e.name).join(",");
+    if (names.isNotEmpty) {
+      return "<$names>";
+    } else {
+      return "";
+    }
+  }
+
+  String _typeParametersAnnotation(ClassElement classElement) {
+    final classDisplayString =
+        classElement.getDisplayString(withNullability: false);
+    final int startIndex = classDisplayString.indexOf("<");
+    final int endIndex = classDisplayString.indexOf(">");
+
+    if (startIndex != -1 && endIndex != -1) {
+      return classDisplayString.substring(
+        startIndex,
+        endIndex + 1,
+      );
+    } else {
+      return "";
+    }
+  }
+
   String _copyWithPart(
-    ClassElement classElement,
+    String typeAnnotation,
     List<_FieldInfo> sortedFields,
   ) {
     final constructorInput = sortedFields.fold(
@@ -49,14 +73,14 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     );
 
     return '''
-        ${classElement.name} copyWith({$constructorInput}) {
-          return ${classElement.name}($paramsInput);
+        $typeAnnotation copyWith({$constructorInput}) {
+          return $typeAnnotation($paramsInput);
         }
     ''';
   }
 
   String _copyWithNullPart(
-    ClassElement classElement,
+    String typeAnnotation,
     List<_FieldInfo> sortedFields,
   ) {
     final nullConstructorInput = sortedFields.fold(
@@ -69,8 +93,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     );
 
     return '''
-      ${classElement.name} copyWithNull({$nullConstructorInput}) {
-        return ${classElement.name}($nullParamsInput);
+      $typeAnnotation copyWithNull({$nullConstructorInput}) {
+        return $typeAnnotation($nullParamsInput);
       }
     ''';
   }
@@ -107,5 +131,5 @@ class _FieldInfo {
 
   _FieldInfo(ParameterElement element)
       : this.name = element.name,
-        this.type = element.type.name;
+        this.type = element.type.getDisplayString();
 }
