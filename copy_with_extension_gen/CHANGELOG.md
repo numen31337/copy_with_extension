@@ -1,3 +1,7 @@
+## 1.2.0 Generic Types
+
+* Introducing Generic Types Supports
+
 ## 1.1.0 copyWithNull
 
 * Introducing the `copyWithNull` function.
