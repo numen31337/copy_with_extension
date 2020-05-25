@@ -15,8 +15,8 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 part 'basic_class.g.dart';
 
 @CopyWith(generateCopyWithNull: true)
-class BasicClass {
-  final String id;
+class BasicClass<T extends String> {
+  final T id;
 
   BasicClass({this.id});
 }
@@ -31,21 +31,19 @@ part of 'basic_class.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-// ignore_for_file: argument_type_not_assignable, implicit_dynamic_type, always_specify_types
-
-extension BasicClassCopyWithExtension on BasicClass {
-  BasicClass copyWith({
-    String id,
+extension BasicClassCopyWithExtension<T extends String> on BasicClass<T> {
+  BasicClass<T> copyWith({
+    T id,
   }) {
-    return BasicClass(
+    return BasicClass<T>(
       id: id ?? this.id,
     );
   }
 
-  BasicClass copyWithNull({
+  BasicClass<T> copyWithNull({
     bool id = false,
   }) {
-    return BasicClass(
+    return BasicClass<T>(
       id: id == true ? null : this.id,
     );
   }

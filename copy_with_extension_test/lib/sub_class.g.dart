@@ -6,8 +6,6 @@ part of 'sub_class.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-// ignore_for_file: argument_type_not_assignable, implicit_dynamic_type, always_specify_types
-
 extension BasicBaseClassCopyWithExtension on BasicBaseClass {
   BasicBaseClass copyWith({
     String id,
@@ -18,22 +16,34 @@ extension BasicBaseClassCopyWithExtension on BasicBaseClass {
   }
 }
 
-// ignore_for_file: argument_type_not_assignable, implicit_dynamic_type, always_specify_types
+extension BasicBaseSubClassCopyWithExtension<T> on BasicBaseSubClass<T> {
+  BasicBaseSubClass<T> copyWith({
+    String id,
+    T item,
+  }) {
+    return BasicBaseSubClass<T>(
+      id: id ?? this.id,
+      item: item ?? this.item,
+    );
+  }
+}
 
-extension SubClassCopyWithExtension on SubClass {
-  SubClass copyWith({
+extension SubClassCopyWithExtension<T, U extends String> on SubClass<T, U> {
+  SubClass<T, U> copyWith({
     String aString,
     DateTime date,
     String id,
-    List listWithGenericType,
-    List listWithType,
-    List listWithTypedType,
+    T item,
+    List<T> listWithGenericType,
+    List<int> listWithType,
+    List<Iterable<U>> listWithTypedType,
     String privateField,
   }) {
-    return SubClass(
+    return SubClass<T, U>(
       aString: aString ?? this.aString,
       date: date ?? this.date,
       id: id ?? this.id,
+      item: item ?? this.item,
       listWithGenericType: listWithGenericType ?? this.listWithGenericType,
       listWithType: listWithType ?? this.listWithType,
       listWithTypedType: listWithTypedType ?? this.listWithTypedType,
@@ -41,19 +51,21 @@ extension SubClassCopyWithExtension on SubClass {
     );
   }
 
-  SubClass copyWithNull({
+  SubClass<T, U> copyWithNull({
     bool aString = false,
     bool date = false,
     bool id = false,
+    bool item = false,
     bool listWithGenericType = false,
     bool listWithType = false,
     bool listWithTypedType = false,
     bool privateField = false,
   }) {
-    return SubClass(
+    return SubClass<T, U>(
       aString: aString == true ? null : this.aString,
       date: date == true ? null : this.date,
       id: id == true ? null : this.id,
+      item: item == true ? null : this.item,
       listWithGenericType:
           listWithGenericType == true ? null : this.listWithGenericType,
       listWithType: listWithType == true ? null : this.listWithType,
