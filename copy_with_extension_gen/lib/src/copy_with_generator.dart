@@ -1,9 +1,15 @@
+import 'package:analyzer/dart/constant/value.dart';
 import 'package:analyzer/dart/element/element.dart'
-    show ClassElement, Element, ParameterElement, ConstructorElement;
+    show
+        ClassElement,
+        ConstructorElement,
+        Element,
+        FieldElement,
+        ParameterElement;
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:source_gen/source_gen.dart'
-    show GeneratorForAnnotation, ConstantReader;
+    show ConstantReader, GeneratorForAnnotation, TypeChecker;
 
 /// A `Generator` for `package:build_runner`
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
@@ -115,7 +121,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       }
     });
 
-    final fields = parameters.map((v) => _FieldInfo(v)).toList();
+    final fields = parameters.map((v) => _FieldInfo(v, element)).toList();
     fields.sort((lhs, rhs) => lhs.name.compareTo(rhs.name));
 
     return fields;
@@ -125,8 +131,36 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 class _FieldInfo {
   final String name;
   final String type;
+  final bool immutable;
 
-  _FieldInfo(ParameterElement element)
+  _FieldInfo(ParameterElement element, ClassElement classElement)
       : name = element.name,
-        type = element.type.getDisplayString(withNullability: false);
+        type = element.type.getDisplayString(withNullability: false),
+        immutable = _readFieldOptions(element, classElement).immutable;
+
+  static CopyWithField _readFieldOptions(
+    ParameterElement element,
+    ClassElement classElement,
+  ) {
+    final fieldElement = classElement.getField(element.name);
+    if (fieldElement is! FieldElement) {
+      return CopyWithField();
+    }
+
+    final checker = TypeChecker.fromRuntime(CopyWithField);
+    final annotation = checker.firstAnnotationOf(fieldElement);
+    if (annotation is! DartObject) {
+      return CopyWithField();
+    }
+
+    final reader = ConstantReader(annotation);
+    final immutable = reader.read('immutable').literalValue as bool;
+
+    return CopyWithField(immutable: immutable);
+  }
+
+  @override
+  String toString() {
+    return 'type:$type name:$name immutable:$immutable';
+  }
 }

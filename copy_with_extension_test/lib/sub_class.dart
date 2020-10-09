@@ -40,6 +40,7 @@ class SubClass<T, U extends String> extends BasicBaseSubClass<T>
   final DateTime date;
   @override
   final String aString;
+  @CopyWithField(immutable: true)
   final String privateField;
   static String staticStr;
   final List<T> listWithGenericType;
