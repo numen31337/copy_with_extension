@@ -3,6 +3,7 @@ on: push
 
 jobs:
   test_project:
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -11,3 +12,5 @@ jobs:
           channel: 'stable'
       - run: (cd copy_with_extension_test && flutter pub get)
       - run: (cd copy_with_extension_test && flutter pub run build_runner build --delete-conflicting-outputs)
+      - run: (cd copy_with_extension_gen && flutter pub get)
+      - run: (cd copy_with_extension_gen && pub run test)
