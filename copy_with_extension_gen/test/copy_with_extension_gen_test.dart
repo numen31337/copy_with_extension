@@ -23,7 +23,7 @@ Builder get _builder => PartBuilder([CopyWithGenerator()], '.g.dart');
 Future<String> _generate(String source) async {
   final srcs = <String, String>{
     'copy_with_extension|lib/copy_with_extension.dart': annotationsBase,
-    '$pkgName|lib/basic_class.dart': source,
+    '$pkgName|lib/test_case_class.dart': source,
   };
 
   String error;
@@ -45,6 +45,6 @@ Future<String> _generate(String source) async {
   }
 
   return String.fromCharCodes(
-    writer.assets[AssetId(pkgName, 'lib/basic_class.g.dart')] ?? [],
+    writer.assets[AssetId(pkgName, 'lib/test_case_class.g.dart')] ?? [],
   );
 }
