@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart' show immutable, required;
 import 'package:copy_with_extension/copy_with_extension.dart';
 
+//Won't work without it!
 part 'sub_class.g.dart';
 
 abstract class AClass {
