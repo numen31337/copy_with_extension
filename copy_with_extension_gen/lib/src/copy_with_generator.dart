@@ -68,11 +68,23 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   ) {
     final constructorInput = sortedFields.fold(
       '',
-      (r, v) => '$r ${v.type} ${v.name},',
+      (r, v) {
+        if (v.immutable) {
+          return '$r';
+        } else {
+          return '$r ${v.type} ${v.name},';
+        }
+      },
     );
     final paramsInput = sortedFields.fold(
       '',
-      (r, v) => '$r ${v.name}: ${v.name} ?? this.${v.name},',
+      (r, v) {
+        if (v.immutable) {
+          return '$r ${v.name}: ${v.name},';
+        } else {
+          return '$r ${v.name}: ${v.name} ?? this.${v.name},';
+        }
+      },
     );
 
     return '''

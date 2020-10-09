@@ -37,7 +37,6 @@ extension SubClassCopyWithExtension<T, U extends String> on SubClass<T, U> {
     List<T> listWithGenericType,
     List<int> listWithType,
     List<Iterable<U>> listWithTypedType,
-    String privateField,
   }) {
     return SubClass<T, U>(
       aString: aString ?? this.aString,
@@ -47,7 +46,7 @@ extension SubClassCopyWithExtension<T, U extends String> on SubClass<T, U> {
       listWithGenericType: listWithGenericType ?? this.listWithGenericType,
       listWithType: listWithType ?? this.listWithType,
       listWithTypedType: listWithTypedType ?? this.listWithTypedType,
-      privateField: privateField ?? this.privateField,
+      privateField: privateField,
     );
   }
 
