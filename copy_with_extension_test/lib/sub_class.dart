@@ -1,6 +1,7 @@
 import 'package:meta/meta.dart' show immutable, required;
 import 'package:copy_with_extension/copy_with_extension.dart';
 
+//Won't work without it!
 part 'sub_class.g.dart';
 
 abstract class AClass {
@@ -24,6 +25,7 @@ mixin TestMixin on BasicBaseClass {
 @immutable
 @CopyWith()
 class BasicBaseSubClass<T> extends BasicBaseClass {
+  @override
   final String id;
   final T item;
 
@@ -36,12 +38,15 @@ class SubClass<T, U extends String> extends BasicBaseSubClass<T>
     with TestMixin
     implements AClass {
   final DateTime date;
+  @override
   final String aString;
+  @CopyWithField(immutable: true)
   final String privateField;
   static String staticStr;
   final List<T> listWithGenericType;
   final List<Iterable<U>> listWithTypedType;
   final List<int> listWithType;
+  @override
   final T item;
 
   SubClass({
@@ -56,17 +61,18 @@ class SubClass<T, U extends String> extends BasicBaseSubClass<T>
   }) : super(id: id);
 
   SubClass.secondConstructor({String id})
-      : this(id: id, date: DateTime.now(), privateField: "", aString: "");
+      : this(id: id, date: DateTime.now(), privateField: '', aString: '');
 
   factory SubClass.testFactory() {
-    return SubClass.secondConstructor(id: "");
+    return SubClass.secondConstructor(id: '');
   }
 
   String get testMethod {
-    return "test";
+    return 'test';
   }
 
+  @override
   String get mixinMethod {
-    return "test";
+    return 'test';
   }
 }
