@@ -6,7 +6,7 @@ homepage: https://github.com/numen31337/copy_with_extension/tree/master/copy_wit
 issue_tracker: https://github.com/numen31337/copy_with_extension/issues
 
 environment:
-  sdk: ^2.9.0
+  sdk: ">=2.9.0 <3.0.0"
 
 dependencies:
   analyzer: ">=0.39.0 <1.0.0"
