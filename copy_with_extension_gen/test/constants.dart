@@ -1,4 +1,4 @@
-const String pkgName = "copy_with_extension_gen";
+const String pkgName = 'copy_with_extension_gen';
 
 const String annotationsBase = r'''
 class CopyWith {

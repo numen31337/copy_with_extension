@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             Text(
               '$_counter',
-              style: Theme.of(context).textTheme.display1,
+              style: Theme.of(context).textTheme.headline4,
             ),
           ],
         ),
@@ -112,6 +112,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
 extension SafeLast<T> on List<T> {
   T get safeLast {
-    return this.isEmpty ? null : this.last;
+    return isEmpty ? null : last;
   }
 }
