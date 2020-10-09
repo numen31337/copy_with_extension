@@ -40,8 +40,11 @@ Future<String> _generate(String source) async {
     onLog: captureError,
   );
 
-  return error ??
-      String.fromCharCodes(
-        writer.assets[AssetId(pkgName, 'lib/basic_class.g.dart')] ?? [],
-      );
+  if (error != null) {
+    print('Error: $error');
+  }
+
+  return String.fromCharCodes(
+    writer.assets[AssetId(pkgName, 'lib/basic_class.g.dart')] ?? [],
+  );
 }
