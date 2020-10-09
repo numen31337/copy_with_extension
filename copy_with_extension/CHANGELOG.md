@@ -1,3 +1,7 @@
+## 1.3.0 Immutable Fields
+* Fixes the `boolean-expression-must-not-be-null-exception` issue
+* Introduces `immutable` field annotation
+
 ## 1.2.0 Generic Types
 
 * Introducing Generic Types Supports
