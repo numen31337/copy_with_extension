@@ -13,17 +13,15 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    if (element is! ClassElement) throw "$element is not a ClassElement";
-    final ClassElement classElement = element as ClassElement;
-    final List<_FieldInfo> sortedFields =
-        _sortedConstructorFields(classElement);
-    final bool generateCopyWithNull =
-        annotation.read("generateCopyWithNull").boolValue;
+    if (element is! ClassElement) throw '$element is not a ClassElement';
+    final classElement = element as ClassElement;
+    final sortedFields = _sortedConstructorFields(classElement);
+    final generateCopyWithNull =
+        annotation.read('generateCopyWithNull').boolValue;
 
-    final String typeParametersAnnotation =
-        _typeParametersAnnotation(classElement);
-    final String typeParametersNames = _typeParametersNames(classElement);
-    final String typeAnnotation = classElement.name + typeParametersNames;
+    final typeParametersAnnotation = _typeParametersAnnotation(classElement);
+    final typeParametersNames = _typeParametersNames(classElement);
+    final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
     extension ${classElement.name}CopyWithExtension$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
@@ -34,20 +32,19 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   }
 
   String _typeParametersNames(ClassElement classElement) {
-    final String names =
-        classElement.typeParameters.map((e) => e.name).join(",");
+    final names = classElement.typeParameters.map((e) => e.name).join(',');
     if (names.isNotEmpty) {
-      return "<$names>";
+      return '<$names>';
     } else {
-      return "";
+      return '';
     }
   }
 
   String _typeParametersAnnotation(ClassElement classElement) {
     final classDisplayString =
         classElement.getDisplayString(withNullability: false);
-    final int startIndex = classDisplayString.indexOf("<");
-    final int endIndex = classDisplayString.indexOf(">");
+    final startIndex = classDisplayString.indexOf('<');
+    final endIndex = classDisplayString.indexOf('>');
 
     if (startIndex != -1 && endIndex != -1) {
       return classDisplayString.substring(
@@ -55,7 +52,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         endIndex + 1,
       );
     } else {
-      return "";
+      return '';
     }
   }
 
@@ -64,12 +61,12 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     List<_FieldInfo> sortedFields,
   ) {
     final constructorInput = sortedFields.fold(
-      "",
-      (r, v) => "$r ${v.type} ${v.name},",
+      '',
+      (r, v) => '$r ${v.type} ${v.name},',
     );
     final paramsInput = sortedFields.fold(
-      "",
-      (r, v) => "$r ${v.name}: ${v.name} ?? this.${v.name},",
+      '',
+      (r, v) => '$r ${v.name}: ${v.name} ?? this.${v.name},',
     );
 
     return '''
@@ -84,12 +81,12 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     List<_FieldInfo> sortedFields,
   ) {
     final nullConstructorInput = sortedFields.fold(
-      "",
-      (r, v) => "$r bool ${v.name} = false,",
+      '',
+      (r, v) => '$r bool ${v.name} = false,',
     );
     final nullParamsInput = sortedFields.fold(
-      "",
-      (r, v) => "$r ${v.name}: ${v.name} == true ? null : this.${v.name},",
+      '',
+      (r, v) => '$r ${v.name}: ${v.name} == true ? null : this.${v.name},',
     );
 
     return '''
@@ -104,17 +101,17 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final constructor = element.unnamedConstructor;
     if (constructor is! ConstructorElement) {
-      throw "Default ${element.name} constructor is missing";
+      throw 'Default ${element.name} constructor is missing';
     }
 
     final parameters = constructor.parameters;
     if (parameters is! List<ParameterElement> || parameters.isEmpty) {
-      throw "Unnamed constructor for ${element.name} has no parameters";
+      throw 'Unnamed constructor for ${element.name} has no parameters';
     }
 
     parameters.forEach((parameter) {
       if (!parameter.isNamed) {
-        throw "Unnamed constructor for ${element.name} contains unnamed parameter. Only named parameters are supported.";
+        throw 'Unnamed constructor for ${element.name} contains unnamed parameter. Only named parameters are supported.';
       }
     });
 
@@ -130,6 +127,6 @@ class _FieldInfo {
   final String type;
 
   _FieldInfo(ParameterElement element)
-      : this.name = element.name,
-        this.type = element.type.getDisplayString(withNullability: false);
+      : name = element.name,
+        type = element.type.getDisplayString(withNullability: false);
 }
