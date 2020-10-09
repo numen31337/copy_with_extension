@@ -4,7 +4,7 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.6.0 <3.0.0"
+  sdk: ^2.9.0
 
 dependencies:
   flutter:
@@ -13,7 +13,7 @@ dependencies:
     path: ../copy_with_extension
 
 dev_dependencies:
-  build_runner: ^1.7.2
+  build_runner: ^1.10.3
   flutter_test:
     sdk: flutter
   copy_with_extension_gen:
