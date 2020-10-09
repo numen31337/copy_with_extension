@@ -1,3 +1,6 @@
+## 1.3.1 README Update
+* Update README.md
+
 ## 1.3.0 Immutable Fields
 * Fixes the `boolean-expression-must-not-be-null-exception` issue
 * Introduces `immutable` field annotation
