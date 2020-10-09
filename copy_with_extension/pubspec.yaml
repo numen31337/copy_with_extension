@@ -6,7 +6,7 @@ repository: https://github.com/numen31337/copy_with_extension
 issue_tracker: https://github.com/numen31337/copy_with_extension/issues
 
 environment:
-  sdk: ^2.9.0
+  sdk: ">=2.9.0 <3.0.0"
 
 dev_dependencies:
   pedantic: ^1.9.0
