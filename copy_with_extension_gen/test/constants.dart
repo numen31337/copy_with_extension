@@ -39,7 +39,7 @@ part of 'test_case_class.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-extension Test_Case_ClassCopyWithExtension<T extends String>
+extension Test_Case_ClassCopyWith<T extends String>
     on Test_Case_Class<T> {
   Test_Case_Class<T> copyWith({
     T id,

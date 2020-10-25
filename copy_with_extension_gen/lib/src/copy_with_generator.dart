@@ -30,7 +30,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
-    extension ${classElement.name}CopyWithExtension$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
+    extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
       ${_copyWithPart(typeAnnotation, sortedFields)}
       ${generateCopyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields) : ""}
     }

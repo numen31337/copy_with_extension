@@ -6,7 +6,7 @@ part of 'immutable_test_case.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-extension TestCaseClassCopyWithExtension<T extends String> on TestCaseClass<T> {
+extension TestCaseClassCopyWith<T extends String> on TestCaseClass<T> {
   TestCaseClass<T> copyWith({
     T id,
   }) {
