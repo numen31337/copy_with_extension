@@ -46,17 +46,20 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
   }
 
+  ///Must be refactored. Currently relies purely on parsing the `ClassElement.getDisplayString`. Must make use of the analyser to get these annotations.
   String _typeParametersAnnotation(ClassElement classElement) {
     final classDisplayString =
         classElement.getDisplayString(withNullability: false);
+    final hasGenerics = classDisplayString.contains('${classElement.name}<');
     final startIndex = classDisplayString.indexOf('<');
     final endIndex = classDisplayString.indexOf('>');
 
-    if (startIndex != -1 && endIndex != -1) {
-      return classDisplayString.substring(
+    if (hasGenerics && startIndex != -1 && endIndex != -1) {
+      final type = classDisplayString.substring(
         startIndex,
         endIndex + 1,
       );
+      return type;
     } else {
       return '';
     }

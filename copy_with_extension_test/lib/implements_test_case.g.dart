@@ -26,7 +26,7 @@ extension WithGenericTypeCopyWith<T> on WithGenericType<T> {
   }
 }
 
-extension WithSpecificTypeCopyWith<String> on WithSpecificType {
+extension WithSpecificTypeCopyWith on WithSpecificType {
   WithSpecificType copyWith({
     String tField,
   }) {
@@ -54,7 +54,7 @@ extension WithBothCopyWith<T, Y> on WithBoth<T, Y> {
   }
 }
 
-extension MediaContentCopyWith<MediaContent> on MediaContent {
+extension MediaContentCopyWith on MediaContent {
   MediaContent copyWith({
     DateTime createdOn,
     String id,
