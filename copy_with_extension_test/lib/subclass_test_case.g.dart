@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'sub_class.dart';
+part of 'subclass_test_case.dart';
 
 // **************************************************************************
 // CopyWithGenerator
