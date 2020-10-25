@@ -54,7 +54,7 @@ class WithSpecificType implements AbstractWithType<String> {
 
 @immutable
 @CopyWith()
-class WithBoth<T, Y>
+class WithBoth<T extends String, Y>
     implements
         Abstract,
         AbstractWithType<T>,
@@ -78,26 +78,4 @@ class WithBoth<T, Y>
   final String saField;
   @override
   final Y sa1Field;
-}
-
-/// User's test case https://github.com/numen31337/copy_with_extension/issues/21
-@immutable
-@CopyWith()
-class MediaContent implements Comparable<MediaContent> {
-  final String id;
-  final String media;
-  final DateTime createdOn;
-  final String type;
-
-  MediaContent({
-    @required this.media,
-    @required this.type,
-    this.id,
-    this.createdOn,
-  });
-
-  @override
-  int compareTo(MediaContent other) {
-    throw UnimplementedError();
-  }
 }

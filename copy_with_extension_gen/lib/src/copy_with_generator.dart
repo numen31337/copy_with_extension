@@ -20,6 +20,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     BuildStep buildStep,
   ) {
     if (element is! ClassElement) throw '$element is not a ClassElement';
+
     final classElement = element as ClassElement;
     final sortedFields = _sortedConstructorFields(classElement);
     final generateCopyWithNull =
@@ -37,7 +38,11 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
+  ///Returns parameter names declared by this class or an empty string.
+  ///`class MyClass<T extends String, Y>` returns `<T, Y>`
   String _typeParametersNames(ClassElement classElement) {
+    assert(classElement is ClassElement);
+
     final names = classElement.typeParameters.map((e) => e.name).join(',');
     if (names.isNotEmpty) {
       return '<$names>';
@@ -46,8 +51,14 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
   }
 
-  ///Must be refactored. Currently relies purely on parsing the `ClassElement.getDisplayString`. Must make use of the analyser to get these annotations.
+  ///Returns full parameters declaration declared by this class or an empty string.
+  ///`class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
+  ///
+  ///Must be refactored. Currently relies purely on parsing the `ClassElement.getDisplayString`.
+  ///Must make use of the analyser to get these annotations as `_typeParametersNames` does.
   String _typeParametersAnnotation(ClassElement classElement) {
+    assert(classElement is ClassElement);
+
     final classDisplayString =
         classElement.getDisplayString(withNullability: false);
     final hasGenerics = classDisplayString.contains('${classElement.name}<');
@@ -65,10 +76,13 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
   }
 
+  ///Generates the complete `copyWith` function.
   String _copyWithPart(
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
   ) {
+    assert(typeAnnotation is String && sortedFields is List<_FieldInfo>);
+
     final constructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
@@ -97,10 +111,13 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
+  ///Generates the complete `copyWithNull` function.
   String _copyWithNullPart(
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
   ) {
+    assert(typeAnnotation is String && sortedFields is List<_FieldInfo>);
+
     final nullConstructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
@@ -129,6 +146,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
+  ///Generates a list of `_FieldInfo` for each class field that will be a part of the code generation process.
+  ///The resulting array is sorted by the field name. `Throws` on error.
   List<_FieldInfo> _sortedConstructorFields(ClassElement element) {
     assert(element is ClassElement);
 
@@ -155,6 +174,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   }
 }
 
+///Represents a single class field with the additional metadata needed for code generation.
 class _FieldInfo {
   final String name;
   final String type;
@@ -163,12 +183,18 @@ class _FieldInfo {
   _FieldInfo(ParameterElement element, ClassElement classElement)
       : name = element.name,
         type = element.type.getDisplayString(withNullability: false),
-        immutable = _readFieldOptions(element, classElement).immutable;
+        immutable = _readFieldOptions(element, classElement).immutable,
+        assert(element.name is String),
+        assert(element.type.getDisplayString(withNullability: false) is String),
+        assert(_readFieldOptions(element, classElement).immutable is bool);
 
   static CopyWithField _readFieldOptions(
     ParameterElement element,
     ClassElement classElement,
   ) {
+    assert(element is Element);
+    assert(classElement is ClassElement);
+    
     final fieldElement = classElement.getField(element.name);
     if (fieldElement is! FieldElement) {
       return CopyWithField();

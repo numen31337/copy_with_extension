@@ -36,7 +36,7 @@ extension WithSpecificTypeCopyWith on WithSpecificType {
   }
 }
 
-extension WithBothCopyWith<T, Y> on WithBoth<T, Y> {
+extension WithBothCopyWith<T extends String, Y> on WithBoth<T, Y> {
   WithBoth<T, Y> copyWith({
     String aField,
     Y sa1Field,
@@ -50,22 +50,6 @@ extension WithBothCopyWith<T, Y> on WithBoth<T, Y> {
       saField: saField ?? this.saField,
       t1Field: t1Field ?? this.t1Field,
       tField: tField ?? this.tField,
-    );
-  }
-}
-
-extension MediaContentCopyWith on MediaContent {
-  MediaContent copyWith({
-    DateTime createdOn,
-    String id,
-    String media,
-    String type,
-  }) {
-    return MediaContent(
-      createdOn: createdOn ?? this.createdOn,
-      id: id ?? this.id,
-      media: media ?? this.media,
-      type: type ?? this.type,
     );
   }
 }
