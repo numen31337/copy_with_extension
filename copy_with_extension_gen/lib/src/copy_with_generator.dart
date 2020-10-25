@@ -66,7 +66,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
   ) {
-    final constructorInput = sortedFields.fold(
+    final constructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
         if (v.immutable) {
@@ -76,7 +76,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         }
       },
     );
-    final paramsInput = sortedFields.fold(
+    final paramsInput = sortedFields.fold<String>(
       '',
       (r, v) {
         if (v.immutable) {
@@ -98,7 +98,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
   ) {
-    final nullConstructorInput = sortedFields.fold(
+    final nullConstructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
         if (v.immutable) {
@@ -108,7 +108,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         }
       },
     );
-    final nullParamsInput = sortedFields.fold(
+    final nullParamsInput = sortedFields.fold<String>(
       '',
       (r, v) {
         if (v.immutable) {
