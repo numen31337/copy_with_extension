@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'test_case_class.dart';
+part of 'immutable_test_case.dart';
 
 // **************************************************************************
 // CopyWithGenerator
