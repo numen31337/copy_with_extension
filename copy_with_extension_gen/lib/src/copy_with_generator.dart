@@ -20,25 +20,38 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     BuildStep buildStep,
   ) {
     if (element is! ClassElement) throw '$element is not a ClassElement';
+
     final classElement = element as ClassElement;
     final sortedFields = _sortedConstructorFields(classElement);
     final generateCopyWithNull =
         annotation.read('generateCopyWithNull').boolValue;
 
-    final typeParametersAnnotation = _typeParametersAnnotation(classElement);
-    final typeParametersNames = _typeParametersNames(classElement);
+    final typeParametersAnnotation = _typeParametersString(classElement, false);
+    final typeParametersNames = _typeParametersString(classElement, true);
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
-    extension ${classElement.name}CopyWithExtension$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
+    extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
       ${_copyWithPart(typeAnnotation, sortedFields)}
       ${generateCopyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields) : ""}
     }
     ''';
   }
 
-  String _typeParametersNames(ClassElement classElement) {
-    final names = classElement.typeParameters.map((e) => e.name).join(',');
+  ///Returns parameter names or full parameters declaration declared by this class or an empty string.
+  ///
+  ///If `nameOnly` is `true`: `class MyClass<T extends String, Y>` returns `<T, Y>`.
+  ///
+  ///If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
+  String _typeParametersString(ClassElement classElement, bool nameOnly) {
+    assert(classElement is ClassElement);
+    assert(nameOnly is bool);
+
+    final names = classElement.typeParameters
+        .map(
+          (e) => nameOnly ? e.name : e.getDisplayString(withNullability: false),
+        )
+        .join(',');
     if (names.isNotEmpty) {
       return '<$names>';
     } else {
@@ -46,26 +59,13 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
   }
 
-  String _typeParametersAnnotation(ClassElement classElement) {
-    final classDisplayString =
-        classElement.getDisplayString(withNullability: false);
-    final startIndex = classDisplayString.indexOf('<');
-    final endIndex = classDisplayString.indexOf('>');
-
-    if (startIndex != -1 && endIndex != -1) {
-      return classDisplayString.substring(
-        startIndex,
-        endIndex + 1,
-      );
-    } else {
-      return '';
-    }
-  }
-
+  ///Generates the complete `copyWith` function.
   String _copyWithPart(
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
   ) {
+    assert(typeAnnotation is String && sortedFields is List<_FieldInfo>);
+
     final constructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
@@ -94,10 +94,13 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
+  ///Generates the complete `copyWithNull` function.
   String _copyWithNullPart(
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
   ) {
+    assert(typeAnnotation is String && sortedFields is List<_FieldInfo>);
+
     final nullConstructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
@@ -126,6 +129,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
+  ///Generates a list of `_FieldInfo` for each class field that will be a part of the code generation process.
+  ///The resulting array is sorted by the field name. `Throws` on error.
   List<_FieldInfo> _sortedConstructorFields(ClassElement element) {
     assert(element is ClassElement);
 
@@ -152,6 +157,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   }
 }
 
+///Represents a single class field with the additional metadata needed for code generation.
 class _FieldInfo {
   final String name;
   final String type;
@@ -160,12 +166,18 @@ class _FieldInfo {
   _FieldInfo(ParameterElement element, ClassElement classElement)
       : name = element.name,
         type = element.type.getDisplayString(withNullability: false),
-        immutable = _readFieldOptions(element, classElement).immutable;
+        immutable = _readFieldOptions(element, classElement).immutable,
+        assert(element.name is String),
+        assert(element.type.getDisplayString(withNullability: false) is String),
+        assert(_readFieldOptions(element, classElement).immutable is bool);
 
   static CopyWithField _readFieldOptions(
     ParameterElement element,
     ClassElement classElement,
   ) {
+    assert(element is Element);
+    assert(classElement is ClassElement);
+
     final fieldElement = classElement.getField(element.name);
     if (fieldElement is! FieldElement) {
       return CopyWithField();

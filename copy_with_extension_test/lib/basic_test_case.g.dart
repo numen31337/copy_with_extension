@@ -6,7 +6,7 @@ part of 'basic_test_case.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-extension BasicClassCopyWithExtension on BasicClass {
+extension BasicClassCopyWith on BasicClass {
   BasicClass copyWith({
     String id,
   }) {

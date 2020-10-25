@@ -1,3 +1,6 @@
+## 1.4.0 Improving genetic compatibility
+* Fixes issue with generating code for some classes with generic type parameters.
+
 ## 1.3.0 Immutable Fields
 * Fixes the `boolean-expression-must-not-be-null-exception` issue
 * Introduces `immutable` field annotation
