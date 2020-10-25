@@ -26,8 +26,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final generateCopyWithNull =
         annotation.read('generateCopyWithNull').boolValue;
 
-    final typeParametersAnnotation = _typeParametersAnnotation(classElement);
-    final typeParametersNames = _typeParametersNames(classElement);
+    final typeParametersAnnotation = _typeParametersNames(classElement, false);
+    final typeParametersNames = _typeParametersNames(classElement, true);
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
@@ -38,39 +38,22 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
-  ///Returns parameter names declared by this class or an empty string.
-  ///`class MyClass<T extends String, Y>` returns `<T, Y>`
-  String _typeParametersNames(ClassElement classElement) {
+  ///Returns parameter names or full parameters declaration declared by this class or an empty string.
+  ///
+  ///If `nameOnly` is `true`: `class MyClass<T extends String, Y>` returns `<T, Y>`.
+  ///
+  ///If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
+  String _typeParametersNames(ClassElement classElement, bool nameOnly) {
     assert(classElement is ClassElement);
+    assert(nameOnly is bool);
 
-    final names = classElement.typeParameters.map((e) => e.name).join(',');
+    final names = classElement.typeParameters
+        .map(
+          (e) => nameOnly ? e.name : e.getDisplayString(withNullability: false),
+        )
+        .join(',');
     if (names.isNotEmpty) {
       return '<$names>';
-    } else {
-      return '';
-    }
-  }
-
-  ///Returns full parameters declaration declared by this class or an empty string.
-  ///`class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
-  ///
-  ///Must be refactored. Currently relies purely on parsing the `ClassElement.getDisplayString`.
-  ///Must make use of the analyser to get these annotations as `_typeParametersNames` does.
-  String _typeParametersAnnotation(ClassElement classElement) {
-    assert(classElement is ClassElement);
-
-    final classDisplayString =
-        classElement.getDisplayString(withNullability: false);
-    final hasGenerics = classDisplayString.contains('${classElement.name}<');
-    final startIndex = classDisplayString.indexOf('<');
-    final endIndex = classDisplayString.indexOf('>');
-
-    if (hasGenerics && startIndex != -1 && endIndex != -1) {
-      final type = classDisplayString.substring(
-        startIndex,
-        endIndex + 1,
-      );
-      return type;
     } else {
       return '';
     }
@@ -194,7 +177,7 @@ class _FieldInfo {
   ) {
     assert(element is Element);
     assert(classElement is ClassElement);
-    
+
     final fieldElement = classElement.getField(element.name);
     if (fieldElement is! FieldElement) {
       return CopyWithField();
