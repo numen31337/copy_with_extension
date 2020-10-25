@@ -6,7 +6,7 @@ part of 'subclass_test_case.dart';
 // CopyWithGenerator
 // **************************************************************************
 
-extension BasicBaseClassCopyWithExtension on BasicBaseClass {
+extension BasicBaseClassCopyWith on BasicBaseClass {
   BasicBaseClass copyWith({
     String id,
   }) {
@@ -16,7 +16,7 @@ extension BasicBaseClassCopyWithExtension on BasicBaseClass {
   }
 }
 
-extension BasicBaseSubClassCopyWithExtension<T> on BasicBaseSubClass<T> {
+extension BasicBaseSubClassCopyWith<T> on BasicBaseSubClass<T> {
   BasicBaseSubClass<T> copyWith({
     String id,
     T item,
@@ -28,7 +28,7 @@ extension BasicBaseSubClassCopyWithExtension<T> on BasicBaseSubClass<T> {
   }
 }
 
-extension SubClassCopyWithExtension<T, U extends String> on SubClass<T, U> {
+extension SubClassCopyWith<T, U extends String> on SubClass<T, U> {
   SubClass<T, U> copyWith({
     String aString,
     DateTime date,

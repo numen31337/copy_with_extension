@@ -1,4 +1,4 @@
-Provides [source_gen](https://pub.dev/packages/source_gen) `Generator` for generating `copyWith` extensions. For more info on this package check out [my blog article](https://www.oleksandrkirichenko.com/blog/dart-extensions/).
+Provides [source_gen](https://pub.dev/packages/source_gen) `Generator` for generating `copyWith` extensions. For more info on this package check out [my blog article](https://www.oleksandrkirichenko.com/blog/dart-extensions/) or the [main documentation file](https://pub.dev/packages/copy_with_extension_gen).
 
 ## copy_with_extension
 * Package: [copy_with_extension](https://pub.dev/packages/copy_with_extension)
