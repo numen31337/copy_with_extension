@@ -26,8 +26,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final generateCopyWithNull =
         annotation.read('generateCopyWithNull').boolValue;
 
-    final typeParametersAnnotation = _typeParametersNames(classElement, false);
-    final typeParametersNames = _typeParametersNames(classElement, true);
+    final typeParametersAnnotation = _typeParametersString(classElement, false);
+    final typeParametersNames = _typeParametersString(classElement, true);
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
@@ -43,7 +43,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   ///If `nameOnly` is `true`: `class MyClass<T extends String, Y>` returns `<T, Y>`.
   ///
   ///If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
-  String _typeParametersNames(ClassElement classElement, bool nameOnly) {
+  String _typeParametersString(ClassElement classElement, bool nameOnly) {
     assert(classElement is ClassElement);
     assert(nameOnly is bool);
 
