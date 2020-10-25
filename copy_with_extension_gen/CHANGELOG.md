@@ -1,3 +1,6 @@
+## 1.4.0 Improving genetic compatibility
+* Fixes issue with generating code for some classes with generic type parameters.
+
 ## 1.3.1 README Update
 * Update README.md
 

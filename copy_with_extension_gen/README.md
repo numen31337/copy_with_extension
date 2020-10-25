@@ -5,8 +5,8 @@ Provides [Dart Build System](https://pub.dev/packages/build) builder for generat
 ## Usage
 
 #### In your `pubspec.yaml` file:
-- Add to `dependencies` section `copy_with_extension: ^1.3.0`
-- Add to `dev_dependencies` section `copy_with_extension_gen: ^1.3.0`
+- Add to `dependencies` section `copy_with_extension: ^1.4.0`
+- Add to `dev_dependencies` section `copy_with_extension_gen: ^1.4.0`
 - Add to `dev_dependencies` section `build_runner: ^1.10.3`
 - Set `environment` to at least Dart 2.9.0 version like so: `">=2.9.0 <3.0.0"`
 
@@ -22,12 +22,12 @@ environment:
 
 dependencies:
   ...
-  copy_with_extension: ^1.3.0
+  copy_with_extension: ^1.4.0
   
 dev_dependencies:
   ...
   build_runner: ^1.10.3
-  copy_with_extension_gen: ^1.3.0
+  copy_with_extension_gen: ^1.4.0
 ```
 
 #### Annotate your class with `CopyWith` annotation:
