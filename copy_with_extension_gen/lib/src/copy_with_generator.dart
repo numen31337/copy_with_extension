@@ -71,6 +71,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       (r, v) {
         if (v.immutable) {
           return '$r';
+        } else if (v.required) {
+          return '$r @required ${v.type} ${v.name},';
         } else {
           return '$r ${v.type} ${v.name},';
         }
@@ -79,7 +81,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final paramsInput = sortedFields.fold<String>(
       '',
       (r, v) {
-        if (v.immutable) {
+        if (v.immutable || v.required) {
           return '$r ${v.name}: ${v.name},';
         } else {
           return '$r ${v.name}: ${v.name} ?? this.${v.name},';
@@ -162,14 +164,17 @@ class _FieldInfo {
   final String name;
   final String type;
   final bool immutable;
+  final bool required;
 
   _FieldInfo(ParameterElement element, ClassElement classElement)
       : name = element.name,
         type = element.type.getDisplayString(withNullability: false),
         immutable = _readFieldOptions(element, classElement).immutable,
+        required = _readFieldOptions(element, classElement).required,
         assert(element.name is String),
         assert(element.type.getDisplayString(withNullability: false) is String),
-        assert(_readFieldOptions(element, classElement).immutable is bool);
+        assert(_readFieldOptions(element, classElement).immutable is bool),
+        assert(_readFieldOptions(element, classElement).required is bool);
 
   static CopyWithField _readFieldOptions(
     ParameterElement element,
@@ -191,12 +196,13 @@ class _FieldInfo {
 
     final reader = ConstantReader(annotation);
     final immutable = reader.read('immutable').literalValue as bool;
+    final required = reader.read('required').literalValue as bool;
 
-    return CopyWithField(immutable: immutable);
+    return CopyWithField(immutable: immutable, required: required);
   }
 
   @override
   String toString() {
-    return 'type:$type name:$name immutable:$immutable';
+    return 'type:$type name:$name immutable:$immutable required:$required';
   }
 }

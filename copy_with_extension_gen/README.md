@@ -5,6 +5,7 @@ Provides [Dart Build System](https://pub.dev/packages/build) builder for generat
 ## Usage
 
 #### In your `pubspec.yaml` file:
+
 - Add to `dependencies` section `copy_with_extension: ^1.4.0`
 - Add to `dev_dependencies` section `copy_with_extension_gen: ^1.4.0`
 - Add to `dev_dependencies` section `build_runner: ^1.10.3`
@@ -23,7 +24,7 @@ environment:
 dependencies:
   ...
   copy_with_extension: ^1.4.0
-  
+
 dev_dependencies:
   ...
   build_runner: ^1.10.3
@@ -91,3 +92,32 @@ final int myImmutableField;
 ```
 
 By adding this annotation you forcing your generated `copyWith` to always copy this field as it is, without allowing its modification.
+
+#### Required fields
+
+```dart
+@CopyWithField(required: true)
+final int myRequiredField;
+```
+
+The extension will be generated:
+
+```dart
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'basic_class.dart';
+
+// **************************************************************************
+// CopyWithGenerator
+// **************************************************************************
+
+extension CopyWithExtension on BasicClass {
+  BasicClass copyWith({
+    @required int myRequiredField,
+  }) {
+    return BasicClass(
+      myRequiredField: myRequiredField,
+    );
+  }
+}
+```

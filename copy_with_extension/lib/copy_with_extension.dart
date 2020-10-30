@@ -14,8 +14,15 @@ class CopyWith {
 
 /// Additional field related options for the `CopyWith`.
 class CopyWithField {
-  const CopyWithField({this.immutable = false}) : assert(immutable is bool);
+  const CopyWithField({
+    this.immutable = false,
+    this.required = false,
+  })  : assert(immutable is bool),
+        assert(required is bool);
 
   /// Indicates that the field should be hidden in the generated `copyWith` method. By setting this flag to `true` the property will always be copied as it is e.g. `userID` field.
   final bool immutable;
+
+  /// Indicates that the field should be required
+  final bool required;
 }
