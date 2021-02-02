@@ -6,6 +6,7 @@ import 'package:analyzer/dart/element/element.dart'
         Element,
         FieldElement,
         ParameterElement;
+import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:source_gen/source_gen.dart'
@@ -21,7 +22,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   ) {
     if (element is! ClassElement) throw '$element is not a ClassElement';
 
-    final classElement = element as ClassElement;
+    final classElement = element;
     final sortedFields = _sortedConstructorFields(classElement);
     final generateCopyWithNull =
         annotation.read('generateCopyWithNull').boolValue;
@@ -72,7 +73,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         if (v.immutable) {
           return '$r';
         } else {
-          return '$r ${v.type} ${v.name},';
+          return '$r ${v.type}? ${v.name},';
         }
       },
     );
@@ -101,10 +102,15 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   ) {
     assert(typeAnnotation is String && sortedFields is List<_FieldInfo>);
 
+    /// Return if there is no nullable fields
+    if (sortedFields.where((element) => element.nullable == true).isEmpty) {
+      return '';
+    }
+
     final nullConstructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
-        if (v.immutable) {
+        if (v.immutable || !v.nullable) {
           return '$r';
         } else {
           return '$r bool ${v.name} = false,';
@@ -114,7 +120,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final nullParamsInput = sortedFields.fold<String>(
       '',
       (r, v) {
-        if (v.immutable) {
+        if (v.immutable || !v.nullable) {
           return '$r ${v.name}: ${v.name},';
         } else {
           return '$r ${v.name}: ${v.name} == true ? null : this.${v.name},';
@@ -162,11 +168,13 @@ class _FieldInfo {
   final String name;
   final String type;
   final bool immutable;
+  final bool nullable;
 
   _FieldInfo(ParameterElement element, ClassElement classElement)
       : name = element.name,
         type = element.type.getDisplayString(withNullability: false),
         immutable = _readFieldOptions(element, classElement).immutable,
+        nullable = element.type.nullabilitySuffix != NullabilitySuffix.none,
         assert(element.name is String),
         assert(element.type.getDisplayString(withNullability: false) is String),
         assert(_readFieldOptions(element, classElement).immutable is bool);
@@ -197,6 +205,6 @@ class _FieldInfo {
 
   @override
   String toString() {
-    return 'type:$type name:$name immutable:$immutable';
+    return 'type:$type name:$name immutable:$immutable nullable:$nullable';
   }
 }

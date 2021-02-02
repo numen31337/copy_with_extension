@@ -8,8 +8,8 @@ part of 'example.dart';
 
 extension CopyWithExtension on SimpleObject {
   SimpleObject copyWith({
-    String id,
-    int value,
+    String? id,
+    int? value,
   }) {
     return SimpleObject(
       id: id ?? this.id,

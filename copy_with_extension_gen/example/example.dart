@@ -11,5 +11,5 @@ class SimpleObject {
   final int value;
 
   /// Make sure that constructor has named parameters (wrapped in curly braces)
-  SimpleObject({this.id, this.value});
+  SimpleObject({required this.id, required this.value});
 }
