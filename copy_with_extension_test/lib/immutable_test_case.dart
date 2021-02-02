@@ -8,5 +8,5 @@ class TestCaseClass<T extends String> {
   @CopyWithField(immutable: true)
   final int immutableField;
 
-  TestCaseClass({this.id, this.immutableField});
+  TestCaseClass({required this.id, required this.immutableField});
 }

@@ -26,7 +26,7 @@ Future<String> _generate(String source) async {
     '$pkgName|lib/test_case_class.dart': source,
   };
 
-  String error;
+  String? error;
   void captureError(LogRecord logRecord) {
     error = logRecord.error.toString();
   }
