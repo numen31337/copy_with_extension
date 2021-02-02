@@ -22,5 +22,5 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: 'dev'
-      - run: (cd copy_with_extension_gen && pub get)
-      - run: (cd copy_with_extension_gen && pub run test)
+      - run: (cd copy_with_extension_gen && dart pub get)
+      - run: (cd copy_with_extension_gen && dart pub run --no-sound-null-safety test)

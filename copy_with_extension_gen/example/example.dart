@@ -2,7 +2,7 @@ import 'package:meta/meta.dart' show immutable;
 import 'package:copy_with_extension/copy_with_extension.dart';
 
 /// Make sure that `part` is specified, even before launching the builder
-part 'example.g.dart';
+/// part 'example.g.dart';
 
 @immutable
 @CopyWith()
