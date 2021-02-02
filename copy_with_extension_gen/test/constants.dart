@@ -41,19 +41,10 @@ part of 'test_case_class.dart';
 
 extension Test_Case_ClassCopyWith<T extends String> on Test_Case_Class<T> {
   Test_Case_Class<T> copyWith({
-    T id,
+    T? id,
   }) {
     return Test_Case_Class<T>(
       id: id ?? this.id,
-      immutableField: immutableField,
-    );
-  }
-
-  Test_Case_Class<T> copyWithNull({
-    bool id = false,
-  }) {
-    return Test_Case_Class<T>(
-      id: id == true ? null : this.id,
       immutableField: immutableField,
     );
   }

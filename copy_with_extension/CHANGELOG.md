@@ -1,3 +1,6 @@
+## 2.0.0-nullsafety.1 Null Safety
+* Introduces support of null safety.
+
 ## 1.4.0 Improving generic compatibility
 * Fixes issue with generating code for some classes with generic type parameters.
 

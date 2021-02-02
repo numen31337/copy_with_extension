@@ -8,18 +8,33 @@ part of 'basic_test_case.dart';
 
 extension BasicClassCopyWith on BasicClass {
   BasicClass copyWith({
-    String id,
+    String? id,
+    String? optional,
   }) {
     return BasicClass(
       id: id ?? this.id,
+      optional: optional ?? this.optional,
     );
   }
 
   BasicClass copyWithNull({
-    bool id = false,
+    bool optional = false,
   }) {
     return BasicClass(
-      id: id == true ? null : this.id,
+      id: id,
+      optional: optional == true ? null : this.optional,
+    );
+  }
+}
+
+extension BasicClassOnlyNonNullableCopyWith on BasicClassOnlyNonNullable {
+  BasicClassOnlyNonNullable copyWith({
+    String? id,
+    String? nextID,
+  }) {
+    return BasicClassOnlyNonNullable(
+      id: id ?? this.id,
+      nextID: nextID ?? this.nextID,
     );
   }
 }

@@ -8,7 +8,7 @@ part of 'implements_test_case.dart';
 
 extension BasicCopyWith on Basic {
   Basic copyWith({
-    String aField,
+    String? aField,
   }) {
     return Basic(
       aField: aField ?? this.aField,
@@ -18,7 +18,7 @@ extension BasicCopyWith on Basic {
 
 extension WithGenericTypeCopyWith<T> on WithGenericType<T> {
   WithGenericType<T> copyWith({
-    T tField,
+    T? tField,
   }) {
     return WithGenericType<T>(
       tField: tField ?? this.tField,
@@ -28,7 +28,7 @@ extension WithGenericTypeCopyWith<T> on WithGenericType<T> {
 
 extension WithSpecificTypeCopyWith on WithSpecificType {
   WithSpecificType copyWith({
-    String tField,
+    String? tField,
   }) {
     return WithSpecificType(
       tField: tField ?? this.tField,
@@ -38,11 +38,11 @@ extension WithSpecificTypeCopyWith on WithSpecificType {
 
 extension WithBothCopyWith<T extends String, Y> on WithBoth<T, Y> {
   WithBoth<T, Y> copyWith({
-    String aField,
-    Y sa1Field,
-    String saField,
-    int t1Field,
-    T tField,
+    String? aField,
+    Y? sa1Field,
+    String? saField,
+    int? t1Field,
+    T? tField,
   }) {
     return WithBoth<T, Y>(
       aField: aField ?? this.aField,
