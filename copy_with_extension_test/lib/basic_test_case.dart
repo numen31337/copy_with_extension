@@ -8,6 +8,16 @@ part 'basic_test_case.g.dart';
 @CopyWith(generateCopyWithNull: true)
 class BasicClass {
   final String id;
+  final String? optional;
 
-  BasicClass({this.id});
+  BasicClass({required this.id, this.optional});
+}
+
+@immutable
+@CopyWith(generateCopyWithNull: true)
+class BasicClassOnlyNonNullable {
+  final String id;
+  final String nextID;
+
+  BasicClassOnlyNonNullable({required this.id, required this.nextID});
 }

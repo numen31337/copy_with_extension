@@ -1,11 +1,11 @@
-import 'package:meta/meta.dart' show immutable, required;
+import 'package:meta/meta.dart' show immutable;
 import 'package:copy_with_extension/copy_with_extension.dart';
 
 //Won't work without it!
 part 'subclass_test_case.g.dart';
 
 abstract class AClass {
-  final String aString;
+  final String? aString;
 
   AClass(this.aString);
 }
@@ -15,7 +15,7 @@ abstract class AClass {
 class BasicBaseClass {
   final String id;
 
-  BasicBaseClass({this.id});
+  BasicBaseClass({this.id = 'test'});
 }
 
 mixin TestMixin on BasicBaseClass {
@@ -27,9 +27,9 @@ mixin TestMixin on BasicBaseClass {
 class BasicBaseSubClass<T> extends BasicBaseClass {
   @override
   final String id;
-  final T item;
+  final T? item;
 
-  BasicBaseSubClass({this.id, this.item});
+  BasicBaseSubClass({required this.id, this.item});
 }
 
 @immutable
@@ -39,19 +39,19 @@ class SubClass<T, U extends String> extends BasicBaseSubClass<T>
     implements AClass {
   final DateTime date;
   @override
-  final String aString;
+  final String? aString;
   @CopyWithField(immutable: true)
-  final String privateField;
-  static String staticStr;
-  final List<T> listWithGenericType;
-  final List<Iterable<U>> listWithTypedType;
-  final List<int> listWithType;
+  final String? privateField;
+  static String staticStr = 'test';
+  final List<T>? listWithGenericType;
+  final List<Iterable<U>?>? listWithTypedType;
+  final List<int>? listWithType;
   @override
-  final T item;
+  final T? item;
 
   SubClass({
-    String id,
-    @required this.date,
+    required String id,
+    required this.date,
     this.privateField,
     this.aString,
     this.listWithGenericType,
@@ -60,7 +60,7 @@ class SubClass<T, U extends String> extends BasicBaseSubClass<T>
     this.item,
   }) : super(id: id);
 
-  SubClass.secondConstructor({String id})
+  SubClass.secondConstructor({required String id})
       : this(id: id, date: DateTime.now(), privateField: '', aString: '');
 
   factory SubClass.testFactory() {
