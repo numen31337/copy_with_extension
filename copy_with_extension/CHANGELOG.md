@@ -1,3 +1,6 @@
+## 2.0.0 Null Safety
+* Updating dependencies.
+
 ## 2.0.0-nullsafety.1 Null Safety
 * Introduces support of null safety.
 
@@ -22,7 +25,7 @@
 
 ## 1.0.6 Minor corrections
 
-* Minor metadata and description corractions.
+* Minor metadata and description corrections.
 
 ## 1.0.0 Initial release
 
