@@ -1,3 +1,6 @@
+## 2.0.0 Null Safety
+* Updating dependencies.
+
 ## 2.0.0-nullsafety.1 Null Safety
 * Introduces support of null safety.
 
