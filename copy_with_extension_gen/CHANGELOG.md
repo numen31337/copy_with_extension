@@ -1,3 +1,6 @@
+## 2.0.1 Null Safety
+* Updating build and source_gen dependencies.
+
 ## 2.0.0 Null Safety
 * Updating dependencies.
 
