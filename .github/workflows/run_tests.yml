@@ -23,4 +23,4 @@ jobs:
         with:
           channel: 'stable'
       - run: (cd copy_with_extension_gen && dart pub get)
-      - run: (cd copy_with_extension_gen && dart --no-sound-null-safety run test)
+      - run: (cd copy_with_extension_gen && dart run test)
