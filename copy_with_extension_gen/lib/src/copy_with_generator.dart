@@ -73,7 +73,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         if (v.immutable) {
           return '$r';
         } else {
-          return '$r ${v.type}? ${v.name},';
+          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
+          return '$r $type ${v.name},';
         }
       },
     );

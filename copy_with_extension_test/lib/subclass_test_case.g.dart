@@ -36,7 +36,7 @@ extension SubClassCopyWith<T, U extends String> on SubClass<T, U> {
     T? item,
     List<T>? listWithGenericType,
     List<int>? listWithType,
-    List<Iterable<U>>? listWithTypedType,
+    List<Iterable<U>?>? listWithTypedType,
   }) {
     return SubClass<T, U>(
       aString: aString ?? this.aString,
