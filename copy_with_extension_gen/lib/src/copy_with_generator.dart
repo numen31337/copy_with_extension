@@ -50,7 +50,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final names = classElement.typeParameters
         .map(
-          (e) => nameOnly ? e.name : e.getDisplayString(withNullability: false),
+          (e) => nameOnly ? e.name : e.getDisplayString(withNullability: true),
         )
         .join(',');
     if (names.isNotEmpty) {
@@ -73,7 +73,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         if (v.immutable) {
           return '$r';
         } else {
-          return '$r ${v.type}? ${v.name},';
+          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
+          return '$r $type ${v.name},';
         }
       },
     );
@@ -172,11 +173,11 @@ class _FieldInfo {
 
   _FieldInfo(ParameterElement element, ClassElement classElement)
       : name = element.name,
-        type = element.type.getDisplayString(withNullability: false),
+        type = element.type.getDisplayString(withNullability: true),
         immutable = _readFieldOptions(element, classElement).immutable,
         nullable = element.type.nullabilitySuffix != NullabilitySuffix.none,
         assert(element.name is String),
-        assert(element.type.getDisplayString(withNullability: false) is String),
+        assert(element.type.getDisplayString(withNullability: true) is String),
         assert(_readFieldOptions(element, classElement).immutable is bool);
 
   static CopyWithField _readFieldOptions(
