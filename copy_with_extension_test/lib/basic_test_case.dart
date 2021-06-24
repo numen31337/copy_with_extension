@@ -9,8 +9,9 @@ part 'basic_test_case.g.dart';
 class BasicClass {
   final String id;
   final String? optional;
+  final List<String?> nullableGeneric;
 
-  BasicClass({required this.id, this.optional});
+  BasicClass({required this.id, this.optional, required this.nullableGeneric});
 }
 
 @immutable
