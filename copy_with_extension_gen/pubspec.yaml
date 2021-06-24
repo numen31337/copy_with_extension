@@ -15,7 +15,7 @@ dependencies:
   copy_with_extension: ^2.0.0
 
 dev_dependencies:
-  pedantic: ^1.11.0
+  pedantic: ^1.11.1
   build_runner: ^1.11.5
   logging: ^1.0.0
   build_test: ^2.0.0
