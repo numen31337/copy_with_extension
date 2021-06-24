@@ -1,3 +1,6 @@
+## 2.0.2 Bugfix
+* Fix generation of generics with nullable types (thanks [@josiahsrc](https://github.com/josiahsrc)).
+
 ## 2.0.0 Null Safety
 * Updating dependencies.
 
