@@ -1,5 +1,5 @@
 name: copy_with_extension_gen
-version: 2.0.2
+version: 2.0.3
 description: Automatically generating `copyWith` extensions code for classes with `@CopyWith()` annotation.
 repository: https://github.com/numen31337/copy_with_extension
 homepage: https://github.com/numen31337/copy_with_extension/tree/master/copy_with_extension_gen
@@ -9,7 +9,7 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  analyzer: ^1.2.0
+  analyzer: ^2.0.0
   build: ^2.0.0
   source_gen: ^1.0.0
   copy_with_extension: ^2.0.0
