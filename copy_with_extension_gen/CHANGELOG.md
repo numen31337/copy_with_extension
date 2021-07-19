@@ -1,3 +1,6 @@
+## 2.0.3 Dependency update
+* Updating `analyzer` to `^2.0.0`
+
 ## 2.0.2 Bugfix
 * Fix generation of generics with nullable types (thanks [@josiahsrc](https://github.com/josiahsrc)).
 

@@ -4,6 +4,3 @@ analyzer:
   strong-mode:
     implicit-casts: false
     implicit-dynamic: false
-  errors:
-    #TODO: Remove when source_gen, build_test and build are migrated
-    import_of_legacy_library_into_null_safe: false
