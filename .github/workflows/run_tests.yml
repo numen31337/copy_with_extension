@@ -23,7 +23,7 @@ jobs:
         run: flutter update-packages --force-upgrade
 
       - name: Flutter Version
-        run: flutter config --no-analytics; flutter --version
+        run: flutter config --no-analytics; dart --disable-analytics; flutter --version
 
       - name: Pub Get
         run: (cd copy_with_extension_test && flutter pub get)
@@ -47,7 +47,7 @@ jobs:
           channel: 'stable'
           
       - name: Flutter Version
-        run: flutter config --no-analytics; flutter --version
+        run: flutter config --no-analytics; dart --disable-analytics; flutter --version
 
       - name: Pub Get
         run: (cd copy_with_extension_gen && dart pub get)
