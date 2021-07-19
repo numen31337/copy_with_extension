@@ -15,7 +15,7 @@ jobs:
           channel: 'stable'
 
       - name: Update Flutter Packages
-        run: flutter update-packages
+        run: flutter update-packages --force-upgrade
 
       - name: Flutter Version
         run: flutter config --no-analytics; flutter --version
