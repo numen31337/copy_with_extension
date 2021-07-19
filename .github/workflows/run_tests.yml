@@ -6,10 +6,16 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
+
+      - name: Update Flutter Packages
+        run: flutter update-packages
 
       - name: Flutter Version
         run: flutter config --no-analytics; flutter --version
@@ -27,8 +33,11 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: subosito/flutter-action@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
           
