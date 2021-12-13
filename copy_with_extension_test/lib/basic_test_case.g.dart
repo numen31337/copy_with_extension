@@ -38,3 +38,36 @@ extension BasicClassOnlyNonNullableCopyWith on BasicClassOnlyNonNullable {
     );
   }
 }
+
+extension BasicClassNamedCopyWith on BasicClassNamed {
+  BasicClassNamed copyWith({
+    String? id,
+    String? optional,
+  }) {
+    return BasicClassNamed._(
+      id: id ?? this.id,
+      optional: optional ?? this.optional,
+    );
+  }
+}
+
+extension BasicClassNamed1CopyWith on BasicClassNamed1 {
+  BasicClassNamed1 copyWith({
+    String? id,
+    String? optional,
+  }) {
+    return BasicClassNamed1.test(
+      id: id ?? this.id,
+      optional: optional ?? this.optional,
+    );
+  }
+
+  BasicClassNamed1 copyWithNull({
+    bool optional = false,
+  }) {
+    return BasicClassNamed1.test(
+      id: id,
+      optional: optional == true ? null : this.optional,
+    );
+  }
+}

@@ -41,6 +41,7 @@ Future<String> _generate(String source) async {
   );
 
   if (error != null) {
+    // ignore: avoid_print
     print('Error: $error');
   }
 
