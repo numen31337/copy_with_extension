@@ -8,7 +8,7 @@ on:
 
 jobs:
   execute_build_runner:
-    timeout-minutes: 5
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,8 +22,11 @@ jobs:
       - name: Update Flutter Packages
         run: flutter update-packages --force-upgrade
 
-      - name: Flutter Version
-        run: flutter config --no-analytics; dart --disable-analytics; flutter --version
+      - name: Flutter Setup
+        run: |
+          flutter config --no-analytics
+          dart --disable-analytics
+          flutter doctor
 
       - name: Pub Get
         run: (cd copy_with_extension_test && flutter pub get)
@@ -35,7 +38,7 @@ jobs:
         run: (cd copy_with_extension_test && flutter analyze)
   
   run_tests:
-    timeout-minutes: 5
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -46,8 +49,11 @@ jobs:
         with:
           channel: 'stable'
           
-      - name: Flutter Version
-        run: flutter config --no-analytics; dart --disable-analytics; flutter --version
+      - name: Flutter Setup
+        run: |
+          flutter config --no-analytics
+          dart --disable-analytics
+          flutter doctor
 
       - name: Pub Get
         run: (cd copy_with_extension_gen && dart pub get)

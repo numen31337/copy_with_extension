@@ -28,6 +28,18 @@ extension BasicBaseSubClassCopyWith<T> on BasicBaseSubClass<T> {
   }
 }
 
+extension BasicBaseSubClassNamedCopyWith<T> on BasicBaseSubClassNamed<T> {
+  BasicBaseSubClassNamed<T> copyWith({
+    String? id,
+    T? item,
+  }) {
+    return BasicBaseSubClassNamed<T>._(
+      id: id ?? this.id,
+      item: item ?? this.item,
+    );
+  }
+}
+
 extension SubClassCopyWith<T, U extends String> on SubClass<T, U> {
   SubClass<T, U> copyWith({
     String? aString,

@@ -10,7 +10,7 @@ class BasicClass {
   final String id;
   final String? optional;
 
-  BasicClass({required this.id, this.optional});
+  const BasicClass({required this.id, this.optional});
 }
 
 @immutable
@@ -19,5 +19,23 @@ class BasicClassOnlyNonNullable {
   final String id;
   final String nextID;
 
-  BasicClassOnlyNonNullable({required this.id, required this.nextID});
+  const BasicClassOnlyNonNullable({required this.id, required this.nextID});
+}
+
+@immutable
+@CopyWith(namedConstructor: "_")
+class BasicClassNamed {
+  final String id;
+  final String? optional;
+
+  const BasicClassNamed._({required this.id, this.optional});
+}
+
+@immutable
+@CopyWith(namedConstructor: "test", generateCopyWithNull: true)
+class BasicClassNamed1 {
+  final String id;
+  final String? optional;
+
+  const BasicClassNamed1.test({required this.id, this.optional});
 }
