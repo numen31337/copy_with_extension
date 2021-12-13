@@ -10,7 +10,7 @@ class BasicClass {
   final String id;
   final String? optional;
 
-  BasicClass({required this.id, this.optional});
+  const BasicClass({required this.id, this.optional});
 }
 
 @immutable
@@ -19,5 +19,5 @@ class BasicClassOnlyNonNullable {
   final String id;
   final String nextID;
 
-  BasicClassOnlyNonNullable({required this.id, required this.nextID});
+  const BasicClassOnlyNonNullable({required this.id, required this.nextID});
 }

@@ -15,7 +15,7 @@ abstract class AClass {
 class BasicBaseClass {
   final String id;
 
-  BasicBaseClass({this.id = 'test'});
+  const BasicBaseClass({this.id = 'test'});
 }
 
 mixin TestMixin on BasicBaseClass {
@@ -24,12 +24,12 @@ mixin TestMixin on BasicBaseClass {
 
 @immutable
 @CopyWith()
-class BasicBaseSubClass<T> extends BasicBaseClass {
+class BasicBaseSubClass<T> implements BasicBaseClass {
   @override
   final String id;
   final T? item;
 
-  BasicBaseSubClass({required this.id, this.item});
+  const BasicBaseSubClass({required this.id, this.item});
 }
 
 @immutable
@@ -47,6 +47,7 @@ class SubClass<T, U extends String> extends BasicBaseSubClass<T>
   final List<Iterable<U>?>? listWithTypedType;
   final List<int>? listWithType;
   @override
+  // ignore: overridden_fields
   final T? item;
 
   SubClass({
