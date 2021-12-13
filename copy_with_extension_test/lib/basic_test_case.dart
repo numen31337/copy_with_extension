@@ -21,3 +21,21 @@ class BasicClassOnlyNonNullable {
 
   const BasicClassOnlyNonNullable({required this.id, required this.nextID});
 }
+
+@immutable
+@CopyWith(namedConstructor: "_")
+class BasicClassNamed {
+  final String id;
+  final String? optional;
+
+  const BasicClassNamed._({required this.id, this.optional});
+}
+
+@immutable
+@CopyWith(namedConstructor: "test", generateCopyWithNull: true)
+class BasicClassNamed1 {
+  final String id;
+  final String? optional;
+
+  const BasicClassNamed1.test({required this.id, this.optional});
+}

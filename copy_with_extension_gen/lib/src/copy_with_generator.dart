@@ -22,19 +22,21 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   ) {
     if (element is! ClassElement) throw '$element is not a ClassElement';
 
-    final classElement = element;
-    final sortedFields = _sortedConstructorFields(classElement);
+    final ClassElement classElement = element;
     final generateCopyWithNull =
         annotation.read('generateCopyWithNull').boolValue;
+    final namedConstructor = annotation.peek('namedConstructor')?.stringValue;
 
+    final sortedFields =
+        _sortedConstructorFields(classElement, namedConstructor);
     final typeParametersAnnotation = _typeParametersString(classElement, false);
     final typeParametersNames = _typeParametersString(classElement, true);
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
     extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
-      ${_copyWithPart(typeAnnotation, sortedFields)}
-      ${generateCopyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields) : ""}
+      ${_copyWithPart(typeAnnotation, sortedFields, namedConstructor)}
+      ${generateCopyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields, namedConstructor) : ""}
     }
     ''';
   }
@@ -57,10 +59,15 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
   }
 
+  ///Returns constructor for the given type and optional named constructor name
+  String _constructorFor(String typeAnnotation, String? namedConstructor) =>
+      "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
+
   ///Generates the complete `copyWith` function.
   String _copyWithPart(
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
+    String? namedConstructor,
   ) {
     final constructorInput = sortedFields.fold<String>(
       '',
@@ -86,7 +93,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     return '''
         $typeAnnotation copyWith({$constructorInput}) {
-          return $typeAnnotation($paramsInput);
+          return ${_constructorFor(typeAnnotation, namedConstructor)}($paramsInput);
         }
     ''';
   }
@@ -95,6 +102,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   String _copyWithNullPart(
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
+    String? namedConstructor,
   ) {
     /// Return if there is no nullable fields
     if (sortedFields.where((element) => element.nullable == true).isEmpty) {
@@ -124,17 +132,28 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     return '''
       $typeAnnotation copyWithNull({$nullConstructorInput}) {
-        return $typeAnnotation($nullParamsInput);
+        return ${_constructorFor(typeAnnotation, namedConstructor)}($nullParamsInput);
       }
     ''';
   }
 
   ///Generates a list of `_FieldInfo` for each class field that will be a part of the code generation process.
   ///The resulting array is sorted by the field name. `Throws` on error.
-  List<_FieldInfo> _sortedConstructorFields(ClassElement element) {
-    final constructor = element.unnamedConstructor;
+  List<_FieldInfo> _sortedConstructorFields(
+    ClassElement element,
+    String? constructorName,
+  ) {
+    // final named = element.getNamedConstructor(name);
+    final constructor = constructorName != null
+        ? element.getNamedConstructor(constructorName)
+        : element.unnamedConstructor;
+
     if (constructor is! ConstructorElement) {
-      throw 'Default ${element.name} constructor is missing';
+      if (constructorName != null) {
+        throw 'Named Constructor $constructorName constructor is missing';
+      } else {
+        throw 'Default ${element.name} constructor is missing';
+      }
     }
 
     final parameters = constructor.parameters;

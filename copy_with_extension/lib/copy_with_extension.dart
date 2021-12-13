@@ -5,10 +5,16 @@ library copy_with_extension;
 /// Annotation used to indicate that the `copyWith` extension should be generated.
 class CopyWith {
   /// Creates a new [CopyWith] instance.
-  /// Set `generateCopyWithNull` to `true` for generating an extra `copyWithNull` function that allows you to nullify the properties.
-  const CopyWith({this.generateCopyWithNull = false});
+  const CopyWith({
+    this.generateCopyWithNull = false,
+    this.namedConstructor,
+  });
 
+  /// Set `generateCopyWithNull` to `true` for generating an extra `copyWithNull` function that allows you to nullify the properties.
   final bool generateCopyWithNull;
+
+  /// Set `namedConstructor` if you want to use a named constructor instead.
+  final String? namedConstructor;
 }
 
 /// Additional field related options for the `CopyWith`.

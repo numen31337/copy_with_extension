@@ -33,6 +33,16 @@ class BasicBaseSubClass<T> implements BasicBaseClass {
 }
 
 @immutable
+@CopyWith(namedConstructor: "_")
+class BasicBaseSubClassNamed<T> implements BasicBaseClass {
+  @override
+  final String id;
+  final T? item;
+
+  const BasicBaseSubClassNamed._({required this.id, this.item});
+}
+
+@immutable
 @CopyWith(generateCopyWithNull: true)
 class SubClass<T, U extends String> extends BasicBaseSubClass<T>
     with TestMixin
