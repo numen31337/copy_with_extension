@@ -40,7 +40,42 @@ extension BasicBaseSubClassNamedCopyWith<T> on BasicBaseSubClassNamed<T> {
   }
 }
 
+class _SubClassCopyWithProxy<T, U extends String> {
+  final SubClass _value;
+
+  _SubClassCopyWithProxy(this._value);
+
+  SubClass aString(String? aString) => aString == null
+      ? _value.copyWithNull(aString: true)
+      : _value.copyWith(aString: aString);
+
+  SubClass item(T? item) => item == null
+      ? _value.copyWithNull(item: true)
+      : _value.copyWith(item: item);
+
+  SubClass listWithGenericType(List<T>? listWithGenericType) =>
+      listWithGenericType == null
+          ? _value.copyWithNull(listWithGenericType: true)
+          : _value.copyWith(listWithGenericType: listWithGenericType);
+
+  SubClass listWithType(List<int>? listWithType) => listWithType == null
+      ? _value.copyWithNull(listWithType: true)
+      : _value.copyWith(listWithType: listWithType);
+
+  SubClass listWithTypedType(List<Iterable<U>?>? listWithTypedType) =>
+      listWithTypedType == null
+          ? _value.copyWithNull(listWithTypedType: true)
+          : _value.copyWith(listWithTypedType: listWithTypedType);
+
+  SubClass date(DateTime date) => _value.copyWith(date: date);
+
+  SubClass id(String id) => _value.copyWith(id: id);
+}
+
 extension SubClassCopyWith<T, U extends String> on SubClass<T, U> {
+  _SubClassCopyWithProxy get copyWithField =>
+      _SubClassCopyWithProxy<T, U>(this);
+
   SubClass<T, U> copyWith({
     String? aString,
     DateTime? date,

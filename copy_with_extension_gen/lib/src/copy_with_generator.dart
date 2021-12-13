@@ -32,10 +32,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeParametersAnnotation = _typeParametersString(classElement, false);
     final typeParametersNames = _typeParametersString(classElement, true);
     final typeAnnotation = classElement.name + typeParametersNames;
+    final generateCopyWithField = generateCopyWithNull;
 
     return '''
+    ${generateCopyWithField ? _copyWithFieldPart(classElement.name, typeParametersAnnotation, sortedFields) : ""}
+    
     extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
+      ${generateCopyWithField ? "_${classElement.name}CopyWithProxy get copyWithField => _${classElement.name}CopyWithProxy$typeParametersNames(this);" : ""}
+
       ${_copyWithPart(typeAnnotation, sortedFields, namedConstructor)}
+
       ${generateCopyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields, namedConstructor) : ""}
     }
     ''';
@@ -133,6 +139,36 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     return '''
       $typeAnnotation copyWithNull({$nullConstructorInput}) {
         return ${_constructorFor(typeAnnotation, namedConstructor)}($nullParamsInput);
+      }
+    ''';
+  }
+
+  String _copyWithFieldPart(
+    String type,
+    String typeParameters,
+    List<_FieldInfo> sortedFields,
+  ) {
+    final filteredFields = sortedFields.where((e) => !e.immutable);
+    final nonNullableFields = filteredFields.where((e) => !e.nullable);
+    final nullableFields =
+        filteredFields.where((e) => !nonNullableFields.contains(e));
+
+    final nonNullableFunctions = nonNullableFields.map((e) => '''
+    $type ${e.name}(${e.type} ${e.name}) => _value.copyWith(${e.name}: ${e.name});
+    ''').join("\n");
+    final nullableFunctions = nullableFields.map((e) => '''
+    $type ${e.name}(${e.type} ${e.name}) => ${e.name} == null ? _value.copyWithNull(${e.name}: true) :  _value.copyWith(${e.name}: ${e.name});
+    ''').join("\n");
+
+    return '''
+      class _${type}CopyWithProxy$typeParameters {
+        final $type _value;
+
+        _${type}CopyWithProxy(this._value);
+
+        $nullableFunctions
+
+        $nonNullableFunctions
       }
     ''';
   }
