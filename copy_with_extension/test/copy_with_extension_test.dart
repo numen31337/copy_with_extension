@@ -3,7 +3,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 
 void main() {
   test('annotation exists', () {
-    final annotation = const CopyWith();
-    expect(annotation is CopyWith, true);
+    const annotation = CopyWith();
+    expect(annotation.generateCopyWithNull, false);
   });
 }

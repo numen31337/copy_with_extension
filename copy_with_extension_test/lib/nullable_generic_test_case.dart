@@ -10,7 +10,7 @@ class NullableGenericTestCase {
   final List<String?> nullableGeneric;
   final List<List<List<int?>?>>? deepNestedGeneric;
 
-  NullableGenericTestCase({
+  const NullableGenericTestCase({
     this.deepNestedGeneric,
     required this.nullableGeneric,
   });

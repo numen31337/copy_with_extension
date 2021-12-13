@@ -22,19 +22,21 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   ) {
     if (element is! ClassElement) throw '$element is not a ClassElement';
 
-    final classElement = element;
-    final sortedFields = _sortedConstructorFields(classElement);
+    final ClassElement classElement = element;
     final generateCopyWithNull =
         annotation.read('generateCopyWithNull').boolValue;
+    final namedConstructor = annotation.peek('namedConstructor')?.stringValue;
 
+    final sortedFields =
+        _sortedConstructorFields(classElement, namedConstructor);
     final typeParametersAnnotation = _typeParametersString(classElement, false);
     final typeParametersNames = _typeParametersString(classElement, true);
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
     extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
-      ${_copyWithPart(typeAnnotation, sortedFields)}
-      ${generateCopyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields) : ""}
+      ${_copyWithPart(typeAnnotation, sortedFields, namedConstructor)}
+      ${generateCopyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields, namedConstructor) : ""}
     }
     ''';
   }
@@ -45,9 +47,6 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   ///
   ///If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
   String _typeParametersString(ClassElement classElement, bool nameOnly) {
-    assert(classElement is ClassElement);
-    assert(nameOnly is bool);
-
     final names = classElement.typeParameters
         .map(
           (e) => nameOnly ? e.name : e.getDisplayString(withNullability: true),
@@ -60,18 +59,21 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
   }
 
+  ///Returns constructor for the given type and optional named constructor name
+  String _constructorFor(String typeAnnotation, String? namedConstructor) =>
+      "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
+
   ///Generates the complete `copyWith` function.
   String _copyWithPart(
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
+    String? namedConstructor,
   ) {
-    assert(typeAnnotation is String && sortedFields is List<_FieldInfo>);
-
     final constructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
         if (v.immutable) {
-          return '$r';
+          return r;
         } else {
           final type = v.type.endsWith('?') ? v.type : '${v.type}?';
           return '$r $type ${v.name},';
@@ -91,7 +93,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     return '''
         $typeAnnotation copyWith({$constructorInput}) {
-          return $typeAnnotation($paramsInput);
+          return ${_constructorFor(typeAnnotation, namedConstructor)}($paramsInput);
         }
     ''';
   }
@@ -100,9 +102,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   String _copyWithNullPart(
     String typeAnnotation,
     List<_FieldInfo> sortedFields,
+    String? namedConstructor,
   ) {
-    assert(typeAnnotation is String && sortedFields is List<_FieldInfo>);
-
     /// Return if there is no nullable fields
     if (sortedFields.where((element) => element.nullable == true).isEmpty) {
       return '';
@@ -112,7 +113,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       '',
       (r, v) {
         if (v.immutable || !v.nullable) {
-          return '$r';
+          return r;
         } else {
           return '$r bool ${v.name} = false,';
         }
@@ -131,31 +132,40 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     return '''
       $typeAnnotation copyWithNull({$nullConstructorInput}) {
-        return $typeAnnotation($nullParamsInput);
+        return ${_constructorFor(typeAnnotation, namedConstructor)}($nullParamsInput);
       }
     ''';
   }
 
   ///Generates a list of `_FieldInfo` for each class field that will be a part of the code generation process.
   ///The resulting array is sorted by the field name. `Throws` on error.
-  List<_FieldInfo> _sortedConstructorFields(ClassElement element) {
-    assert(element is ClassElement);
+  List<_FieldInfo> _sortedConstructorFields(
+    ClassElement element,
+    String? constructorName,
+  ) {
+    // final named = element.getNamedConstructor(name);
+    final constructor = constructorName != null
+        ? element.getNamedConstructor(constructorName)
+        : element.unnamedConstructor;
 
-    final constructor = element.unnamedConstructor;
     if (constructor is! ConstructorElement) {
-      throw 'Default ${element.name} constructor is missing';
+      if (constructorName != null) {
+        throw 'Named Constructor $constructorName constructor is missing';
+      } else {
+        throw 'Default ${element.name} constructor is missing';
+      }
     }
 
     final parameters = constructor.parameters;
-    if (parameters is! List<ParameterElement> || parameters.isEmpty) {
+    if (parameters.isEmpty) {
       throw 'Unnamed constructor for ${element.name} has no parameters';
     }
 
-    parameters.forEach((parameter) {
+    for (final parameter in parameters) {
       if (!parameter.isNamed) {
         throw 'Unnamed constructor for ${element.name} contains unnamed parameter. Only named parameters are supported.';
       }
-    });
+    }
 
     final fields = parameters.map((v) => _FieldInfo(v, element)).toList();
     fields.sort((lhs, rhs) => lhs.name.compareTo(rhs.name));
@@ -175,27 +185,21 @@ class _FieldInfo {
       : name = element.name,
         type = element.type.getDisplayString(withNullability: true),
         immutable = _readFieldOptions(element, classElement).immutable,
-        nullable = element.type.nullabilitySuffix != NullabilitySuffix.none,
-        assert(element.name is String),
-        assert(element.type.getDisplayString(withNullability: true) is String),
-        assert(_readFieldOptions(element, classElement).immutable is bool);
+        nullable = element.type.nullabilitySuffix != NullabilitySuffix.none;
 
   static CopyWithField _readFieldOptions(
     ParameterElement element,
     ClassElement classElement,
   ) {
-    assert(element is Element);
-    assert(classElement is ClassElement);
-
     final fieldElement = classElement.getField(element.name);
     if (fieldElement is! FieldElement) {
-      return CopyWithField();
+      return const CopyWithField();
     }
 
-    final checker = TypeChecker.fromRuntime(CopyWithField);
+    const checker = TypeChecker.fromRuntime(CopyWithField);
     final annotation = checker.firstAnnotationOf(fieldElement);
     if (annotation is! DartObject) {
-      return CopyWithField();
+      return const CopyWithField();
     }
 
     final reader = ConstantReader(annotation);

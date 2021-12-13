@@ -28,7 +28,7 @@ abstract class AbstractWithType2<T, Y> {
 @immutable
 @CopyWith()
 class Basic implements Abstract {
-  Basic({required this.aField});
+  const Basic({required this.aField});
 
   @override
   final String aField;
@@ -37,7 +37,7 @@ class Basic implements Abstract {
 @immutable
 @CopyWith()
 class WithGenericType<T> implements AbstractWithType<T> {
-  WithGenericType({required this.tField});
+  const WithGenericType({required this.tField});
 
   @override
   final T tField;
@@ -46,7 +46,7 @@ class WithGenericType<T> implements AbstractWithType<T> {
 @immutable
 @CopyWith()
 class WithSpecificType implements AbstractWithType<String> {
-  WithSpecificType({required this.tField});
+  const WithSpecificType({required this.tField});
 
   @override
   final String tField;
@@ -60,7 +60,7 @@ class WithBoth<T extends String, Y>
         AbstractWithType<T>,
         AbstractWithType1<int>,
         AbstractWithType2<String, Y> {
-  WithBoth({
+  const WithBoth({
     required this.aField,
     required this.tField,
     required this.t1Field,
