@@ -11,14 +11,14 @@ class _TestCaseClassCopyWithProxy<T extends String> {
 
   _TestCaseClassCopyWithProxy(this._value);
 
-  TestCaseClass id(T id) => _value.copyWith(id: id);
+  TestCaseClass id(T id) => _value._copyWithValues(id: id);
 }
 
 extension TestCaseClassCopyWith<T extends String> on TestCaseClass<T> {
-  _TestCaseClassCopyWithProxy get copyWithField =>
+  _TestCaseClassCopyWithProxy get copyWith =>
       _TestCaseClassCopyWithProxy<T>(this);
 
-  TestCaseClass<T> copyWith({
+  TestCaseClass<T> _copyWithValues({
     T? id,
   }) {
     return TestCaseClass<T>(

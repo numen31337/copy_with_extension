@@ -3,7 +3,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 //Won't work without it!
 part 'immutable_test_case.g.dart';
 
-@CopyWith(generateCopyWithNull: true)
+@CopyWith(copyWith: true, copyWithNull: true)
 class TestCaseClass<T extends String> {
   final T id;
   @CopyWithField(immutable: true)

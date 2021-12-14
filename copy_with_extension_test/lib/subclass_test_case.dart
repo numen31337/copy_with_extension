@@ -11,7 +11,7 @@ abstract class AClass {
 }
 
 @immutable
-@CopyWith()
+@CopyWith(copyWith: true)
 class BasicBaseClass {
   final String id;
 
@@ -23,7 +23,7 @@ mixin TestMixin on BasicBaseClass {
 }
 
 @immutable
-@CopyWith()
+@CopyWith(copyWith: true)
 class BasicBaseSubClass<T> implements BasicBaseClass {
   @override
   final String id;
@@ -33,7 +33,7 @@ class BasicBaseSubClass<T> implements BasicBaseClass {
 }
 
 @immutable
-@CopyWith(namedConstructor: "_")
+@CopyWith(namedConstructor: "_", copyWith: true)
 class BasicBaseSubClassNamed<T> implements BasicBaseClass {
   @override
   final String id;
@@ -43,7 +43,7 @@ class BasicBaseSubClassNamed<T> implements BasicBaseClass {
 }
 
 @immutable
-@CopyWith(generateCopyWithNull: true)
+@CopyWith(copyWith: true, copyWithNull: true)
 class SubClass<T, U extends String> extends BasicBaseSubClass<T>
     with TestMixin
     implements AClass {

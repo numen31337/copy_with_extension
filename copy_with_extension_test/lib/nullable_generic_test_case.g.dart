@@ -15,17 +15,17 @@ class _NullableGenericTestCaseCopyWithProxy {
           List<List<List<int?>?>>? deepNestedGeneric) =>
       deepNestedGeneric == null
           ? _value.copyWithNull(deepNestedGeneric: true)
-          : _value.copyWith(deepNestedGeneric: deepNestedGeneric);
+          : _value._copyWithValues(deepNestedGeneric: deepNestedGeneric);
 
   NullableGenericTestCase nullableGeneric(List<String?> nullableGeneric) =>
-      _value.copyWith(nullableGeneric: nullableGeneric);
+      _value._copyWithValues(nullableGeneric: nullableGeneric);
 }
 
 extension NullableGenericTestCaseCopyWith on NullableGenericTestCase {
-  _NullableGenericTestCaseCopyWithProxy get copyWithField =>
+  _NullableGenericTestCaseCopyWithProxy get copyWith =>
       _NullableGenericTestCaseCopyWithProxy(this);
 
-  NullableGenericTestCase copyWith({
+  NullableGenericTestCase _copyWithValues({
     List<List<List<int?>?>>? deepNestedGeneric,
     List<String?>? nullableGeneric,
   }) {

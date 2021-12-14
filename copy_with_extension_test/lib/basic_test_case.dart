@@ -5,7 +5,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 part 'basic_test_case.g.dart';
 
 @immutable
-@CopyWith(generateCopyWithNull: true)
+@CopyWith()
 class BasicClass {
   final String id;
   final String? optional;
@@ -14,7 +14,7 @@ class BasicClass {
 }
 
 @immutable
-@CopyWith(generateCopyWithNull: true)
+@CopyWith(copyWith: true, copyWithNull: true)
 class BasicClassOnlyNonNullable {
   final String id;
   final String nextID;
@@ -23,19 +23,23 @@ class BasicClassOnlyNonNullable {
 }
 
 @immutable
-@CopyWith(namedConstructor: "_")
+@CopyWith(namedConstructor: "_", copyWithValues: true)
 class BasicClassNamed {
   final String id;
   final String? optional;
 
+  const BasicClassNamed({this.optional}) : id = "";
   const BasicClassNamed._({required this.id, this.optional});
 }
 
 @immutable
-@CopyWith(namedConstructor: "test", generateCopyWithNull: true)
-class BasicClassNamed1 {
+@CopyWith(namedConstructor: "test")
+class BasicClassNamedWithoutCopyWithAndCopyWithNull {
   final String id;
   final String? optional;
 
-  const BasicClassNamed1.test({required this.id, this.optional});
+  const BasicClassNamedWithoutCopyWithAndCopyWithNull.test({
+    required this.id,
+    this.optional,
+  });
 }

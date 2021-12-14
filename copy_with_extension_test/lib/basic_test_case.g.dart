@@ -12,16 +12,16 @@ class _BasicClassCopyWithProxy {
   _BasicClassCopyWithProxy(this._value);
 
   BasicClass optional(String? optional) => optional == null
-      ? _value.copyWithNull(optional: true)
-      : _value.copyWith(optional: optional);
+      ? _value._copyWithNull(optional: true)
+      : _value._copyWithValues(optional: optional);
 
-  BasicClass id(String id) => _value.copyWith(id: id);
+  BasicClass id(String id) => _value._copyWithValues(id: id);
 }
 
 extension BasicClassCopyWith on BasicClass {
-  _BasicClassCopyWithProxy get copyWithField => _BasicClassCopyWithProxy(this);
+  _BasicClassCopyWithProxy get copyWith => _BasicClassCopyWithProxy(this);
 
-  BasicClass copyWith({
+  BasicClass _copyWithValues({
     String? id,
     String? optional,
   }) {
@@ -31,7 +31,7 @@ extension BasicClassCopyWith on BasicClass {
     );
   }
 
-  BasicClass copyWithNull({
+  BasicClass _copyWithNull({
     bool optional = false,
   }) {
     return BasicClass(
@@ -46,17 +46,17 @@ class _BasicClassOnlyNonNullableCopyWithProxy {
 
   _BasicClassOnlyNonNullableCopyWithProxy(this._value);
 
-  BasicClassOnlyNonNullable id(String id) => _value.copyWith(id: id);
+  BasicClassOnlyNonNullable id(String id) => _value._copyWithValues(id: id);
 
   BasicClassOnlyNonNullable nextID(String nextID) =>
-      _value.copyWith(nextID: nextID);
+      _value._copyWithValues(nextID: nextID);
 }
 
 extension BasicClassOnlyNonNullableCopyWith on BasicClassOnlyNonNullable {
-  _BasicClassOnlyNonNullableCopyWithProxy get copyWithField =>
+  _BasicClassOnlyNonNullableCopyWithProxy get copyWith =>
       _BasicClassOnlyNonNullableCopyWithProxy(this);
 
-  BasicClassOnlyNonNullable copyWith({
+  BasicClassOnlyNonNullable _copyWithValues({
     String? id,
     String? nextID,
   }) {
@@ -67,8 +67,23 @@ extension BasicClassOnlyNonNullableCopyWith on BasicClassOnlyNonNullable {
   }
 }
 
+class _BasicClassNamedCopyWithProxy {
+  final BasicClassNamed _value;
+
+  _BasicClassNamedCopyWithProxy(this._value);
+
+  BasicClassNamed optional(String? optional) => optional == null
+      ? _value._copyWithNull(optional: true)
+      : _value.copyWithValues(optional: optional);
+
+  BasicClassNamed id(String id) => _value.copyWithValues(id: id);
+}
+
 extension BasicClassNamedCopyWith on BasicClassNamed {
-  BasicClassNamed copyWith({
+  _BasicClassNamedCopyWithProxy get copyWith =>
+      _BasicClassNamedCopyWithProxy(this);
+
+  BasicClassNamed copyWithValues({
     String? id,
     String? optional,
   }) {
@@ -77,38 +92,50 @@ extension BasicClassNamedCopyWith on BasicClassNamed {
       optional: optional ?? this.optional,
     );
   }
+
+  BasicClassNamed _copyWithNull({
+    bool optional = false,
+  }) {
+    return BasicClassNamed._(
+      id: id,
+      optional: optional == true ? null : this.optional,
+    );
+  }
 }
 
-class _BasicClassNamed1CopyWithProxy {
-  final BasicClassNamed1 _value;
+class _BasicClassNamedWithoutCopyWithAndCopyWithNullCopyWithProxy {
+  final BasicClassNamedWithoutCopyWithAndCopyWithNull _value;
 
-  _BasicClassNamed1CopyWithProxy(this._value);
+  _BasicClassNamedWithoutCopyWithAndCopyWithNullCopyWithProxy(this._value);
 
-  BasicClassNamed1 optional(String? optional) => optional == null
-      ? _value.copyWithNull(optional: true)
-      : _value.copyWith(optional: optional);
+  BasicClassNamedWithoutCopyWithAndCopyWithNull optional(String? optional) =>
+      optional == null
+          ? _value._copyWithNull(optional: true)
+          : _value._copyWithValues(optional: optional);
 
-  BasicClassNamed1 id(String id) => _value.copyWith(id: id);
+  BasicClassNamedWithoutCopyWithAndCopyWithNull id(String id) =>
+      _value._copyWithValues(id: id);
 }
 
-extension BasicClassNamed1CopyWith on BasicClassNamed1 {
-  _BasicClassNamed1CopyWithProxy get copyWithField =>
-      _BasicClassNamed1CopyWithProxy(this);
+extension BasicClassNamedWithoutCopyWithAndCopyWithNullCopyWith
+    on BasicClassNamedWithoutCopyWithAndCopyWithNull {
+  _BasicClassNamedWithoutCopyWithAndCopyWithNullCopyWithProxy get copyWith =>
+      _BasicClassNamedWithoutCopyWithAndCopyWithNullCopyWithProxy(this);
 
-  BasicClassNamed1 copyWith({
+  BasicClassNamedWithoutCopyWithAndCopyWithNull _copyWithValues({
     String? id,
     String? optional,
   }) {
-    return BasicClassNamed1.test(
+    return BasicClassNamedWithoutCopyWithAndCopyWithNull.test(
       id: id ?? this.id,
       optional: optional ?? this.optional,
     );
   }
 
-  BasicClassNamed1 copyWithNull({
+  BasicClassNamedWithoutCopyWithAndCopyWithNull _copyWithNull({
     bool optional = false,
   }) {
-    return BasicClassNamed1.test(
+    return BasicClassNamedWithoutCopyWithAndCopyWithNull.test(
       id: id,
       optional: optional == true ? null : this.optional,
     );

@@ -6,8 +6,19 @@ part of 'subclass_test_case.dart';
 // CopyWithGenerator
 // **************************************************************************
 
+class _BasicBaseClassCopyWithProxy {
+  final BasicBaseClass _value;
+
+  _BasicBaseClassCopyWithProxy(this._value);
+
+  BasicBaseClass id(String id) => _value._copyWithValues(id: id);
+}
+
 extension BasicBaseClassCopyWith on BasicBaseClass {
-  BasicBaseClass copyWith({
+  _BasicBaseClassCopyWithProxy get copyWith =>
+      _BasicBaseClassCopyWithProxy(this);
+
+  BasicBaseClass _copyWithValues({
     String? id,
   }) {
     return BasicBaseClass(
@@ -16,8 +27,23 @@ extension BasicBaseClassCopyWith on BasicBaseClass {
   }
 }
 
+class _BasicBaseSubClassCopyWithProxy<T> {
+  final BasicBaseSubClass _value;
+
+  _BasicBaseSubClassCopyWithProxy(this._value);
+
+  BasicBaseSubClass item(T? item) => item == null
+      ? _value._copyWithNull(item: true)
+      : _value._copyWithValues(item: item);
+
+  BasicBaseSubClass id(String id) => _value._copyWithValues(id: id);
+}
+
 extension BasicBaseSubClassCopyWith<T> on BasicBaseSubClass<T> {
-  BasicBaseSubClass<T> copyWith({
+  _BasicBaseSubClassCopyWithProxy get copyWith =>
+      _BasicBaseSubClassCopyWithProxy<T>(this);
+
+  BasicBaseSubClass<T> _copyWithValues({
     String? id,
     T? item,
   }) {
@@ -26,16 +52,49 @@ extension BasicBaseSubClassCopyWith<T> on BasicBaseSubClass<T> {
       item: item ?? this.item,
     );
   }
+
+  BasicBaseSubClass<T> _copyWithNull({
+    bool item = false,
+  }) {
+    return BasicBaseSubClass<T>(
+      id: id,
+      item: item == true ? null : this.item,
+    );
+  }
+}
+
+class _BasicBaseSubClassNamedCopyWithProxy<T> {
+  final BasicBaseSubClassNamed _value;
+
+  _BasicBaseSubClassNamedCopyWithProxy(this._value);
+
+  BasicBaseSubClassNamed item(T? item) => item == null
+      ? _value._copyWithNull(item: true)
+      : _value._copyWithValues(item: item);
+
+  BasicBaseSubClassNamed id(String id) => _value._copyWithValues(id: id);
 }
 
 extension BasicBaseSubClassNamedCopyWith<T> on BasicBaseSubClassNamed<T> {
-  BasicBaseSubClassNamed<T> copyWith({
+  _BasicBaseSubClassNamedCopyWithProxy get copyWith =>
+      _BasicBaseSubClassNamedCopyWithProxy<T>(this);
+
+  BasicBaseSubClassNamed<T> _copyWithValues({
     String? id,
     T? item,
   }) {
     return BasicBaseSubClassNamed<T>._(
       id: id ?? this.id,
       item: item ?? this.item,
+    );
+  }
+
+  BasicBaseSubClassNamed<T> _copyWithNull({
+    bool item = false,
+  }) {
+    return BasicBaseSubClassNamed<T>._(
+      id: id,
+      item: item == true ? null : this.item,
     );
   }
 }
@@ -47,36 +106,35 @@ class _SubClassCopyWithProxy<T, U extends String> {
 
   SubClass aString(String? aString) => aString == null
       ? _value.copyWithNull(aString: true)
-      : _value.copyWith(aString: aString);
+      : _value._copyWithValues(aString: aString);
 
   SubClass item(T? item) => item == null
       ? _value.copyWithNull(item: true)
-      : _value.copyWith(item: item);
+      : _value._copyWithValues(item: item);
 
   SubClass listWithGenericType(List<T>? listWithGenericType) =>
       listWithGenericType == null
           ? _value.copyWithNull(listWithGenericType: true)
-          : _value.copyWith(listWithGenericType: listWithGenericType);
+          : _value._copyWithValues(listWithGenericType: listWithGenericType);
 
   SubClass listWithType(List<int>? listWithType) => listWithType == null
       ? _value.copyWithNull(listWithType: true)
-      : _value.copyWith(listWithType: listWithType);
+      : _value._copyWithValues(listWithType: listWithType);
 
   SubClass listWithTypedType(List<Iterable<U>?>? listWithTypedType) =>
       listWithTypedType == null
           ? _value.copyWithNull(listWithTypedType: true)
-          : _value.copyWith(listWithTypedType: listWithTypedType);
+          : _value._copyWithValues(listWithTypedType: listWithTypedType);
 
-  SubClass date(DateTime date) => _value.copyWith(date: date);
+  SubClass date(DateTime date) => _value._copyWithValues(date: date);
 
-  SubClass id(String id) => _value.copyWith(id: id);
+  SubClass id(String id) => _value._copyWithValues(id: id);
 }
 
 extension SubClassCopyWith<T, U extends String> on SubClass<T, U> {
-  _SubClassCopyWithProxy get copyWithField =>
-      _SubClassCopyWithProxy<T, U>(this);
+  _SubClassCopyWithProxy get copyWith => _SubClassCopyWithProxy<T, U>(this);
 
-  SubClass<T, U> copyWith({
+  SubClass<T, U> _copyWithValues({
     String? aString,
     DateTime? date,
     String? id,
