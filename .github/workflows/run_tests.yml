@@ -40,7 +40,7 @@ jobs:
       - name: Pub Get
         run: (cd copy_with_extension_test && flutter pub get)
 
-      - name: Build runner
+      - name: Execute build_runner
         run: (cd copy_with_extension_test && flutter pub run build_runner build --delete-conflicting-outputs)
 
       - name: Analyze
@@ -49,10 +49,17 @@ jobs:
       - name: Check formatting
         run: flutter format --set-exit-if-changed .
 
-      - name: Check Score
+      - name: Check Score copy_with_extension_gen
         uses: axel-op/dart-package-analyzer@v3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
+          relativePath: copy_with_extension_gen
+
+      - name: Check Score copy_with_extension
+        uses: axel-op/dart-package-analyzer@v3
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          relativePath: copy_with_extension
   
   run_tests:
     timeout-minutes: 10

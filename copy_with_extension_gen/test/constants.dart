@@ -2,15 +2,22 @@ const String pkgName = 'copy_with_extension_gen';
 
 const String annotationsBase = r'''
 class CopyWith {
-  const CopyWith({this.generateCopyWithNull = false})
-      : assert(generateCopyWithNull is bool);
+  const CopyWith({
+    this.copyWithValues = false,
+    this.copyWithNull = false,
+    this.copyWith = true,
+    this.namedConstructor,
+  });
 
-  final bool generateCopyWithNull;
+  final bool copyWithValues;
+  final bool copyWithNull;
+  final bool copyWith;
+  final String? namedConstructor;
 }
 
 class CopyWithField {
-  const CopyWithField({this.immutable = false}) : assert(immutable is bool);
-  
+  const CopyWithField({this.immutable = false});
+
   final bool immutable;
 }
 ''';
@@ -20,7 +27,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 
 part 'test_case_class.g.dart';
 
-@CopyWith(generateCopyWithNull: true)
+@CopyWith()
 class Test_Case_Class<T extends String> {
   final T id;
   @CopyWithField(immutable: true)
@@ -44,8 +51,22 @@ part of 'test_case_class.dart';
 // CopyWithGenerator
 // **************************************************************************
 
+class _Test_Case_ClassCopyWithProxy<T extends String> {
+  final Test_Case_Class _value;
+
+  _Test_Case_ClassCopyWithProxy(this._value);
+
+  Test_Case_Class id(T id) => _value._copyWithValues(id: id);
+
+  Test_Case_Class nullableGenerics(List<T?> nullableGenerics) =>
+      _value._copyWithValues(nullableGenerics: nullableGenerics);
+}
+
 extension Test_Case_ClassCopyWith<T extends String> on Test_Case_Class<T> {
-  Test_Case_Class<T> copyWith({
+  _Test_Case_ClassCopyWithProxy get copyWith =>
+      _Test_Case_ClassCopyWithProxy<T>(this);
+
+  Test_Case_Class<T> _copyWithValues({
     T? id,
     List<T?>? nullableGenerics,
   }) {
