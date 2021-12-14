@@ -3,7 +3,7 @@ import 'package:analyzer/dart/element/element.dart'
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
 
-///Represents a single class field with the additional metadata needed for code generation.
+/// Represents a single class field with the additional metadata needed for code generation.
 class FieldInfo {
   final String name;
   final String type;

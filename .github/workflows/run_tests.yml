@@ -5,11 +5,20 @@ on:
     branches:
       - master
   pull_request:
+  schedule:
+    - cron: "0 0 1 * *" # Run Monthly
 
 jobs:
   execute_build_runner:
     timeout-minutes: 10
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        channel:
+          - stable
+          - beta
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -17,7 +26,7 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v1
         with:
-          channel: 'stable'
+          channel: ${{ matrix.channel }}
 
       - name: Update Flutter Packages
         run: flutter update-packages --force-upgrade
@@ -36,6 +45,14 @@ jobs:
 
       - name: Analyze
         run: (cd copy_with_extension_test && flutter analyze)
+
+      - name: Check formatting
+        run: flutter format --set-exit-if-changed .
+
+      - name: Check Score
+        uses: axel-op/dart-package-analyzer@v3
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
   
   run_tests:
     timeout-minutes: 10

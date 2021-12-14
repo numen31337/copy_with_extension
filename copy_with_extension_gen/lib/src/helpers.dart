@@ -5,13 +5,12 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
-///Generates a list of `FieldInfo` for each class field that will be a part of the code generation process.
-///The resulting array is sorted by the field name. `Throws` on error.
+/// Generates a list of `FieldInfo` for each class field that will be a part of the code generation process.
+/// The resulting array is sorted by the field name. `Throws` on error.
 List<FieldInfo> sortedConstructorFields(
   ClassElement element,
   String? constructorName,
 ) {
-  // final named = element.getNamedConstructor(name);
   final constructor = constructorName != null
       ? element.getNamedConstructor(constructorName)
       : element.unnamedConstructor;
@@ -78,11 +77,11 @@ CopyWith readClassAnnotation(ConstantReader reader) {
   );
 }
 
-///Returns parameter names or full parameters declaration declared by this class or an empty string.
+/// Returns parameter names or full parameters declaration declared by this class or an empty string.
 ///
-///If `nameOnly` is `true`: `class MyClass<T extends String, Y>` returns `<T, Y>`.
+/// If `nameOnly` is `true`: `class MyClass<T extends String, Y>` returns `<T, Y>`.
 ///
-///If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
+/// If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
 String typeParametersString(ClassElement classElement, bool nameOnly) {
   final names = classElement.typeParameters
       .map(
@@ -96,6 +95,6 @@ String typeParametersString(ClassElement classElement, bool nameOnly) {
   }
 }
 
-///Returns constructor for the given type and optional named constructor name. E.g. "TestConstructor" or "TestConstructor._private" when "_private" constructor name is provided.
+/// Returns constructor for the given type and optional named constructor name. E.g. "TestConstructor" or "TestConstructor._private" when "_private" constructor name is provided.
 String constructorFor(String typeAnnotation, String? namedConstructor) =>
     "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";

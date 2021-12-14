@@ -26,7 +26,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
-    ${classAnnotation.copyWith ? _copyWithPart(
+    ${classAnnotation.copyWith ? _copyWithProxyPart(
             classElement.name,
             typeParametersAnnotation,
             sortedFields,
@@ -44,7 +44,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
-  ///Generates the complete `_copyWithValuesPart` function.
+  /// Generates the complete `_copyWithValuesPart` function.
   String _copyWithValuesPart(
     String typeAnnotation,
     List<FieldInfo> sortedFields,
@@ -80,7 +80,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
-  ///Generates the complete `copyWithNull` function.
+  /// Generates the complete `copyWithNull` function.
   String _copyWithNullPart(
     String typeAnnotation,
     List<FieldInfo> sortedFields,
@@ -120,7 +120,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
-  String _copyWithPart(
+  /// Generates a `CopyWithProxy` class.
+  String _copyWithProxyPart(
     String type,
     String typeParameters,
     List<FieldInfo> sortedFields,
