@@ -1,3 +1,9 @@
+## 3.0.0
+* Named constructor support.
+* Introduction of the new `copyWith` approach with nullability support. The default behaviour of this library assumes using it like so: `myInstance.copyWith.value("newValue")`. The old functions are still available but must be enabled in annotation like so `@CopyWith(copyWith: false, copyWithNull: true, copyWithValues: true)`.
+* **BREAKING** The default behaviour of `@CopyWith()` annotation has been changed.
+* **BREAKING** The old `copyWith` function has been renamed to `copyWithValues`.
+
 ## 2.0.2 Bugfix
 * Fix generation of generics with nullable types (thanks [@josiahsrc](https://github.com/josiahsrc)).
 

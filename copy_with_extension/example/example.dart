@@ -13,3 +13,27 @@ class SimpleObject {
   /// Make sure that constructor has named parameters (wrapped in curly braces)
   const SimpleObject({required this.id, this.value});
 }
+
+@immutable
+@CopyWith(namedConstructor: "_")
+class SimpleObjectPrivateConstructor {
+  final String id;
+  final int? value;
+
+  const SimpleObjectPrivateConstructor._({required this.id, this.value});
+}
+
+@immutable
+@CopyWith(copyWith: false, copyWithNull: true, copyWithValues: true)
+class SimpleObjectExposeWithNullAndWithValues {
+  final String id;
+  final int? value;
+  @CopyWithField(immutable: true)
+  final int immutableField;
+
+  const SimpleObjectExposeWithNullAndWithValues({
+    required this.id,
+    this.value,
+    required this.immutableField,
+  });
+}
