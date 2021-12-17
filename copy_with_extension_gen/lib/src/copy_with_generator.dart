@@ -149,7 +149,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       class _${type}CopyWithProxy$typeParameters {
         final $type _value;
 
-        _${type}CopyWithProxy(this._value);
+        const _${type}CopyWithProxy(this._value);
 
         $nullableFunctions
 

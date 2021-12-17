@@ -4,7 +4,7 @@ part of 'source_gen_tests.dart';
 class _BasicClassCopyWithProxy {
   final BasicClass _value;
 
-  _BasicClassCopyWithProxy(this._value);
+  const _BasicClassCopyWithProxy(this._value);
 
   BasicClass optional(String? optional) => optional == null
       ? _value._copyWithNull(optional: true)
