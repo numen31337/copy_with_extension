@@ -2,7 +2,7 @@ import 'package:meta/meta.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 
 //Won't work without it!
-part 'implements_test_case.g.dart';
+part 'gen_implements_test_case.g.dart';
 
 abstract class Abstract {
   final String aField;

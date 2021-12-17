@@ -4,7 +4,7 @@ import 'package:source_gen_test/source_gen_test.dart';
 
 Future<void> main() async {
   final reader = await initializeLibraryReaderForDirectory(
-    'test',
+    'test/raw_generated_code_test_cases',
     'source_gen_tests.dart',
   );
 

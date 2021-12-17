@@ -1,6 +1,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:test/test.dart';
 
-part 'basic_class.g.dart';
+part 'gen_basic_class_test_.g.dart';
 
 @CopyWith()
 class BasicClass {
@@ -16,5 +17,17 @@ class BasicClass {
     this.optional,
     required this.immutable,
     required this.nullableImmutable,
+  });
+}
+
+void main() {
+  test('BasicClass test', () {
+    const basicClass = BasicClass(
+      id: '',
+      immutable: 0,
+      nullableImmutable: 0,
+    );
+
+    expect(basicClass.copyWith.id("test").id, "test");
   });
 }

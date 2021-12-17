@@ -1,7 +1,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 
 //Won't work without it!
-part 'immutable_test_case.g.dart';
+part 'gen_immutable_test_.g.dart';
 
 @CopyWith(copyWith: true, copyWithNull: true)
 class TestCaseClass<T extends String> {

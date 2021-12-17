@@ -2,7 +2,7 @@ import 'package:meta/meta.dart' show immutable;
 import 'package:copy_with_extension/copy_with_extension.dart';
 
 //Won't work without it!
-part 'subclass_test_case.g.dart';
+part 'gen_subclass_test_case.g.dart';
 
 abstract class AClass {
   final String? aString;

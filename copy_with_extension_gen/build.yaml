@@ -8,7 +8,7 @@ targets:
             - test
             - example
           include:
-            - test/test_classes/*
+            - test/gen_*
 
 builders:
   copy_with_extension_gen:
