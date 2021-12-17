@@ -54,6 +54,7 @@ jobs:
         run: dart format --set-exit-if-changed ../
 
       - name: Check Outdated Packages - copy_with_extension_gen
+        if: matrix.sdk == 'stable'
         run: |
           warning=$(dart pub outdated)
           [[ $warning =~ "dependencies are constrained" ]]
@@ -61,9 +62,10 @@ jobs:
           echo -n "::warning ::$warning_formatted"
 
       - name: Check Outdated Packages - copy_with_extension
+        if: matrix.sdk == 'stable'
         run: |
           cd ../copy_with_extension
-          dart pub get
+          dart pub get || true
           warning=$(dart pub outdated)
           [[ $warning =~ "dependencies are constrained" ]]
           warning_formatted=${warning//$'\n'/}
