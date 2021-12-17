@@ -1,8 +1,14 @@
 targets:
   $default:
     builders:
-      copy_with_extension_gen|copy_with_extension:
+      copy_with_extension_gen:
         enabled: true
+        generate_for:
+          exclude:
+            - test
+            - example
+          include:
+            - test/test_classes/*
 
 builders:
   copy_with_extension_gen:
