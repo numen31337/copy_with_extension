@@ -53,18 +53,20 @@ jobs:
         run: dart format --set-exit-if-changed ../
 
       - name: Check Outdated Packages - copy_with_extension_gen
-        run: warning=$(dart pub outdated) && [[ $warning =~ "older than" ]] && echo "::warning ::$warning" 
+        run: warning=$(dart pub outdated) && [[ $warning =~ "older than" ]] && echo -n "::warning ::$warning" 
 
       - name: Check Outdated Packages - copy_with_extension
         run: cd ../copy_with_extension && dart pub get && dart pub outdated
 
       - name: Check Score - copy_with_extension_gen
+        if: ${{ matrix.sdk == "stable" }}
         uses: axel-op/dart-package-analyzer@v3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           relativePath: copy_with_extension_gen
 
       - name: Check Score - copy_with_extension
+        if: ${{ matrix.sdk == "stable" }}
         uses: axel-op/dart-package-analyzer@v3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
