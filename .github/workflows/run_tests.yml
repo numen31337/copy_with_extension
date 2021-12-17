@@ -32,10 +32,7 @@ jobs:
         with:
           sdk: ${{ matrix.sdk }}
 
-      # - name: Update Flutter Packages
-      #   run: flutter update-packages --force-upgrade
-
-      - name: Flutter Setup
+      - name: Dart Info
         run: |
           dart --disable-analytics
           dart --version
@@ -53,7 +50,7 @@ jobs:
         run: dart run test test/tests_main.dart
 
       - name: Check formatting
-        run: flutter format --set-exit-if-changed .
+        run: dart format --set-exit-if-changed ../
 
       - name: Check Score copy_with_extension_gen
         uses: axel-op/dart-package-analyzer@v3
