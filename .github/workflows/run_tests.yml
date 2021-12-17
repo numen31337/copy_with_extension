@@ -10,6 +10,7 @@ on:
 
 jobs:
   run_tests:
+    name: Run Tests - Dart ${{ matrix.sdk }}
     timeout-minutes: 10
     runs-on: ubuntu-latest
     defaults:
@@ -53,7 +54,11 @@ jobs:
         run: dart format --set-exit-if-changed ../
 
       - name: Check Outdated Packages - copy_with_extension_gen
-        run: warning=$(dart pub outdated) && [[ $warning =~ "older than" ]] && echo -n "::warning ::$warning" 
+        run: |
+          warning=$(dart pub outdated)
+          [[ $warning =~ "older than" ]]
+          warning_formatted=${dependency_error//$'\n'/}
+          echo -n "::warning ::$warning_formatted" 
 
       - name: Check Outdated Packages - copy_with_extension
         run: cd ../copy_with_extension && dart pub get && dart pub outdated
