@@ -10,9 +10,9 @@ on:
 
 jobs:
   run_tests:
-    name: Run Tests - Dart ${{ matrix.sdk }}
+    name: Run Tests - Dart ${{ matrix.sdk }} - ${{ matrix.os }}
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: bash
@@ -20,6 +20,9 @@ jobs:
 
     strategy:
       matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
         sdk:
           - stable
           - beta
@@ -60,7 +63,7 @@ jobs:
       - name: Check Outdated Packages - copy_with_extension_gen
         if: matrix.sdk == 'stable'
         run: |
-          warning=$(dart pub outdated 2>&1 >/dev/null)
+          dart pub outdated
           [[ $warning =~ "dependencies are constrained" ]]
           warning_formatted=${warning//$'\n'/}
           echo -n "::warning ::$warning_formatted"
@@ -69,7 +72,7 @@ jobs:
         working-directory: copy_with_extension
         if: matrix.sdk == 'stable'
         run: |
-          warning=$(dart pub outdated 2>&1 >/dev/null)
+          dart pub outdated
           [[ $warning =~ "dependencies are constrained" ]]
           warning_formatted=${warning//$'\n'/}
           echo -n "::warning ::$warning_formatted"
