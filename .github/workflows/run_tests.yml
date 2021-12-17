@@ -66,6 +66,7 @@ jobs:
           warning_msg=`dart pub outdated`
           warning_formatted=${warning_msg//$'\n'/}
           if [[ $warning_formatted =~ "constrained" ]]; then
+            echo $warning_msg
             echo -n "::warning ::$warning_formatted"
           fi
 
@@ -76,6 +77,7 @@ jobs:
           warning_msg=`dart pub outdated`
           warning_formatted=${warning_msg//$'\n'/}
           if [[ $warning_formatted =~ "constrained" ]]; then
+            echo $warning_msg
             echo -n "::warning ::$warning_formatted"
           fi
 
