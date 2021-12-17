@@ -23,21 +23,30 @@ List<FieldInfo> sortedConstructorFields(
         element: element,
       );
     } else {
-      throw 'Default ${element.name} constructor is missing.';
+      throw InvalidGenerationSourceError(
+        'Default constructor for "${element.name}" is missing.',
+        element: element,
+      );
     }
   }
 
   final parameters = constructor.parameters;
   if (parameters.isEmpty) {
     throw InvalidGenerationSourceError(
-      'Unnamed constructor for ${element.name} has no parameters.',
+      'Unnamed constructor for ${element.name} has no parameters or missing.',
       element: element,
     );
   }
 
   for (final parameter in parameters) {
     if (!parameter.isNamed) {
-      throw 'Unnamed constructor for ${element.name} contains unnamed parameter. Only named parameters are supported.';
+      final constructorName = constructor.name.isEmpty
+          ? 'Unnamed constructor'
+          : 'Constructor "${constructor.name}"';
+      throw InvalidGenerationSourceError(
+        '$constructorName for "${element.name}" contains unnamed parameter "${parameter.name}". Constructors annotated with "CopyWith" can contain only named parameters.',
+        element: element,
+      );
     }
   }
 

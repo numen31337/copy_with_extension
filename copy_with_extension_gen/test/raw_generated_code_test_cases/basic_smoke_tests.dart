@@ -1,26 +1,5 @@
 part of 'source_gen_tests.dart';
 
-@ShouldThrow(
-  'Only classes can be annotated with "CopyWith". "int? wrongAnnotation" is not a ClassElement.',
-)
-@CopyWith()
-int? wrongAnnotation;
-
-@ShouldThrow(
-  'Only classes can be annotated with "CopyWith". "Object wrongAnnotation1" is not a ClassElement.',
-)
-@CopyWith()
-Object wrongAnnotation1 = Object();
-
-//TODO: Correct, there is no constructor at all. There is no constructor message here.
-@ShouldThrow('Unnamed constructor for NoConstructor has no parameters.')
-@CopyWith()
-class NoConstructor {}
-
-@ShouldThrow('Named Constructor "test" constructor is missing.')
-@CopyWith(namedConstructor: "test")
-class WrongConstructor {}
-
 @ShouldGenerate(r'''
 class _BasicClassCopyWithProxy {
   final BasicClass _value;

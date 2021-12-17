@@ -3,3 +3,4 @@ import 'package:meta/meta.dart';
 import 'package:source_gen_test/annotations.dart';
 
 part 'basic_smoke_tests.dart';
+part 'exception_tests.dart';
