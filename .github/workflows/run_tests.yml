@@ -60,12 +60,16 @@ jobs:
       - name: Check formatting
         run: dart format --set-exit-if-changed ../
 
+      - run: warning_msg=`dart pub outdated 2>&1 >/dev/null` || true
+      - run: warning_formatted=${warning_msg//$'\n'/}
+      - run: ([[ $warning_formatted =~ "constrained" ]] && echo -n "::warning ::$warning_formatted")
+
       - name: Check Outdated Packages - copy_with_extension_gen
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
           warning_msg=`dart pub outdated 2>&1 >/dev/null` || true
           warning_formatted=${warning_msg//$'\n'/}
-          [[ $warning_formatted =~ "constrained" ]] && echo -n "::warning ::$warning_formatted"
+          ([[ $warning_formatted =~ "constrained" ]] && echo -n "::warning ::$warning_formatted")
 
       - name: Check Outdated Packages - copy_with_extension
         working-directory: copy_with_extension
@@ -73,7 +77,7 @@ jobs:
         run: |
           warning_msg=`dart pub outdated 2>&1 >/dev/null` || true
           warning_formatted=${warning_msg//$'\n'/}
-          [[ $warning_formatted =~ "constrained" ]] && echo -n "::warning ::$warning_formatted"
+          ([[ $warning_formatted =~ "constrained" ]] && echo -n "::warning ::$warning_formatted")
 
       - name: Check Score - copy_with_extension_gen
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
