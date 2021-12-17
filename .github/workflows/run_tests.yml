@@ -38,8 +38,12 @@ jobs:
           dart --disable-analytics
           dart --version
 
-      - name: Pub Get
+      - name: Pub Get - copy_with_extension_gen
         run: dart pub get
+
+      - name: Pub Get - copy_with_extension
+        run: dart pub get
+        working-directory: copy_with_extension
 
       - name: Execute build_runner
         run: dart run build_runner build --delete-conflicting-outputs
@@ -60,18 +64,15 @@ jobs:
           [[ $warning =~ "dependencies are constrained" ]]
           warning_formatted=${warning//$'\n'/}
           echo -n "::warning ::$warning_formatted"
-          unset warning && unset warning_formatted
 
       - name: Check Outdated Packages - copy_with_extension
+        working-directory: copy_with_extension
         if: matrix.sdk == 'stable'
         run: |
-          cd ../copy_with_extension
-          dart pub get
           warning=$(dart pub outdated)
           [[ $warning =~ "dependencies are constrained" ]]
           warning_formatted=${warning//$'\n'/}
           echo -n "::warning ::$warning_formatted"
-          unset warning && unset warning_formatted
 
       - name: Check Score - copy_with_extension_gen
         if: matrix.sdk == 'stable'
