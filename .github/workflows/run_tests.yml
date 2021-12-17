@@ -32,8 +32,8 @@ jobs:
         with:
           sdk: ${{ matrix.sdk }}
 
-      - name: Update Flutter Packages
-        run: flutter update-packages --force-upgrade
+      # - name: Update Flutter Packages
+      #   run: flutter update-packages --force-upgrade
 
       - name: Flutter Setup
         run: |
