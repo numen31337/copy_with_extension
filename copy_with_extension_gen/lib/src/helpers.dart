@@ -3,7 +3,8 @@ import 'package:analyzer/dart/element/element.dart'
 import 'package:analyzer/dart/constant/value.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
-import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
+import 'package:source_gen/source_gen.dart'
+    show ConstantReader, InvalidGenerationSourceError, TypeChecker;
 
 /// Generates a list of `FieldInfo` for each class field that will be a part of the code generation process.
 /// The resulting array is sorted by the field name. `Throws` on error.
@@ -17,15 +18,21 @@ List<FieldInfo> sortedConstructorFields(
 
   if (constructor is! ConstructorElement) {
     if (constructorName != null) {
-      throw 'Named Constructor $constructorName constructor is missing';
+      throw InvalidGenerationSourceError(
+        'Named Constructor "$constructorName" constructor is missing.',
+        element: element,
+      );
     } else {
-      throw 'Default ${element.name} constructor is missing';
+      throw 'Default ${element.name} constructor is missing.';
     }
   }
 
   final parameters = constructor.parameters;
   if (parameters.isEmpty) {
-    throw 'Unnamed constructor for ${element.name} has no parameters';
+    throw InvalidGenerationSourceError(
+      'Unnamed constructor for ${element.name} has no parameters.',
+      element: element,
+    );
   }
 
   for (final parameter in parameters) {

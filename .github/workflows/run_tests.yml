@@ -83,4 +83,4 @@ jobs:
         run: (cd copy_with_extension_gen && dart pub get)
 
       - name: Run tests
-        run: (cd copy_with_extension_gen && dart run test)
+        run: (cd copy_with_extension_gen && dart run test test/tests_main.dart)

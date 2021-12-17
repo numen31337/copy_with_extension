@@ -4,7 +4,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
 import 'package:source_gen/source_gen.dart'
-    show ConstantReader, GeneratorForAnnotation;
+    show ConstantReader, GeneratorForAnnotation, InvalidGenerationSourceError;
 
 /// A `Generator` for `package:build_runner`
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
@@ -14,7 +14,12 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    if (element is! ClassElement) throw '$element is not a ClassElement';
+    if (element is! ClassElement) {
+      throw InvalidGenerationSourceError(
+        'Only classes can be annotated with "CopyWith". "$element" is not a ClassElement.',
+        element: element,
+      );
+    }
 
     final ClassElement classElement = element;
     final classAnnotation = readClassAnnotation(annotation);
