@@ -61,7 +61,7 @@ jobs:
         run: dart format --set-exit-if-changed ../
 
       - name: Check Outdated Packages - copy_with_extension_gen
-        if: matrix.sdk == 'stable' && matrix.os == `ubuntu-latest`
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
           warning=`dart pub outdated 2>&1 >/dev/null` || true
           [[ $warning =~ "dependencies are constrained" ]]
@@ -70,7 +70,7 @@ jobs:
 
       - name: Check Outdated Packages - copy_with_extension
         working-directory: copy_with_extension
-        if: matrix.sdk == 'stable' && matrix.os == `ubuntu-latest`
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
           warning=`dart pub outdated 2>&1 >/dev/null` || true
           [[ $warning =~ "dependencies are constrained" ]]
@@ -78,14 +78,14 @@ jobs:
           echo -n "::warning ::$warning_formatted"
 
       - name: Check Score - copy_with_extension_gen
-        if: matrix.sdk == 'stable' && matrix.os == `ubuntu-latest`
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         uses: axel-op/dart-package-analyzer@v3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           relativePath: copy_with_extension_gen
 
       - name: Check Score - copy_with_extension
-        if: matrix.sdk == 'stable' && matrix.os == `ubuntu-latest`
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         uses: axel-op/dart-package-analyzer@v3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
