@@ -6,15 +6,15 @@ class _BasicClassCopyWithProxy<T extends Iterable<int>> {
 
   const _BasicClassCopyWithProxy(this._value);
 
-  BasicClass optional(T? optional) => optional == null
+  BasicClass<T> optional(T? optional) => optional == null
       ? _value._copyWithNull(optional: true)
       : _value._copyWithValues(optional: optional);
 
-  BasicClass id(String id) => _value._copyWithValues(id: id);
+  BasicClass<T> id(String id) => _value._copyWithValues(id: id);
 }
 
 extension BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
-  _BasicClassCopyWithProxy get copyWith => _BasicClassCopyWithProxy<T>(this);
+  _BasicClassCopyWithProxy<T> get copyWith => _BasicClassCopyWithProxy<T>(this);
 
   BasicClass<T> _copyWithValues({
     String? id,

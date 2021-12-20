@@ -41,7 +41,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
           ) : ""}
     
     extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
-      ${classAnnotation.copyWith ? "_${classElement.name}CopyWithProxy get copyWith => _${classElement.name}CopyWithProxy$typeParametersNames(this);" : ""}
+      ${classAnnotation.copyWith ? "_${classElement.name}CopyWithProxy$typeParametersNames get copyWith => _${classElement.name}CopyWithProxy$typeParametersNames(this);" : ""}
 
       ${_copyWithValuesPart(typeAnnotation, sortedFields, classAnnotation.namedConstructor, !classAnnotation.copyWithValues)}
 
@@ -141,10 +141,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         filteredFields.where((e) => !nonNullableFields.contains(e));
 
     final nonNullableFunctions = nonNullableFields.map((e) => '''
-    $type ${e.name}(${e.type} ${e.name}) => _value.${privateCopyWithValues ? "_" : ""}copyWithValues(${e.name}: ${e.name});
+    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => _value.${privateCopyWithValues ? "_" : ""}copyWithValues(${e.name}: ${e.name});
     ''').join("\n");
     final nullableFunctions = nullableFields.map((e) => '''
-    $type ${e.name}(${e.type} ${e.name}) => ${e.name} == null ? _value.${privateCopyWithNull ? "_" : ""}copyWithNull(${e.name}: true) :  _value.${privateCopyWithValues ? "_" : ""}copyWithValues(${e.name}: ${e.name});
+    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => ${e.name} == null ? _value.${privateCopyWithNull ? "_" : ""}copyWithNull(${e.name}: true) :  _value.${privateCopyWithValues ? "_" : ""}copyWithValues(${e.name}: ${e.name});
     ''').join("\n");
 
     return '''

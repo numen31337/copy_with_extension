@@ -126,15 +126,10 @@ void main() {
       <Iterable<String>?>[].runtimeType,
     );
 
-    // expect(
-    //   result.copyWith.listWithGenericType([]),
-    //   <Iterable<String>?>[].runtimeType,
-    // );
-
-    // final test_ok = result._copyWithValues();
-    // //TODO: we are losing type here
-    // final test = result.copyWith.id("");
-    // final test2 = result.copyWith;
+    expect(
+      result.copyWith.listWithGenericType([]).listWithGenericType.runtimeType,
+      <int>[].runtimeType,
+    );
 
     expect(
       result.copyWith.listWithTypedType([]).listWithTypedType.runtimeType,
