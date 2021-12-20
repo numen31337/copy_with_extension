@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 part 'gen_basic_functionality_test.g.dart';
 
-@CopyWith(copyWith: false, copyWithValues: true, copyWithNull: false)
+@CopyWith(copyWith: true, copyWithValues: true, copyWithNull: false)
 class CopyWithValues {
   final String id;
 
@@ -24,9 +24,12 @@ class CopyWithValuesOptional {
 @CopyWith(copyWith: true, copyWithValues: false, copyWithNull: false)
 class CopyWithProxy {
   final String? id;
+  @CopyWithField(immutable: true)
+  final String? immutable;
 
   const CopyWithProxy({
     this.id,
+    this.immutable,
   });
 }
 
@@ -44,14 +47,14 @@ class CopyWithProxyChaining {
 void main() {
   test('CopyWithValues', () {
     expect(
-      const CopyWithValues(id: '').copyWithValues(id: "test").id,
+      const CopyWithValues(id: '').copyWith(id: "test").id,
       "test",
     );
   });
 
   test('CopyWithValuesOptional', () {
     expect(
-      const CopyWithValuesOptional().copyWithValues(id: "test").id,
+      const CopyWithValuesOptional().copyWith(id: "test").id,
       "test",
     );
 

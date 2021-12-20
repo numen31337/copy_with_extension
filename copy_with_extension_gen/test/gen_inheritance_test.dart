@@ -97,10 +97,10 @@ void main() {
       id: "testid",
       date: date,
       listWithTypedType: const [],
-    )._copyWithNull()._copyWithValues();
+    )._copyWithNull().copyWith();
 
     expect(
-      result._copyWithValues().runtimeType,
+      result.copyWith().runtimeType,
       ComplexSubClass<int, String>(id: "", date: date).runtimeType,
     );
 

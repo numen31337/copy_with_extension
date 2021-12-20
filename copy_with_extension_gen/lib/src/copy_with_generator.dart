@@ -31,31 +31,28 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
-    ${classAnnotation.copyWith ? _copyWithProxyPart(
+    ${classAnnotation.copyWith || classAnnotation.copyWithValues ? _copyWithProxyPart(
+            classAnnotation.namedConstructor,
             classElement.name,
             typeParametersAnnotation,
             typeParametersNames,
             sortedFields,
-            !classAnnotation.copyWithValues,
             !classAnnotation.copyWithNull,
           ) : ""}
     
     extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
       ${classAnnotation.copyWith ? "_${classElement.name}CopyWithProxy$typeParametersNames get copyWith => _${classElement.name}CopyWithProxy$typeParametersNames(this);" : ""}
 
-      ${_copyWithValuesPart(typeAnnotation, sortedFields, classAnnotation.namedConstructor, !classAnnotation.copyWithValues)}
-
       ${_copyWithNullPart(typeAnnotation, sortedFields, classAnnotation.namedConstructor, !classAnnotation.copyWithNull)}
     }
     ''';
   }
 
-  /// Generates the complete `_copyWithValuesPart` function.
+  /// Generates a callable class function for copyWith(...).
   String _copyWithValuesPart(
     String typeAnnotation,
     List<FieldInfo> sortedFields,
     String? namedConstructor,
-    bool private,
   ) {
     final constructorInput = sortedFields.fold<String>(
       '',
@@ -72,15 +69,21 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       '',
       (r, v) {
         if (v.immutable) {
-          return '$r ${v.name}: ${v.name},';
+          return '$r ${v.name}: _value.${v.name},';
         } else {
-          return '$r ${v.name}: ${v.name} ?? this.${v.name},';
+          return '$r ${v.name}: ${v.name} ?? _value.${v.name},';
         }
       },
     );
 
     return '''
-        $typeAnnotation ${private ? "_" : ""}copyWithValues({$constructorInput}) {
+        /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `$typeAnnotation(...).copyWithNull(...)` to set certain fields to `null`. Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+        /// 
+        /// Usage
+        /// ```dart
+        /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
+        /// ````
+        $typeAnnotation call({$constructorInput}) {
           return ${constructorFor(typeAnnotation, namedConstructor)}($paramsInput);
         }
     ''';
@@ -128,23 +131,24 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
   /// Generates a `CopyWithProxy` class.
   String _copyWithProxyPart(
+    String? namedConstructor,
     String type,
     String typeParameters,
     String typeParameterNames,
     List<FieldInfo> sortedFields,
-    bool privateCopyWithValues,
     bool privateCopyWithNull,
   ) {
+    final typeAnnotation = type + typeParameterNames;
     final filteredFields = sortedFields.where((e) => !e.immutable);
     final nonNullableFields = filteredFields.where((e) => !e.nullable);
     final nullableFields =
         filteredFields.where((e) => !nonNullableFields.contains(e));
 
     final nonNullableFunctions = nonNullableFields.map((e) => '''
-    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => _value.${privateCopyWithValues ? "_" : ""}copyWithValues(${e.name}: ${e.name});
+    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => this(${e.name}: ${e.name});
     ''').join("\n");
     final nullableFunctions = nullableFields.map((e) => '''
-    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => ${e.name} == null ? _value.${privateCopyWithNull ? "_" : ""}copyWithNull(${e.name}: true) :  _value.${privateCopyWithValues ? "_" : ""}copyWithValues(${e.name}: ${e.name});
+    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => ${e.name} == null ? _value.${privateCopyWithNull ? "_" : ""}copyWithNull(${e.name}: true) : this(${e.name}: ${e.name});
     ''').join("\n");
 
     return '''
@@ -152,6 +156,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         final $type$typeParameterNames _value;
 
         const _${type}CopyWithProxy(this._value);
+
+        ${_copyWithValuesPart(typeAnnotation, sortedFields, namedConstructor)}
 
         $nullableFunctions
 

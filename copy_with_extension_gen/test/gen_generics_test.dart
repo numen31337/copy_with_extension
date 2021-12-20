@@ -26,7 +26,7 @@ void main() {
         basicGeneric: [],
         genericFromClass: [],
         nullableGeneric: [],
-        deepNestedGeneric: [])._copyWithValues().copyWithNull();
+        deepNestedGeneric: []).copyWith().copyWithNull();
 
     expect(
       generic.basicGeneric.runtimeType,
