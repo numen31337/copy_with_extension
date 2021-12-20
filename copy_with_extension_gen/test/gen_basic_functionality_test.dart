@@ -12,20 +12,11 @@ class CopyWithValues {
   });
 }
 
-@CopyWith(copyWith: false, copyWithValues: true, copyWithNull: false)
+@CopyWith(copyWith: true, copyWithValues: true, copyWithNull: true)
 class CopyWithValuesOptional {
   final String? id;
 
   const CopyWithValuesOptional({
-    this.id,
-  });
-}
-
-@CopyWith(copyWith: false, copyWithValues: false, copyWithNull: true)
-class CopyWithNull {
-  final String? id;
-
-  const CopyWithNull({
     this.id,
   });
 }
@@ -63,11 +54,14 @@ void main() {
       const CopyWithValuesOptional().copyWithValues(id: "test").id,
       "test",
     );
-  });
 
-  test('CopyWithNull', () {
     expect(
-      const CopyWithNull(id: "test").copyWithNull(id: true).id,
+      const CopyWithValuesOptional(id: "test").copyWithNull(id: true).id,
+      null,
+    );
+
+    expect(
+      const CopyWithValuesOptional(id: "test").copyWith.id(null).id,
       null,
     );
   });

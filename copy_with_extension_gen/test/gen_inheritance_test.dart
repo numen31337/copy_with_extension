@@ -135,5 +135,14 @@ void main() {
       result.copyWith.listWithTypedType([]).listWithTypedType.runtimeType,
       <Iterable<String>?>[].runtimeType,
     );
+
+    final Mixin mixin = result;
+    expect(
+      mixin.mixinMethod,
+      "test",
+    );
+
+    expect(result.abstractString, null);
+    expect(result.copyWith.abstractString("test").abstractString, "test");
   });
 }
