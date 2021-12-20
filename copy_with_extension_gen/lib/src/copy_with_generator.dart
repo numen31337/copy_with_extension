@@ -34,6 +34,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ${classAnnotation.copyWith ? _copyWithProxyPart(
             classElement.name,
             typeParametersAnnotation,
+            typeParametersNames,
             sortedFields,
             !classAnnotation.copyWithValues,
             !classAnnotation.copyWithNull,
@@ -129,6 +130,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   String _copyWithProxyPart(
     String type,
     String typeParameters,
+    String typeParameterNames,
     List<FieldInfo> sortedFields,
     bool privateCopyWithValues,
     bool privateCopyWithNull,
@@ -147,7 +149,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     return '''
       class _${type}CopyWithProxy$typeParameters {
-        final $type _value;
+        final $type$typeParameterNames _value;
 
         const _${type}CopyWithProxy(this._value);
 

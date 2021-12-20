@@ -1,26 +1,26 @@
 part of 'source_gen_tests.dart';
 
 @ShouldGenerate(r'''
-class _BasicClassCopyWithProxy {
-  final BasicClass _value;
+class _BasicClassCopyWithProxy<T extends Iterable<int>> {
+  final BasicClass<T> _value;
 
   const _BasicClassCopyWithProxy(this._value);
 
-  BasicClass optional(String? optional) => optional == null
+  BasicClass optional(T? optional) => optional == null
       ? _value._copyWithNull(optional: true)
       : _value._copyWithValues(optional: optional);
 
   BasicClass id(String id) => _value._copyWithValues(id: id);
 }
 
-extension BasicClassCopyWith on BasicClass {
-  _BasicClassCopyWithProxy get copyWith => _BasicClassCopyWithProxy(this);
+extension BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
+  _BasicClassCopyWithProxy get copyWith => _BasicClassCopyWithProxy<T>(this);
 
-  BasicClass _copyWithValues({
+  BasicClass<T> _copyWithValues({
     String? id,
-    String? optional,
+    T? optional,
   }) {
-    return BasicClass(
+    return BasicClass<T>(
       id: id ?? this.id,
       immutable: immutable,
       nullableImmutable: nullableImmutable,
@@ -28,10 +28,10 @@ extension BasicClassCopyWith on BasicClass {
     );
   }
 
-  BasicClass _copyWithNull({
+  BasicClass<T> _copyWithNull({
     bool optional = false,
   }) {
-    return BasicClass(
+    return BasicClass<T>(
       id: id,
       immutable: immutable,
       nullableImmutable: nullableImmutable,
@@ -42,9 +42,9 @@ extension BasicClassCopyWith on BasicClass {
 ''')
 @immutable
 @CopyWith()
-class BasicClass {
+class BasicClass<T extends Iterable<int>> {
   final String id;
-  final String? optional;
+  final T? optional;
   @CopyWithField(immutable: true)
   final int immutable;
   @CopyWithField(immutable: true)
