@@ -37,3 +37,15 @@ class SimpleObjectImmutableField {
   /// Make sure that constructor has named parameters (wrapped in curly braces)
   const SimpleObjectImmutableField({this.id, this.intValue});
 }
+
+/// Allows the use of a private constructor.
+@immutable
+@CopyWith(namedConstructor: "_")
+class SimpleObjectPrivateConstructor {
+  @CopyWithField(immutable: true)
+  final String? id;
+  final int? intValue;
+
+  /// Make sure that constructor has named parameters (wrapped in curly braces)
+  const SimpleObjectPrivateConstructor._({this.id, this.intValue});
+}
