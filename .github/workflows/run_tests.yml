@@ -98,6 +98,6 @@ jobs:
       - name: Check Files Are in Sync
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
-          cmp -s example/example.dart ../copy_with_extension/example/example.dart || echo "::error ::File example.dart is out of sync" && exit 1
-          cmp -s LICENSE ../copy_with_extension/LICENSE || echo "::error ::File LICENSE is out of sync" && exit 1
-          cmp -s CHANGELOG.md ../copy_with_extension/CHANGELOG.md || echo "::error ::File CHANGELOG.md is out of sync" && exit 1
+          cmp -s example/example.dart ../copy_with_extension/example/example.dart || (echo "::error ::File example.dart is out of sync" && exit 1)
+          cmp -s LICENSE ../copy_with_extension/LICENSE || (echo "::error ::File LICENSE is out of sync" && exit 1)
+          cmp -s CHANGELOG.md ../copy_with_extension/CHANGELOG.md || (echo "::error ::File CHANGELOG.md is out of sync" && exit 1)
