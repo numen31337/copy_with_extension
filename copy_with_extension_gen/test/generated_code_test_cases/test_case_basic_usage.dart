@@ -48,7 +48,6 @@ extension BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
   }
 }
 ''')
-@immutable
 @CopyWith()
 class BasicClass<T extends Iterable<int>> {
   final String id;

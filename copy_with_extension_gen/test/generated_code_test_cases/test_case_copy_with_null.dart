@@ -43,7 +43,6 @@ extension WithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
   }
 }
 ''')
-@immutable
 @CopyWith(skipFields: true, copyWithNull: true)
 class WithNullableWithoutFields<T extends Iterable<int>> {
   final T? nullable;

@@ -1,6 +1,5 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:meta/meta.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' show test, expect;
 
 part 'gen_inheritance_test.g.dart';
 
@@ -10,7 +9,6 @@ abstract class AbstractClass {
   AbstractClass(this.abstractString);
 }
 
-@immutable
 @CopyWith()
 class BasicBaseClass {
   final String id;
@@ -22,7 +20,6 @@ mixin Mixin on BasicBaseClass {
   String get mixinMethod;
 }
 
-@immutable
 @CopyWith()
 class BasicSubClass<T> extends BasicBaseClass {
   final T? item;
@@ -30,7 +27,6 @@ class BasicSubClass<T> extends BasicBaseClass {
   const BasicSubClass({required String id, this.item}) : super(id: id);
 }
 
-@immutable
 @CopyWith()
 class ComplexSubClass<T, U extends String> extends BasicSubClass<T>
     with Mixin

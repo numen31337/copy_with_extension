@@ -1,5 +1,5 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart';
+import 'package:test/test.dart' show test, expect;
 
 part 'gen_named_constructor_test.g.dart';
 
