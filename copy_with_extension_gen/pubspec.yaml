@@ -12,8 +12,7 @@ dependencies:
   analyzer: '>=2.0.0 <4.0.0'
   build: ^2.0.0
   source_gen: ^1.0.0
-  copy_with_extension:
-    path: ../copy_with_extension
+  copy_with_extension: ^3.0.0
 
 dev_dependencies:
   flutter_lints: ^1.0.0
