@@ -2,13 +2,24 @@
 
 Provides [Dart Build System](https://pub.dev/packages/build) builder for generating `copyWith` extensions for classes annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension). For more information on how this package works, see [my blog article](https://oleksandrkirichenko.com/blog/dart-extensions/).
 
+This library allows you to copy instances of immutable classes modifying specific fields like so:
+
+```dart
+myInstance.copyWith.fieldName("test") // Preferred way with nullability support.
+
+myInstance.copyWith(fieldName: "test", anotherField: "test") // Change multiple fields at once without nullability support.
+
+myInstance.copyWithNull(fieldName: true, anotherField: true) // Nullify multiple fields at once.
+```
+
+
 ## Usage
 
 #### In your `pubspec.yaml` file:
 - Add to `dependencies` section `copy_with_extension: ^3.0.0`
 - Add to `dev_dependencies` section `copy_with_extension_gen: ^3.0.0`
 - Add to `dev_dependencies` section `build_runner: ^2.1.7`
-- Set `environment` to at least Dart 2.12.0 version like so: `">=2.12.0 <3.0.0"`
+- Set `environment` to at least Dart `2.12.0` version like so: `">=2.12.0 <3.0.0"`
 
 Your `pubspec.yaml` should look like so:
 
@@ -63,11 +74,11 @@ final copied = result.copyWith.text("test") // Results in BasicClass(id: "id", t
 
 ## Additional features
 
-#### Using copyWith() function
+#### Change several fields at once with copyWith()
 
+You can modify multiple fields at once using `copyWith` as a function like so: `myInstance.copyWith(fieldName: "test", anotherField: "test")`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.
 
-
-#### Nullifying the class fields:
+#### Nullifying instance fields:
 
 The `copyWith` method ignores any `null` values that are passed to it. In order to nullify the class fields, an additional `copyWithNull` function can be generated. To achieve this, simply pass an additional parameter to your class annotation `@CopyWith(generateCopyWithNull: true)`.
 

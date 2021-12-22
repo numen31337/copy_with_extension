@@ -2,9 +2,7 @@
 * Updating `analyzer` to `>=2.0.0 <4.0.0`
 * Named constructor support.
 * Better error reporting.
-* Introduction of the new `copyWith` approach with nullability support. The default behaviour of this library assumes using it like so: `myInstance.copyWith.value("newValue")`. The old functions are still available but must be enabled in annotation like so `@CopyWith(copyWith: false, copyWithNull: true, copyWithValues: true)`.
-* **BREAKING** The default behaviour of the `@CopyWith()` annotation has been changed. It creates new `copyWith.fieldName()` functions instead of the `copyWith()` function, which has now been renamed `copyWithValues()`.
-* **BREAKING** The old `copyWith()` function has been renamed to `copyWithValues()`.
+* Introduction of the new `copyWith` function with nullability support. The default behaviour of this library assumes that this function is used as follows: `myInstance.copyWith.value("newValue")`. The old functionality is still available.
 
 ## 2.0.3 Dependency update
 * Updating `analyzer` to `^2.0.0`

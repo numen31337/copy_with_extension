@@ -24,6 +24,6 @@ class CopyWith {
 class CopyWithField {
   const CopyWithField({this.immutable = false});
 
-  /// Indicates that the field should be hidden in the generated `copyWith` method. By setting this flag to `true` the property will always be copied as it is e.g. `userID` field.
+  /// Indicates that the field should be hidden in the generated `copyWith` method. By setting this flag to `true` the field will always be copied as it is e.g. `userID` field.
   final bool immutable;
 }
