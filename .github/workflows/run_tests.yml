@@ -94,3 +94,10 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           relativePath: copy_with_extension
+      
+      - name: Check Files Are in Sync
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
+        run: |
+          cmp example/example.dart ../copy_with_extension/example/example.dart || echo "::error ::File example.dart is out of sync"
+          cmp LICENSE ../copy_with_extension/LICENSE || echo "::error ::File LICENSE is out of sync"
+          cmp CHANGELOG.md ../copy_with_extension/CHANGELOG.md || echo "::error ::File CHANGELOG.md is out of sync"
