@@ -168,6 +168,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''').join("\n");
 
     return '''
+      /// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOf$type.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.${skipFields ? "" : " Prefer to copy the instance with a specific field changed that handles nullification of fields correctly, e.g. like this:`instanceOf$type.copyWith.fieldName(...)`"}
       class _${type}CWProxy$typeParameters {
         final $type$typeParameterNames _value;
 

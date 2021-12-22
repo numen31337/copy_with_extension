@@ -1,6 +1,7 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
+/// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOfWithNullableWithoutFields.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.
 class _WithNullableWithoutFieldsCWProxy<T extends Iterable<int>> {
   final WithNullableWithoutFields<T> _value;
 
