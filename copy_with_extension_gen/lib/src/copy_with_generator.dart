@@ -31,28 +31,30 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
-    ${classAnnotation.copyWith || classAnnotation.copyWithValues ? _copyWithProxyPart(
-            classAnnotation.namedConstructor,
-            classElement.name,
-            typeParametersAnnotation,
-            typeParametersNames,
-            sortedFields,
-            !classAnnotation.copyWithNull,
-          ) : ""}
+    ${_copyWithProxyPart(
+      classAnnotation.namedConstructor,
+      classElement.name,
+      typeParametersAnnotation,
+      typeParametersNames,
+      sortedFields,
+      !classAnnotation.copyWithNull,
+      classAnnotation.skipFields,
+    )}
     
     extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
-      ${classAnnotation.copyWith ? "_${classElement.name}CopyWithProxy$typeParametersNames get copyWith => _${classElement.name}CopyWithProxy$typeParametersNames(this);" : ""}
+      ${"_${classElement.name}CWProxy$typeParametersNames get copyWith => _${classElement.name}CWProxy$typeParametersNames(this);"}
 
-      ${_copyWithNullPart(typeAnnotation, sortedFields, classAnnotation.namedConstructor, !classAnnotation.copyWithNull)}
+      ${_copyWithNullPart(typeAnnotation, sortedFields, classAnnotation.namedConstructor, !classAnnotation.copyWithNull, classAnnotation.skipFields)}
     }
     ''';
   }
 
-  /// Generates a callable class function for copyWith(...).
+  /// Generates the callable class function for copyWith(...).
   String _copyWithValuesPart(
     String typeAnnotation,
     List<FieldInfo> sortedFields,
     String? namedConstructor,
+    bool skipFields,
   ) {
     final constructorInput = sortedFields.fold<String>(
       '',
@@ -77,7 +79,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     );
 
     return '''
-        /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `$typeAnnotation(...).copyWithNull(...)` to set certain fields to `null`. Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+        /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `$typeAnnotation(...).copyWithNull(...)` to set certain fields to `null`.${skipFields ? "" : " Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
         /// 
         /// Usage
         /// ```dart
@@ -95,6 +97,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     List<FieldInfo> sortedFields,
     String? namedConstructor,
     bool private,
+    bool skipFields,
   ) {
     /// Return if there is no nullable fields
     if (sortedFields.where((element) => element.nullable == true).isEmpty) {
@@ -122,7 +125,18 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       },
     );
 
+    final description = private
+        ? ""
+        : '''
+        /// Copies the object with the specific fields set to `null`. If you pass `false` as a parameter, nothing will be done and it will be ignored. Don't do it.${skipFields ? "" : " Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
+        ///
+        /// Usage
+        /// ```dart
+        /// $typeAnnotation(...).copyWithNull(firstField: true, secondField: true)
+        /// ````''';
+
     return '''
+      $description
       $typeAnnotation ${private ? "_" : ""}copyWithNull({$nullConstructorInput}) {
         return ${constructorFor(typeAnnotation, namedConstructor)}($nullParamsInput);
       }
@@ -137,6 +151,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     String typeParameterNames,
     List<FieldInfo> sortedFields,
     bool privateCopyWithNull,
+    bool skipFields,
   ) {
     final typeAnnotation = type + typeParameterNames;
     final filteredFields = sortedFields.where((e) => !e.immutable);
@@ -144,20 +159,21 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final nullableFields =
         filteredFields.where((e) => !nonNullableFields.contains(e));
 
-    final nonNullableFunctions = nonNullableFields.map((e) => '''
+    final nonNullableFunctions =
+        skipFields ? "" : nonNullableFields.map((e) => '''
     $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => this(${e.name}: ${e.name});
     ''').join("\n");
-    final nullableFunctions = nullableFields.map((e) => '''
+    final nullableFunctions = skipFields ? "" : nullableFields.map((e) => '''
     $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => ${e.name} == null ? _value.${privateCopyWithNull ? "_" : ""}copyWithNull(${e.name}: true) : this(${e.name}: ${e.name});
     ''').join("\n");
 
     return '''
-      class _${type}CopyWithProxy$typeParameters {
+      class _${type}CWProxy$typeParameters {
         final $type$typeParameterNames _value;
 
-        const _${type}CopyWithProxy(this._value);
+        const _${type}CWProxy(this._value);
 
-        ${_copyWithValuesPart(typeAnnotation, sortedFields, namedConstructor)}
+        ${_copyWithValuesPart(typeAnnotation, sortedFields, namedConstructor, skipFields)}
 
         $nullableFunctions
 

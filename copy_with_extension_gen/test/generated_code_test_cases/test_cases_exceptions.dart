@@ -1,4 +1,4 @@
-part of 'source_gen_tests.dart';
+part of 'source_gen_entrypoint.dart';
 
 @ShouldThrow(
   'Only classes can be annotated with "CopyWith". "Object wrongAnnotation" is not a ClassElement.',

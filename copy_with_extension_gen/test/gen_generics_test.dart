@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 part 'gen_generics_test.g.dart';
 
 @immutable
-@CopyWith(copyWith: true, copyWithNull: true)
+@CopyWith(copyWithNull: true)
 class Generics<G, T extends Iterable<G>> {
   final List<int> basicGeneric;
   final List<T> genericFromClass;

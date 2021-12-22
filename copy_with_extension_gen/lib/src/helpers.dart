@@ -81,15 +81,13 @@ CopyWithField readFieldAnnotation(
 /// Restores the `CopyWith` annotation provided by the user.
 CopyWith readClassAnnotation(ConstantReader reader) {
   final generateCopyWithNull = reader.read('copyWithNull').boolValue;
-  final generateCopyWithValues = reader.read('copyWithValues').boolValue;
-  final generateCopyWith = reader.read('copyWith').boolValue;
+  final skipFields = reader.read('skipFields').boolValue;
   final useNamedConstructor = reader.peek('namedConstructor')?.stringValue;
 
   return CopyWith(
-    copyWith: generateCopyWith,
-    copyWithValues: generateCopyWithValues,
     copyWithNull: generateCopyWithNull,
     namedConstructor: useNamedConstructor,
+    skipFields: skipFields,
   );
 }
 

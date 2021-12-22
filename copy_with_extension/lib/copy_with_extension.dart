@@ -5,20 +5,16 @@ library copy_with_extension;
 /// Annotation used to indicate that the `copyWith` extension should be generated.
 class CopyWith {
   const CopyWith({
-    this.copyWithValues = false,
     this.copyWithNull = false,
-    this.copyWith = true,
+    this.skipFields = false,
     this.namedConstructor,
   });
 
-  /// Set `copyWithValues` to `true` to generate the `copyWithValues` function, which allows to override multiple fields at once. This function does not support nullification of optional types, and all `null` values passed to this function will be ignored. For nullification, use `copyWithNull` to set certain fields to `null` or `copyWith` to override fields one at a time with nullification support. E.g. `myInstance.copyWithValues(id: 12, name: "My name")`.
-  final bool copyWithValues;
-
-  /// Set `copyWithNull` to `true` for generating `copyWithNull` function that allows you to nullify the fields. E.g. `myInstance.copyWithNull(id: true, name: true)`.
+  /// Set `copyWithNull` to `true` if you want to use `copyWithNull` function that allows you to nullify the fields. E.g. `myInstance.copyWithNull(id: true, name: true)`. Otherwise it will be still generated for internal use but marked as private.
   final bool copyWithNull;
 
-  /// Set `copyWith` to `true` to generate `copyWith`. It will provide you with a `copyWith` functionality and support for nullability. E.g. `myInstance.copyWith.id(12).copyWith.name("My name")`.
-  final bool copyWith;
+  /// TODO: Info here
+  final bool skipFields;
 
   /// Set `namedConstructor` if you want to use a named constructor instead. The generated fields will be derived from this constructor.
   final String? namedConstructor;

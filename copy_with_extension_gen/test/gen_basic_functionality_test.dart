@@ -3,7 +3,7 @@ import 'package:test/test.dart';
 
 part 'gen_basic_functionality_test.g.dart';
 
-@CopyWith(copyWith: true, copyWithValues: true, copyWithNull: false)
+@CopyWith()
 class CopyWithValues {
   final String id;
 
@@ -12,7 +12,7 @@ class CopyWithValues {
   });
 }
 
-@CopyWith(copyWith: true, copyWithValues: true, copyWithNull: true)
+@CopyWith(copyWithNull: true)
 class CopyWithValuesOptional {
   final String? id;
 
@@ -21,7 +21,7 @@ class CopyWithValuesOptional {
   });
 }
 
-@CopyWith(copyWith: true, copyWithValues: false, copyWithNull: false)
+@CopyWith()
 class CopyWithProxy {
   final String? id;
   @CopyWithField(immutable: true)
@@ -33,7 +33,7 @@ class CopyWithProxy {
   });
 }
 
-@CopyWith(copyWith: true, copyWithValues: false, copyWithNull: false)
+@CopyWith()
 class CopyWithProxyChaining {
   final String? id;
   final String? field;

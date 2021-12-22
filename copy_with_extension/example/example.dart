@@ -24,7 +24,7 @@ class SimpleObjectPrivateConstructor {
 }
 
 @immutable
-@CopyWith(copyWith: false, copyWithNull: true, copyWithValues: true)
+@CopyWith(copyWithNull: true)
 class SimpleObjectExposeWithNullAndWithValues {
   final String id;
   final int? value;
