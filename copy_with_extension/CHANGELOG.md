@@ -1,5 +1,18 @@
+## 3.0.0
+* Updating `analyzer` to `>=2.0.0 <4.0.0`
+* Named constructor support.
+* Better error reporting.
+* Introduction of the new `copyWith` function with nullability support. The default behaviour of this library assumes that this function is used as follows: `myInstance.copyWith.value("newValue")`. The old functionality is still available.
+* **BREAKING** `generateCopyWithNull` is renamed to `copyWithNull`.
+
+## 2.0.3 Dependency update
+* Updating `analyzer` to `^2.0.0`
+
 ## 2.0.2 Bugfix
 * Fix generation of generics with nullable types (thanks [@josiahsrc](https://github.com/josiahsrc)).
+
+## 2.0.1 Null Safety
+* Updating build and source_gen dependencies.
 
 ## 2.0.0 Null Safety
 * Updating dependencies.
@@ -9,6 +22,9 @@
 
 ## 1.4.0 Improving generic compatibility
 * Fixes issue with generating code for some classes with generic type parameters.
+
+## 1.3.1 README Update
+* Update README.md
 
 ## 1.3.0 Immutable Fields
 * Fixes the `boolean-expression-must-not-be-null-exception` issue
@@ -22,6 +38,10 @@
 
 * Introducing the `copyWithNull` function.
 
+## 1.0.8 Analyzer rules
+
+* Suppresses some of the analyzer's rules as we do not support generic types yet.
+
 ## 1.0.7 Extension name fix
 
 * Creates a unique extension name for each class.
@@ -32,4 +52,4 @@
 
 ## 1.0.0 Initial release
 
-* Lets you annotate an object using `@CopyWith()` to generate a `copyWith` extension.
+* Lets you generate a `copyWith` extension for objects annotated with `@CopyWith()`.

@@ -5,58 +5,99 @@ on:
     branches:
       - master
   pull_request:
+  schedule:
+    - cron: "0 0 1 * *" # Run Monthly
 
 jobs:
-  execute_build_runner:
+  run_tests:
+    name: Run Tests - Dart ${{ matrix.sdk }} - ${{ matrix.os }}
     timeout-minutes: 10
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: copy_with_extension_gen
+
+    strategy:
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+        sdk:
+          - stable
+          - beta
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Flutter
-        uses: subosito/flutter-action@v1
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
         with:
-          channel: 'stable'
+          sdk: ${{ matrix.sdk }}
 
-      - name: Update Flutter Packages
-        run: flutter update-packages --force-upgrade
-
-      - name: Flutter Setup
+      - name: Dart Info
         run: |
-          flutter config --no-analytics
           dart --disable-analytics
-          flutter doctor
+          dart --version
 
-      - name: Pub Get
-        run: (cd copy_with_extension_test && flutter pub get)
+      - name: Pub Get - copy_with_extension_gen
+        run: dart pub get
 
-      - name: Build runner
-        run: (cd copy_with_extension_test && flutter pub run build_runner build --delete-conflicting-outputs)
+      - name: Pub Get - copy_with_extension
+        run: dart pub get
+        working-directory: copy_with_extension
+
+      - name: Execute build_runner
+        run: dart run build_runner build --delete-conflicting-outputs
 
       - name: Analyze
-        run: (cd copy_with_extension_test && flutter analyze)
-  
-  run_tests:
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install Flutter
-        uses: subosito/flutter-action@v1
-        with:
-          channel: 'stable'
-          
-      - name: Flutter Setup
-        run: |
-          flutter config --no-analytics
-          dart --disable-analytics
-          flutter doctor
-
-      - name: Pub Get
-        run: (cd copy_with_extension_gen && dart pub get)
+        run: dart analyze
 
       - name: Run tests
-        run: (cd copy_with_extension_gen && dart run test)
+        run: dart run test
+
+      - name: Check formatting
+        run: dart format --set-exit-if-changed ../
+
+      - name: Check Outdated Packages - copy_with_extension_gen
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
+        run: |
+          warning_msg=`dart pub outdated`
+          warning_formatted=${warning_msg//$'\n'/}
+          if [[ $warning_formatted =~ "constrained" ]]; then
+            echo $warning_msg
+            echo -n "::warning ::$warning_formatted"
+          fi
+
+      - name: Check Outdated Packages - copy_with_extension
+        working-directory: copy_with_extension
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
+        run: |
+          warning_msg=`dart pub outdated`
+          warning_formatted=${warning_msg//$'\n'/}
+          if [[ $warning_formatted =~ "constrained" ]]; then
+            echo $warning_msg
+            echo -n "::warning ::$warning_formatted"
+          fi
+
+      - name: Check Score - copy_with_extension_gen
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
+        uses: axel-op/dart-package-analyzer@v3
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          relativePath: copy_with_extension_gen
+
+      - name: Check Score - copy_with_extension
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
+        uses: axel-op/dart-package-analyzer@v3
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          relativePath: copy_with_extension
+      
+      - name: Check Files Are in Sync
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
+        run: |
+          cmp -s example/example.dart ../copy_with_extension/example/example.dart || (echo "::error ::File example.dart is out of sync" && exit 1)
+          cmp -s LICENSE ../copy_with_extension/LICENSE || (echo "::error ::File LICENSE is out of sync" && exit 1)
+          cmp -s CHANGELOG.md ../copy_with_extension/CHANGELOG.md || (echo "::error ::File CHANGELOG.md is out of sync" && exit 1)

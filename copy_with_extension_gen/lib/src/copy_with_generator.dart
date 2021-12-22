@@ -1,16 +1,10 @@
-import 'package:analyzer/dart/constant/value.dart';
-import 'package:analyzer/dart/element/element.dart'
-    show
-        ClassElement,
-        ConstructorElement,
-        Element,
-        FieldElement,
-        ParameterElement;
-import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/dart/element/element.dart' show ClassElement, Element;
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:copy_with_extension_gen/src/field_info.dart';
+import 'package:copy_with_extension_gen/src/helpers.dart';
 import 'package:source_gen/source_gen.dart'
-    show ConstantReader, GeneratorForAnnotation, TypeChecker;
+    show ConstantReader, GeneratorForAnnotation, InvalidGenerationSourceError;
 
 /// A `Generator` for `package:build_runner`
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
@@ -20,54 +14,48 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    if (element is! ClassElement) throw '$element is not a ClassElement';
+    if (element is! ClassElement) {
+      throw InvalidGenerationSourceError(
+        'Only classes can be annotated with "CopyWith". "$element" is not a ClassElement.',
+        element: element,
+      );
+    }
 
     final ClassElement classElement = element;
-    final generateCopyWithNull =
-        annotation.read('generateCopyWithNull').boolValue;
-    final namedConstructor = annotation.peek('namedConstructor')?.stringValue;
+    final classAnnotation = readClassAnnotation(annotation);
 
     final sortedFields =
-        _sortedConstructorFields(classElement, namedConstructor);
-    final typeParametersAnnotation = _typeParametersString(classElement, false);
-    final typeParametersNames = _typeParametersString(classElement, true);
+        sortedConstructorFields(classElement, classAnnotation.namedConstructor);
+    final typeParametersAnnotation = typeParametersString(classElement, false);
+    final typeParametersNames = typeParametersString(classElement, true);
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
+    ${_copyWithProxyPart(
+      classAnnotation.namedConstructor,
+      classElement.name,
+      typeParametersAnnotation,
+      typeParametersNames,
+      sortedFields,
+      !classAnnotation.copyWithNull,
+      classAnnotation.skipFields,
+    )}
+    
     extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
-      ${_copyWithPart(typeAnnotation, sortedFields, namedConstructor)}
-      ${generateCopyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields, namedConstructor) : ""}
+      /// CopyWith feature provided by `copy_with_extension_gen` library. Returns a callable class and can be used as follows: `instanceOf$classElement.name.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.${classAnnotation.skipFields ? "" : " Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOf$classElement.name.copyWith.fieldName(...)`"}
+      ${"_${classElement.name}CWProxy$typeParametersNames get copyWith => _${classElement.name}CWProxy$typeParametersNames(this);"}
+
+      ${_copyWithNullPart(typeAnnotation, sortedFields, classAnnotation.namedConstructor, !classAnnotation.copyWithNull, classAnnotation.skipFields)}
     }
     ''';
   }
 
-  ///Returns parameter names or full parameters declaration declared by this class or an empty string.
-  ///
-  ///If `nameOnly` is `true`: `class MyClass<T extends String, Y>` returns `<T, Y>`.
-  ///
-  ///If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
-  String _typeParametersString(ClassElement classElement, bool nameOnly) {
-    final names = classElement.typeParameters
-        .map(
-          (e) => nameOnly ? e.name : e.getDisplayString(withNullability: true),
-        )
-        .join(',');
-    if (names.isNotEmpty) {
-      return '<$names>';
-    } else {
-      return '';
-    }
-  }
-
-  ///Returns constructor for the given type and optional named constructor name
-  String _constructorFor(String typeAnnotation, String? namedConstructor) =>
-      "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
-
-  ///Generates the complete `copyWith` function.
-  String _copyWithPart(
+  /// Generates the callable class function for copyWith(...).
+  String _copyWithValuesPart(
     String typeAnnotation,
-    List<_FieldInfo> sortedFields,
+    List<FieldInfo> sortedFields,
     String? namedConstructor,
+    bool skipFields,
   ) {
     final constructorInput = sortedFields.fold<String>(
       '',
@@ -84,25 +72,33 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       '',
       (r, v) {
         if (v.immutable) {
-          return '$r ${v.name}: ${v.name},';
+          return '$r ${v.name}: _value.${v.name},';
         } else {
-          return '$r ${v.name}: ${v.name} ?? this.${v.name},';
+          return '$r ${v.name}: ${v.name} ?? _value.${v.name},';
         }
       },
     );
 
     return '''
-        $typeAnnotation copyWith({$constructorInput}) {
-          return ${_constructorFor(typeAnnotation, namedConstructor)}($paramsInput);
+        /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `$typeAnnotation(...).copyWithNull(...)` to set certain fields to `null`.${skipFields ? "" : " Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
+        /// 
+        /// Usage
+        /// ```dart
+        /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
+        /// ````
+        $typeAnnotation call({$constructorInput}) {
+          return ${constructorFor(typeAnnotation, namedConstructor)}($paramsInput);
         }
     ''';
   }
 
-  ///Generates the complete `copyWithNull` function.
+  /// Generates the complete `copyWithNull` function.
   String _copyWithNullPart(
     String typeAnnotation,
-    List<_FieldInfo> sortedFields,
+    List<FieldInfo> sortedFields,
     String? namedConstructor,
+    bool private,
+    bool skipFields,
   ) {
     /// Return if there is no nullable fields
     if (sortedFields.where((element) => element.nullable == true).isEmpty) {
@@ -130,86 +126,61 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       },
     );
 
+    final description = private
+        ? ""
+        : '''
+        /// Copies the object with the specific fields set to `null`. If you pass `false` as a parameter, nothing will be done and it will be ignored. Don't do it.${skipFields ? "" : " Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
+        ///
+        /// Usage
+        /// ```dart
+        /// $typeAnnotation(...).copyWithNull(firstField: true, secondField: true)
+        /// ````''';
+
     return '''
-      $typeAnnotation copyWithNull({$nullConstructorInput}) {
-        return ${_constructorFor(typeAnnotation, namedConstructor)}($nullParamsInput);
+      $description
+      $typeAnnotation ${private ? "_" : ""}copyWithNull({$nullConstructorInput}) {
+        return ${constructorFor(typeAnnotation, namedConstructor)}($nullParamsInput);
       }
     ''';
   }
 
-  ///Generates a list of `_FieldInfo` for each class field that will be a part of the code generation process.
-  ///The resulting array is sorted by the field name. `Throws` on error.
-  List<_FieldInfo> _sortedConstructorFields(
-    ClassElement element,
-    String? constructorName,
+  /// Generates a `CopyWithProxy` class.
+  String _copyWithProxyPart(
+    String? namedConstructor,
+    String type,
+    String typeParameters,
+    String typeParameterNames,
+    List<FieldInfo> sortedFields,
+    bool privateCopyWithNull,
+    bool skipFields,
   ) {
-    // final named = element.getNamedConstructor(name);
-    final constructor = constructorName != null
-        ? element.getNamedConstructor(constructorName)
-        : element.unnamedConstructor;
+    final typeAnnotation = type + typeParameterNames;
+    final filteredFields = sortedFields.where((e) => !e.immutable);
+    final nonNullableFields = filteredFields.where((e) => !e.nullable);
+    final nullableFields =
+        filteredFields.where((e) => !nonNullableFields.contains(e));
 
-    if (constructor is! ConstructorElement) {
-      if (constructorName != null) {
-        throw 'Named Constructor $constructorName constructor is missing';
-      } else {
-        throw 'Default ${element.name} constructor is missing';
+    final nonNullableFunctions =
+        skipFields ? "" : nonNullableFields.map((e) => '''
+    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => this(${e.name}: ${e.name});
+    ''').join("\n");
+    final nullableFunctions = skipFields ? "" : nullableFields.map((e) => '''
+    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => ${e.name} == null ? _value.${privateCopyWithNull ? "_" : ""}copyWithNull(${e.name}: true) : this(${e.name}: ${e.name});
+    ''').join("\n");
+
+    return '''
+      /// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOf$type.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.${skipFields ? "" : " Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOf$type.copyWith.fieldName(...)`"}
+      class _${type}CWProxy$typeParameters {
+        final $type$typeParameterNames _value;
+
+        const _${type}CWProxy(this._value);
+
+        ${_copyWithValuesPart(typeAnnotation, sortedFields, namedConstructor, skipFields)}
+
+        $nullableFunctions
+
+        $nonNullableFunctions
       }
-    }
-
-    final parameters = constructor.parameters;
-    if (parameters.isEmpty) {
-      throw 'Unnamed constructor for ${element.name} has no parameters';
-    }
-
-    for (final parameter in parameters) {
-      if (!parameter.isNamed) {
-        throw 'Unnamed constructor for ${element.name} contains unnamed parameter. Only named parameters are supported.';
-      }
-    }
-
-    final fields = parameters.map((v) => _FieldInfo(v, element)).toList();
-    fields.sort((lhs, rhs) => lhs.name.compareTo(rhs.name));
-
-    return fields;
-  }
-}
-
-///Represents a single class field with the additional metadata needed for code generation.
-class _FieldInfo {
-  final String name;
-  final String type;
-  final bool immutable;
-  final bool nullable;
-
-  _FieldInfo(ParameterElement element, ClassElement classElement)
-      : name = element.name,
-        type = element.type.getDisplayString(withNullability: true),
-        immutable = _readFieldOptions(element, classElement).immutable,
-        nullable = element.type.nullabilitySuffix != NullabilitySuffix.none;
-
-  static CopyWithField _readFieldOptions(
-    ParameterElement element,
-    ClassElement classElement,
-  ) {
-    final fieldElement = classElement.getField(element.name);
-    if (fieldElement is! FieldElement) {
-      return const CopyWithField();
-    }
-
-    const checker = TypeChecker.fromRuntime(CopyWithField);
-    final annotation = checker.firstAnnotationOf(fieldElement);
-    if (annotation is! DartObject) {
-      return const CopyWithField();
-    }
-
-    final reader = ConstantReader(annotation);
-    final immutable = reader.read('immutable').literalValue as bool;
-
-    return CopyWithField(immutable: immutable);
-  }
-
-  @override
-  String toString() {
-    return 'type:$type name:$name immutable:$immutable nullable:$nullable';
+    ''';
   }
 }
