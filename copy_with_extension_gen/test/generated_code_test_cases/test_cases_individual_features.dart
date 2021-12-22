@@ -1,10 +1,10 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
-class _WithNullableWithoutFields_CWProxy<T extends Iterable<int>> {
+class _WithNullableWithoutFieldsCWProxy<T extends Iterable<int>> {
   final WithNullableWithoutFields<T> _value;
 
-  const _WithNullableWithoutFields_CWProxy(this._value);
+  const _WithNullableWithoutFieldsCWProxy(this._value);
 
   /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `WithNullableWithoutFields<T>(...).copyWithNull(...)` to set certain fields to `null`.
   ///
@@ -23,8 +23,8 @@ class _WithNullableWithoutFields_CWProxy<T extends Iterable<int>> {
 
 extension WithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
     on WithNullableWithoutFields<T> {
-  _WithNullableWithoutFields_CWProxy<T> get copyWith =>
-      _WithNullableWithoutFields_CWProxy<T>(this);
+  _WithNullableWithoutFieldsCWProxy<T> get copyWith =>
+      _WithNullableWithoutFieldsCWProxy<T>(this);
 
   /// Copies the object with the specific fields set to `null`. If you pass `false` as a parameter, nothing will be done and it will be ignored. Don't do it.
   ///

@@ -1,10 +1,10 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
-class _BasicClass_CWProxy<T extends Iterable<int>> {
+class _BasicClassCWProxy<T extends Iterable<int>> {
   final BasicClass<T> _value;
 
-  const _BasicClass_CWProxy(this._value);
+  const _BasicClassCWProxy(this._value);
 
   /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `BasicClass<T>(...).copyWithNull(...)` to set certain fields to `null`. Prefer `BasicClass<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
@@ -32,7 +32,7 @@ class _BasicClass_CWProxy<T extends Iterable<int>> {
 }
 
 extension BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
-  _BasicClass_CWProxy<T> get copyWith => _BasicClass_CWProxy<T>(this);
+  _BasicClassCWProxy<T> get copyWith => _BasicClassCWProxy<T>(this);
 
   BasicClass<T> _copyWithNull({
     bool optional = false,
