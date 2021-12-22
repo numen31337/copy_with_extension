@@ -2,4 +2,6 @@
 
 Defines the annotation used by [copy_with_extension_gen](https://pub.dev/packages/copy_with_extension_gen) to generate `copyWith` extensions.
 
-For more info on this package check out [my blog article](https://www.alexander-kirsch.com/blog/dart-extensions/).
+For more information on how to use this package, see [copy_with_extension_gen](https://pub.dev/packages/copy_with_extension_gen).
+
+For more information on how this package works, see [my blog article](https://alexander-kirsch.com/blog/dart-extensions).
