@@ -1,7 +1,7 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
-/// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOfBasicClass.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored. Prefer to copy the instance with a specific field changed that handles nullification of fields correctly, e.g. like this:`instanceOfBasicClass.copyWith.fieldName(...)`
+/// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOfBasicClass.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored. Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOfBasicClass.copyWith.fieldName(...)`
 class _BasicClassCWProxy<T extends Iterable<int>> {
   final BasicClass<T> _value;
 
@@ -33,6 +33,7 @@ class _BasicClassCWProxy<T extends Iterable<int>> {
 }
 
 extension BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
+  /// CopyWith feature provided by `copy_with_extension_gen` library. Returns a callable class and can be used as follows: `instanceOfclass BasicClass<T extends Iterable<int>>.name.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored. Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOfclass BasicClass<T extends Iterable<int>>.name.copyWith.fieldName(...)`
   _BasicClassCWProxy<T> get copyWith => _BasicClassCWProxy<T>(this);
 
   BasicClass<T> _copyWithNull({

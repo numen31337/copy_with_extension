@@ -24,6 +24,7 @@ class _WithNullableWithoutFieldsCWProxy<T extends Iterable<int>> {
 
 extension WithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
     on WithNullableWithoutFields<T> {
+  /// CopyWith feature provided by `copy_with_extension_gen` library. Returns a callable class and can be used as follows: `instanceOfclass WithNullableWithoutFields<T extends Iterable<int>>.name.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.
   _WithNullableWithoutFieldsCWProxy<T> get copyWith =>
       _WithNullableWithoutFieldsCWProxy<T>(this);
 

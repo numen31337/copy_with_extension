@@ -42,6 +42,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     )}
     
     extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
+      /// CopyWith feature provided by `copy_with_extension_gen` library. Returns a callable class and can be used as follows: `instanceOf$classElement.name.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.${classAnnotation.skipFields ? "" : " Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOf$classElement.name.copyWith.fieldName(...)`"}
       ${"_${classElement.name}CWProxy$typeParametersNames get copyWith => _${classElement.name}CWProxy$typeParametersNames(this);"}
 
       ${_copyWithNullPart(typeAnnotation, sortedFields, classAnnotation.namedConstructor, !classAnnotation.copyWithNull, classAnnotation.skipFields)}
@@ -168,7 +169,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''').join("\n");
 
     return '''
-      /// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOf$type.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.${skipFields ? "" : " Prefer to copy the instance with a specific field changed that handles nullification of fields correctly, e.g. like this:`instanceOf$type.copyWith.fieldName(...)`"}
+      /// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOf$type.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.${skipFields ? "" : " Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOf$type.copyWith.fieldName(...)`"}
       class _${type}CWProxy$typeParameters {
         final $type$typeParameterNames _value;
 
