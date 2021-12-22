@@ -3,6 +3,7 @@
 * Named constructor support.
 * Better error reporting.
 * Introduction of the new `copyWith` function with nullability support. The default behaviour of this library assumes that this function is used as follows: `myInstance.copyWith.value("newValue")`. The old functionality is still available.
+* **BREAKING** `generateCopyWithNull` is renamed to `copyWithNull`.
 
 ## 2.0.3 Dependency update
 * Updating `analyzer` to `^2.0.0`
