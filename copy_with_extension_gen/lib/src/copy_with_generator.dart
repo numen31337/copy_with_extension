@@ -41,54 +41,12 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       classAnnotation.skipFields,
     )}
     
-    extension ${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
+    extension \$${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
       /// CopyWith feature provided by `copy_with_extension_gen` library. Returns a callable class and can be used as follows: `instanceOf$classElement.name.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.${classAnnotation.skipFields ? "" : " Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOf$classElement.name.copyWith.fieldName(...)`"}
       ${"_${classElement.name}CWProxy$typeParametersNames get copyWith => _${classElement.name}CWProxy$typeParametersNames(this);"}
 
       ${_copyWithNullPart(typeAnnotation, sortedFields, classAnnotation.namedConstructor, !classAnnotation.copyWithNull, classAnnotation.skipFields)}
     }
-    ''';
-  }
-
-  /// Generates the callable class function for copyWith(...).
-  String _copyWithValuesPart(
-    String typeAnnotation,
-    List<FieldInfo> sortedFields,
-    String? namedConstructor,
-    bool skipFields,
-  ) {
-    final constructorInput = sortedFields.fold<String>(
-      '',
-      (r, v) {
-        if (v.immutable) {
-          return r;
-        } else {
-          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
-          return '$r $type ${v.name},';
-        }
-      },
-    );
-    final paramsInput = sortedFields.fold<String>(
-      '',
-      (r, v) {
-        if (v.immutable) {
-          return '$r ${v.name}: _value.${v.name},';
-        } else {
-          return '$r ${v.name}: ${v.name} ?? _value.${v.name},';
-        }
-      },
-    );
-
-    return '''
-        /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `$typeAnnotation(...).copyWithNull(...)` to set certain fields to `null`.${skipFields ? "" : " Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
-        /// 
-        /// Usage
-        /// ```dart
-        /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
-        /// ````
-        $typeAnnotation call({$constructorInput}) {
-          return ${constructorFor(typeAnnotation, namedConstructor)}($paramsInput);
-        }
     ''';
   }
 
@@ -141,6 +99,51 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       $typeAnnotation ${private ? "_" : ""}copyWithNull({$nullConstructorInput}) {
         return ${constructorFor(typeAnnotation, namedConstructor)}($nullParamsInput);
       }
+     ''';
+  }
+
+  /// Generates the callable class function for copyWith(...).
+  String _copyWithValuesPart(
+    String typeAnnotation,
+    List<FieldInfo> sortedFields,
+    String? namedConstructor,
+    bool skipFields,
+    bool isAbstract,
+  ) {
+    final constructorInput = sortedFields.fold<String>(
+      '',
+      (r, v) {
+        if (v.immutable) return r; // Skip the field
+
+        if (isAbstract) {
+          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
+          return '$r $type ${v.name},';
+        } else {
+          return '$r Object? ${v.name} = const \$Placeholder(),';
+        }
+      },
+    );
+    final paramsInput = sortedFields.fold<String>(
+      '',
+      (r, v) {
+        if (v.immutable) return '$r ${v.name}: _value.${v.name},';
+
+        return '$r ${v.name}: ${v.name} == const \$Placeholder() ? _value.${v.name} : ${v.name} as ${v.type},';
+      },
+    );
+
+    final constructorBody = isAbstract
+        ? ""
+        : "{ return ${constructorFor(typeAnnotation, namedConstructor)}($paramsInput); }";
+
+    return '''
+        /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `$typeAnnotation(...).copyWithNull(...)` to set certain fields to `null`.${skipFields ? "" : " Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
+        /// 
+        /// Usage
+        /// ```dart
+        /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
+        /// ````
+        $typeAnnotation call({$constructorInput}) $constructorBody
     ''';
   }
 
@@ -162,24 +165,43 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final nonNullableFunctions =
         skipFields ? "" : nonNullableFields.map((e) => '''
+    @override
     $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => this(${e.name}: ${e.name});
     ''').join("\n");
     final nullableFunctions = skipFields ? "" : nullableFields.map((e) => '''
+    @override
     $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => ${e.name} == null ? _value.${privateCopyWithNull ? "_" : ""}copyWithNull(${e.name}: true) : this(${e.name}: ${e.name});
+    ''').join("\n");
+    final nonNullableFunctionsInterface =
+        skipFields ? "" : nonNullableFields.map((e) => '''
+    $type$typeParameterNames ${e.name}(${e.type} ${e.name});
+    ''').join("\n");
+    final nullableFunctionsInterface =
+        skipFields ? "" : nullableFields.map((e) => '''
+    $type$typeParameterNames ${e.name}(${e.type} ${e.name});
     ''').join("\n");
 
     return '''
+      abstract class _${type}CWProxyInterface$typeParameters {
+        $nonNullableFunctionsInterface
+
+        $nullableFunctionsInterface
+
+        ${_copyWithValuesPart(typeAnnotation, sortedFields, namedConstructor, skipFields, true)};
+      }
+
       /// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOf$type.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.${skipFields ? "" : " Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOf$type.copyWith.fieldName(...)`"}
-      class _${type}CWProxy$typeParameters {
+      class _${type}CWProxy$typeParameters implements _${type}CWProxyInterface$typeParameterNames {
         final $type$typeParameterNames _value;
 
         const _${type}CWProxy(this._value);
 
-        ${_copyWithValuesPart(typeAnnotation, sortedFields, namedConstructor, skipFields)}
-
         $nullableFunctions
 
         $nonNullableFunctions
+
+        @override
+        ${_copyWithValuesPart(typeAnnotation, sortedFields, namedConstructor, skipFields, false)}
       }
     ''';
   }
