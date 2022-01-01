@@ -50,6 +50,51 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
+  /// Generates the callable class function for copyWith(...).
+  String _copyWithValuesPart(
+    String typeAnnotation,
+    List<FieldInfo> sortedFields,
+    String? namedConstructor,
+    bool skipFields,
+    bool isAbstract,
+  ) {
+    final constructorInput = sortedFields.fold<String>(
+      '',
+      (r, v) {
+        if (v.immutable) return r; // Skip the field
+
+        if (isAbstract) {
+          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
+          return '$r $type ${v.name},';
+        } else {
+          return '$r Object? ${v.name} = const \$Placeholder(),';
+        }
+      },
+    );
+    final paramsInput = sortedFields.fold<String>(
+      '',
+      (r, v) {
+        if (v.immutable) return '$r ${v.name}: _value.${v.name},';
+
+        return '$r ${v.name}: ${v.name} == const \$Placeholder() ? _value.${v.name} : ${v.name} as ${v.type},';
+      },
+    );
+
+    final constructorBody = isAbstract
+        ? ""
+        : "{ return ${constructorFor(typeAnnotation, namedConstructor)}($paramsInput); }";
+
+    return '''
+        /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `$typeAnnotation(...).copyWithNull(...)` to set certain fields to `null`.${skipFields ? "" : " Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
+        /// 
+        /// Usage
+        /// ```dart
+        /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
+        /// ````
+        $typeAnnotation call({$constructorInput}) $constructorBody
+    ''';
+  }
+
   /// Generates the complete `copyWithNull` function.
   String _copyWithNullPart(
     String typeAnnotation,
@@ -100,51 +145,6 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         return ${constructorFor(typeAnnotation, namedConstructor)}($nullParamsInput);
       }
      ''';
-  }
-
-  /// Generates the callable class function for copyWith(...).
-  String _copyWithValuesPart(
-    String typeAnnotation,
-    List<FieldInfo> sortedFields,
-    String? namedConstructor,
-    bool skipFields,
-    bool isAbstract,
-  ) {
-    final constructorInput = sortedFields.fold<String>(
-      '',
-      (r, v) {
-        if (v.immutable) return r; // Skip the field
-
-        if (isAbstract) {
-          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
-          return '$r $type ${v.name},';
-        } else {
-          return '$r Object? ${v.name} = const \$Placeholder(),';
-        }
-      },
-    );
-    final paramsInput = sortedFields.fold<String>(
-      '',
-      (r, v) {
-        if (v.immutable) return '$r ${v.name}: _value.${v.name},';
-
-        return '$r ${v.name}: ${v.name} == const \$Placeholder() ? _value.${v.name} : ${v.name} as ${v.type},';
-      },
-    );
-
-    final constructorBody = isAbstract
-        ? ""
-        : "{ return ${constructorFor(typeAnnotation, namedConstructor)}($paramsInput); }";
-
-    return '''
-        /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `$typeAnnotation(...).copyWithNull(...)` to set certain fields to `null`.${skipFields ? "" : " Prefer `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
-        /// 
-        /// Usage
-        /// ```dart
-        /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
-        /// ````
-        $typeAnnotation call({$constructorInput}) $constructorBody
-    ''';
   }
 
   /// Generates a `CopyWithProxy` class.
