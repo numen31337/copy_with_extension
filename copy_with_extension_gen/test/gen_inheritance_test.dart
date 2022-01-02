@@ -107,7 +107,7 @@ void main() {
 
     expect(
       result.copyWith.runtimeType,
-      _ComplexSubClassCWProxy<int, String>(
+      _$ComplexSubClassCWProxyImpl<int, String>(
         ComplexSubClass<int, String>(id: "", date: date),
       ).runtimeType,
     );

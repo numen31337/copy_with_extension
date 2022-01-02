@@ -7,7 +7,7 @@ class CopyWith {
   const CopyWith({
     this.copyWithNull = false,
     this.skipFields = false,
-    this.namedConstructor,
+    this.constructor,
   });
 
   /// Set `copyWithNull` to `true` if you want to use `copyWithNull` function that allows you to nullify the fields. E.g. `myInstance.copyWithNull(id: true, name: true)`. Otherwise it will be still generated for internal use but marked as private.
@@ -16,8 +16,8 @@ class CopyWith {
   /// Prevent the library from generating copyWith function for individual filelds. If you want to use only copyWith(...) function.
   final bool skipFields;
 
-  /// Set `namedConstructor` if you want to use a named constructor instead. The generated fields will be derived from this constructor.
-  final String? namedConstructor;
+  /// Set `constructor` if you want to use a named constructor instead. The generated fields will be derived from this constructor.
+  final String? constructor;
 }
 
 /// Additional field related options for the `CopyWith`.
