@@ -28,6 +28,6 @@ class CopyWithField {
   final bool immutable;
 }
 
-class $Placeholder {
-  const $Placeholder();
+class $CopyWithPlaceholder {
+  const $CopyWithPlaceholder();
 }

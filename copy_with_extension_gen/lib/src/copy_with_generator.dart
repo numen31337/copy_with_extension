@@ -66,7 +66,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
           final type = v.type.endsWith('?') ? v.type : '${v.type}?';
           return '$r $type ${v.name},';
         } else {
-          return '$r Object? ${v.name} = const \$Placeholder(),';
+          return '$r Object? ${v.name} = const \$CopyWithPlaceholder(),';
         }
       },
     );
@@ -75,7 +75,12 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       (r, v) {
         if (v.immutable) return '$r ${v.name}: _value.${v.name},';
 
-        return '$r ${v.name}: ${v.name} == const \$Placeholder() ? _value.${v.name} : ${v.name} as ${v.type},';
+        return '''
+        $r ${v.name}:
+        ${v.name} == const \$CopyWithPlaceholder() 
+        ? _value.${v.name}
+        // ignore: cast_nullable_to_non_nullable
+        : ${v.name} as ${v.type},''';
       },
     );
 
