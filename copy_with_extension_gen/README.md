@@ -93,3 +93,7 @@ final int myImmutableField;
 ```
 
 By adding this annotation you forcing your generated `copyWith` to always copy this field as it is, without exposing it in the function interface.
+
+## How this library is better than `freezed`?
+
+It isn't. This library is a non-intrusive alternative for those who only need the `copyWith` functionality and do not want to maintain the codebase in the way implied by the framework. This library only requires from your side the annotation of your class with `CopyWith()` and an indication of the `.part` file, everything else is up to you. [`freezed`](https://pub.dev/packages/freezed), on the other hand, offers many more code generation features but requires your models to be written in a framework-specific manner.
