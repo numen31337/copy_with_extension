@@ -1,13 +1,12 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
-/// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOfBasicClass.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored. Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOfBasicClass.copyWith.fieldName(...)`
-class _BasicClassCWProxy<T extends Iterable<int>> {
-  final BasicClass<T> _value;
+abstract class _$BasicClassCWProxy<T extends Iterable<int>> {
+  BasicClass<T> id(String id);
 
-  const _BasicClassCWProxy(this._value);
+  BasicClass<T> optional(T? optional);
 
-  /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `BasicClass<T>(...).copyWithNull(...)` to set certain fields to `null`. Prefer `BasicClass<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BasicClass<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
   ///
   /// Usage
   /// ```dart
@@ -16,36 +15,52 @@ class _BasicClassCWProxy<T extends Iterable<int>> {
   BasicClass<T> call({
     String? id,
     T? optional,
-  }) {
-    return BasicClass<T>(
-      id: id ?? _value.id,
-      immutable: _value.immutable,
-      nullableImmutable: _value.nullableImmutable,
-      optional: optional ?? _value.optional,
-    );
-  }
-
-  BasicClass<T> optional(T? optional) => optional == null
-      ? _value._copyWithNull(optional: true)
-      : this(optional: optional);
-
-  BasicClass<T> id(String id) => this(id: id);
+  });
 }
 
-extension BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
-  /// CopyWith feature provided by `copy_with_extension_gen` library. Returns a callable class and can be used as follows: `instanceOfclass BasicClass<T extends Iterable<int>>.name.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored. Prefer to copy the instance with a specific field change that handles nullification of fields correctly, e.g. like this:`instanceOfclass BasicClass<T extends Iterable<int>>.name.copyWith.fieldName(...)`
-  _BasicClassCWProxy<T> get copyWith => _BasicClassCWProxy<T>(this);
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfBasicClass.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfBasicClass.copyWith.fieldName(...)`
+class _$BasicClassCWProxyImpl<T extends Iterable<int>>
+    implements _$BasicClassCWProxy<T> {
+  final BasicClass<T> _value;
 
-  BasicClass<T> _copyWithNull({
-    bool optional = false,
+  const _$BasicClassCWProxyImpl(this._value);
+
+  @override
+  BasicClass<T> id(String id) => this(id: id);
+
+  @override
+  BasicClass<T> optional(T? optional) => this(optional: optional);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BasicClass<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  ///
+  /// Usage
+  /// ```dart
+  /// BasicClass<T>(...).copyWith(id: 12, name: "My name")
+  /// ````
+  BasicClass<T> call({
+    Object? id = const $CopyWithPlaceholder(),
+    Object? optional = const $CopyWithPlaceholder(),
   }) {
     return BasicClass<T>(
-      id: id,
-      immutable: immutable,
-      nullableImmutable: nullableImmutable,
-      optional: optional == true ? null : this.optional,
+      id: id == const $CopyWithPlaceholder()
+          ? _value.id
+          // ignore: cast_nullable_to_non_nullable
+          : id as String,
+      immutable: _value.immutable,
+      nullableImmutable: _value.nullableImmutable,
+      optional: optional == const $CopyWithPlaceholder()
+          ? _value.optional
+          // ignore: cast_nullable_to_non_nullable
+          : optional as T?,
     );
   }
+}
+
+extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
+  /// Returns a callable class that can be used as follows: `instanceOfclass BasicClass<T extends Iterable<int>>.name.copyWith(...)` or like so:`instanceOfclass BasicClass<T extends Iterable<int>>.name.copyWith.fieldName(...)`.
+  _$BasicClassCWProxy<T> get copyWith => _$BasicClassCWProxyImpl<T>(this);
 }
 ''')
 @CopyWith()
