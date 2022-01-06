@@ -9,16 +9,16 @@ import 'package:source_gen/source_gen.dart'
 /// The resulting array is sorted by the field name. `Throws` on error.
 List<FieldInfo> sortedConstructorFields(
   ClassElement element,
-  String? constructorName,
+  String? constructor,
 ) {
-  final constructor = constructorName != null
-      ? element.getNamedConstructor(constructorName)
+  final targetConstructor = constructor != null
+      ? element.getNamedConstructor(constructor)
       : element.unnamedConstructor;
 
-  if (constructor is! ConstructorElement) {
-    if (constructorName != null) {
+  if (targetConstructor is! ConstructorElement) {
+    if (constructor != null) {
       throw InvalidGenerationSourceError(
-        'Named Constructor "$constructorName" constructor is missing.',
+        'Named Constructor "$constructor" constructor is missing.',
         element: element,
       );
     } else {
@@ -29,7 +29,7 @@ List<FieldInfo> sortedConstructorFields(
     }
   }
 
-  final parameters = constructor.parameters;
+  final parameters = targetConstructor.parameters;
   if (parameters.isEmpty) {
     throw InvalidGenerationSourceError(
       'Unnamed constructor for ${element.name} has no parameters or missing.',
@@ -39,9 +39,9 @@ List<FieldInfo> sortedConstructorFields(
 
   for (final parameter in parameters) {
     if (!parameter.isNamed) {
-      final constructorName = constructor.name.isEmpty
+      final constructorName = targetConstructor.name.isEmpty
           ? 'Unnamed constructor'
-          : 'Constructor "${constructor.name}"';
+          : 'Constructor "${targetConstructor.name}"';
       throw InvalidGenerationSourceError(
         '$constructorName for "${element.name}" contains unnamed parameter "${parameter.name}". Constructors annotated with "CopyWith" can contain only named parameters.',
         element: element,
@@ -59,11 +59,11 @@ List<FieldInfo> sortedConstructorFields(
 CopyWith readClassAnnotation(ConstantReader reader) {
   final generateCopyWithNull = reader.read('copyWithNull').boolValue;
   final skipFields = reader.read('skipFields').boolValue;
-  final useNamedConstructor = reader.peek('namedConstructor')?.stringValue;
+  final constructor = reader.peek('constructor')?.stringValue;
 
   return CopyWith(
     copyWithNull: generateCopyWithNull,
-    namedConstructor: useNamedConstructor,
+    constructor: constructor,
     skipFields: skipFields,
   );
 }

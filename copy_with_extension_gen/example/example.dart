@@ -26,7 +26,7 @@ class SimpleObjectImmutableField {
 }
 
 /// Allows the use of a private constructor.
-@CopyWith(namedConstructor: "_")
+@CopyWith(constructor: "_")
 class SimpleObjectPrivateConstructor {
   @CopyWithField(immutable: true)
   final String? id;
