@@ -1,4 +1,8 @@
-Provides [source_gen](https://pub.dev/packages/source_gen) `Generator` for generating `copyWith` extensions. For more info on this package check out [my blog article](https://www.alexander-kirsch.com/blog/dart-extensions/) or the [main documentation file](https://pub.dev/packages/copy_with_extension_gen).
+Provides [Dart Build System](https://pub.dev/packages/build) builder for generating `copyWith` extensions for classes annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension).
+
+For more information on how to use this package, see [copy_with_extension_gen](https://pub.dev/packages/copy_with_extension_gen).
+
+For more information on how this package works, see [my blog article](https://alexander-kirsch.com/blog/dart-extensions).
 
 ## copy_with_extension
 * Package: [copy_with_extension](https://pub.dev/packages/copy_with_extension)

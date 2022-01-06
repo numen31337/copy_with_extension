@@ -93,15 +93,10 @@ void main() {
       id: "testid",
       date: date,
       listWithTypedType: const [],
-    )._copyWithNull().copyWith();
+    ).copyWith();
 
     expect(
       result.copyWith().runtimeType,
-      ComplexSubClass<int, String>(id: "", date: date).runtimeType,
-    );
-
-    expect(
-      result._copyWithNull().runtimeType,
       ComplexSubClass<int, String>(id: "", date: date).runtimeType,
     );
 
@@ -112,7 +107,7 @@ void main() {
 
     expect(
       result.copyWith.runtimeType,
-      _ComplexSubClassCWProxy<int, String>(
+      _$ComplexSubClassCWProxyImpl<int, String>(
         ComplexSubClass<int, String>(id: "", date: date),
       ).runtimeType,
     );

@@ -1,8 +1,12 @@
+## 4.0.0
+* **BREAKING** `copyWith` function now correctly supports nullification of nullable fields like so `copyWith(id: null)`.
+* **BREAKING** `CopyWith` annotation for named constructor `namedConstructor` is renamed to `constructor` to be in sync with [json_serializable](https://pub.dev/packages/json_serializable).
+
 ## 3.0.0
 * Updating `analyzer` to `>=2.0.0 <4.0.0`
 * Named constructor support.
 * Better error reporting.
-* Introduction of the new `copyWith` function with nullability support. The default behaviour of this library assumes that this function is used as follows: `myInstance.copyWith.value("newValue")`. The old functionality is still available.
+* Introduction of the new `copyWith` function with nullability support that can be used like so: `myInstance.copyWith.value("newValue")`. The old functionality is still available.
 * **BREAKING** `generateCopyWithNull` is renamed to `copyWithNull`.
 
 ## 2.0.3 Dependency update

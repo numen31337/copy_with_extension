@@ -15,7 +15,7 @@ class NoConstructor {
 }
 
 @ShouldThrow('Named Constructor "test" constructor is missing.')
-@CopyWith(namedConstructor: "test")
+@CopyWith(constructor: "test")
 class WrongConstructor {}
 
 @ShouldThrow('Default constructor for "NoDefaultConstructor" is missing.')
@@ -49,7 +49,7 @@ class ConstructorWithAllUnnamedFields {
 @ShouldThrow(
   'Constructor "test" for "NamedConstructorWithSomeUnnamedFields" contains unnamed parameter "value". Constructors annotated with "CopyWith" can contain only named parameters.',
 )
-@CopyWith(namedConstructor: "test")
+@CopyWith(constructor: "test")
 class NamedConstructorWithSomeUnnamedFields {
   int? test;
   int value;

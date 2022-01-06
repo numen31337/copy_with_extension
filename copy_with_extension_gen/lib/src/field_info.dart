@@ -40,8 +40,10 @@ class FieldInfo {
     }
 
     final reader = ConstantReader(annotation);
-    final immutable = reader.read('immutable').literalValue as bool;
+    final immutable = reader.read('immutable').literalValue as bool?;
 
-    return CopyWithField(immutable: immutable);
+    return CopyWithField(
+      immutable: immutable ?? const CopyWithField().immutable,
+    );
   }
 }
