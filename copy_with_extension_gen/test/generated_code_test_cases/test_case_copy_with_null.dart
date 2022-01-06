@@ -1,13 +1,8 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
-/// Proxy class for `CopyWith` functionality. This is a callable class and can be used as follows: `instanceOfWithNullableWithoutFields.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.
-class _WithNullableWithoutFieldsCWProxy<T extends Iterable<int>> {
-  final WithNullableWithoutFields<T> _value;
-
-  const _WithNullableWithoutFieldsCWProxy(this._value);
-
-  /// This function does not support nullification of optional types, all `null` values passed to this function will be ignored. For nullification, use `WithNullableWithoutFields<T>(...).copyWithNull(...)` to set certain fields to `null`.
+abstract class _$WithNullableWithoutFieldsCWProxy<T extends Iterable<int>> {
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
   ///
   /// Usage
   /// ```dart
@@ -15,20 +10,43 @@ class _WithNullableWithoutFieldsCWProxy<T extends Iterable<int>> {
   /// ````
   WithNullableWithoutFields<T> call({
     T? nullable,
+  });
+}
+
+/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfWithNullableWithoutFields.copyWith(...)`.
+class _$WithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
+    implements _$WithNullableWithoutFieldsCWProxy<T> {
+  final WithNullableWithoutFields<T> _value;
+
+  const _$WithNullableWithoutFieldsCWProxyImpl(this._value);
+
+  @override
+
+  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
+  ///
+  /// Usage
+  /// ```dart
+  /// WithNullableWithoutFields<T>(...).copyWith(id: 12, name: "My name")
+  /// ````
+  WithNullableWithoutFields<T> call({
+    Object? nullable = const $CopyWithPlaceholder(),
   }) {
     return WithNullableWithoutFields<T>(
-      nullable: nullable ?? _value.nullable,
+      nullable: nullable == const $CopyWithPlaceholder()
+          ? _value.nullable
+          // ignore: cast_nullable_to_non_nullable
+          : nullable as T?,
     );
   }
 }
 
-extension WithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
+extension $WithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
     on WithNullableWithoutFields<T> {
-  /// CopyWith feature provided by `copy_with_extension_gen` library. Returns a callable class and can be used as follows: `instanceOfclass WithNullableWithoutFields<T extends Iterable<int>>.name.copyWith(...)`. Be aware that this kind of usage does not support nullification and all passed `null` values will be ignored.
-  _WithNullableWithoutFieldsCWProxy<T> get copyWith =>
-      _WithNullableWithoutFieldsCWProxy<T>(this);
+  /// Returns a callable class that can be used as follows: `instanceOfclass WithNullableWithoutFields<T extends Iterable<int>>.name.copyWith(...)`.
+  _$WithNullableWithoutFieldsCWProxy<T> get copyWith =>
+      _$WithNullableWithoutFieldsCWProxyImpl<T>(this);
 
-  /// Copies the object with the specific fields set to `null`. If you pass `false` as a parameter, nothing will be done and it will be ignored. Don't do it.
+  /// Copies the object with the specific fields set to `null`. If you pass `false` as a parameter, nothing will be done and it will be ignored. Don't do it. Prefer `copyWith(field: null)`.
   ///
   /// Usage
   /// ```dart

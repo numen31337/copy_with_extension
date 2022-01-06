@@ -3,7 +3,7 @@ import 'package:test/test.dart' show test, expect;
 
 part 'gen_named_constructor_test.g.dart';
 
-@CopyWith(namedConstructor: "_")
+@CopyWith(constructor: "_")
 class CopyWithNamedConstructor {
   final String? id;
 
@@ -12,7 +12,7 @@ class CopyWithNamedConstructor {
   });
 }
 
-@CopyWith(namedConstructor: "first")
+@CopyWith(constructor: "first")
 class CopyWithTwoThreeConstructors {
   final String? id;
   final String field;
@@ -32,7 +32,7 @@ class CopyWithTwoThreeConstructors {
   });
 }
 
-@CopyWith(namedConstructor: "_")
+@CopyWith(constructor: "_")
 class DefaultValuesConstructor {
   final String? id = "test";
   final String? field;
