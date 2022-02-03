@@ -74,7 +74,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       '',
       (r, v) {
         if (v.immutable) return '$r ${v.name}: _value.${v.name},';
-        final nullCheckForNonNullable = v.nullable ? "" : "|| ${v.name} == null";
+        final nullCheckForNonNullable =
+            v.nullable ? "" : "|| ${v.name} == null";
 
         return '''
         $r ${v.name}:
