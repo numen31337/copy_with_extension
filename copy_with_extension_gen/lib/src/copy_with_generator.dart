@@ -74,10 +74,11 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       '',
       (r, v) {
         if (v.immutable) return '$r ${v.name}: _value.${v.name},';
+        final nullCheckForNonNullable = v.nullable ? "" : "|| ${v.name} == null";
 
         return '''
         $r ${v.name}:
-        ${v.name} == const \$CopyWithPlaceholder() 
+        ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
         ? _value.${v.name}
         // ignore: cast_nullable_to_non_nullable
         : ${v.name} as ${v.type},''';
