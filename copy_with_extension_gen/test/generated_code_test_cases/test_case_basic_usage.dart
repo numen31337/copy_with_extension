@@ -59,7 +59,7 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
 }
 
 extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
-  /// Returns a callable class that can be used as follows: `instanceOfclass BasicClass<T extends Iterable<int>>.name.copyWith(...)` or like so:`instanceOfclass BasicClass<T extends Iterable<int>>.name.copyWith.fieldName(...)`.
+  /// Returns a callable class that can be used as follows: `instanceOfBasicClass.copyWith(...)` or like so:`instanceOfBasicClass.copyWith.fieldName(...)`.
   _$BasicClassCWProxy<T> get copyWith => _$BasicClassCWProxyImpl<T>(this);
 }
 ''')
