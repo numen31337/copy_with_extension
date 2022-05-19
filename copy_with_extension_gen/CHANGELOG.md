@@ -1,3 +1,6 @@
+## 4.0.2
+* Updating `analyzer` to `>=2.0.0 <5.0.0`
+
 ## 4.0.1
 * [Fix](https://github.com/numen31337/copy_with_extension/issues/45) for passing `null` into `copyWith` function for non-nullable values.
 

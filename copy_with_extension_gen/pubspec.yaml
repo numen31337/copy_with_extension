@@ -1,5 +1,5 @@
 name: copy_with_extension_gen
-version: 4.0.1
+version: 4.0.2
 description: Automatically generating `copyWith` extensions code for classes with `@CopyWith()` annotation.
 repository: https://github.com/numen31337/copy_with_extension
 homepage: https://github.com/numen31337/copy_with_extension/tree/master/copy_with_extension_gen
