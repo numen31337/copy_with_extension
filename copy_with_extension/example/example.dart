@@ -1,3 +1,5 @@
+// ignore_for_file: unused_element
+
 import 'package:copy_with_extension/copy_with_extension.dart';
 
 /// Make sure the `part` is specified before running the builder.
