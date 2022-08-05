@@ -79,7 +79,7 @@ final copiedTwo = result.copyWith(id: "foo", text: null) // Results in BasicClas
 
 You can modify multiple fields at once using `copyWith` as a function like so: `myInstance.copyWith(fieldName: "test", anotherField: "test")`. Passing the `null` value to `non-nullable` fields will be ignored.
 
-#### Nullifying instance fields:
+#### Nullifying instance fields
 
 In order to nullify the class fields, an additional `copyWithNull` function can be generated. To make use of it, pass an additional parameter to your class annotation `@CopyWith(generateCopyWithNull: true)`.
 
@@ -93,6 +93,35 @@ final int myImmutableField;
 ```
 
 By adding this annotation you forcing your generated `copyWith` to always copy this field as it is, without exposing it in the function interface.
+
+#### Custom constructor name
+
+Set `constructor` if you want to use a named constructor, e.g. a private one. The generated fields will be derived from this constructor.
+
+```dart
+@CopyWith(constructor: "_")
+class SimpleObjectPrivateConstructor {
+  @CopyWithField(immutable: true)
+  final String? id;
+  final int? intValue;
+
+  const SimpleObjectPrivateConstructor._({this.id, this.intValue});
+}
+```
+
+#### Skipping generation of `copyWith` functionality for individual fields
+
+Set `skipFields` to prevent the library from generating `copyWith` functions for individual fields e.g. `instance.copyWith.id("123")`. If you want to use only `copyWith(...)` function.
+
+```dart
+@CopyWith(skipFields: true)
+class SimpleObject {
+  final String id;
+  final int? intValue;
+
+  const SimpleObject({required this.id, this.intValue});
+}
+```
 
 ## How this library is better than `freezed`?
 
