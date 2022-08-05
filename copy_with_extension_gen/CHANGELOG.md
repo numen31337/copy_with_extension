@@ -1,3 +1,7 @@
+## 4.0.3
+* Suppressing [lint warnings](https://github.com/numen31337/copy_with_extension/issues/54) for `library_private_types_in_public_api`.
+* Classes that are declared as private will [get a private](https://github.com/numen31337/copy_with_extension/issues/50) `copyWith` extension.
+
 ## 4.0.2
 * Updating `analyzer` to `>=2.0.0 <5.0.0`
 
