@@ -22,6 +22,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     }
 
     final ClassElement classElement = element;
+    final privacyPrefix = element.isPrivate ? "_" : "";
     final classAnnotation = readClassAnnotation(annotation);
 
     final sortedFields =
@@ -40,7 +41,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       classAnnotation.skipFields,
     )}
     
-    extension \$${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
+    extension $privacyPrefix\$${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
       /// Returns a callable class that can be used as follows: `instanceOf${classElement.name}.copyWith(...)`${classAnnotation.skipFields ? "" : " or like so:`instanceOf${classElement.name}.copyWith.fieldName(...)`"}.
       // ignore: library_private_types_in_public_api
       ${"_\$${classElement.name}CWProxy$typeParametersNames get copyWith => _\$${classElement.name}CWProxyImpl$typeParametersNames(this);"}
