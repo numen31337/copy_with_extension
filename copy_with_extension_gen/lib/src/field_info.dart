@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/element.dart'
     show ClassElement, FieldElement, ParameterElement;
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /// Represents a single class field with the additional metadata needed for code generation.
@@ -13,10 +14,10 @@ class FieldInfo {
     required this.isPositioned,
   })  : name = element.name,
         type = element.type.getDisplayString(withNullability: true),
-        immutable = _readFieldAnnotation(element, classElement).immutable,
+        fieldAnnotation = _readFieldAnnotation(element, classElement),
         nullable = element.type.nullabilitySuffix != NullabilitySuffix.none;
 
-  final bool immutable;
+  final CopyWithFieldAnnotation fieldAnnotation;
   final String name;
   final bool nullable;
   final String type;
@@ -27,30 +28,32 @@ class FieldInfo {
 
   @override
   String toString() {
-    return 'type:$type name:$name immutable:$immutable nullable:$nullable';
+    return 'type:$type name:$name fieldAnnotation:$fieldAnnotation nullable:$nullable';
   }
 
   /// Restores the `CopyWithField` annotation provided by the user.
-  static CopyWithField _readFieldAnnotation(
+  static CopyWithFieldAnnotation _readFieldAnnotation(
     ParameterElement element,
     ClassElement classElement,
   ) {
+    const defaults = CopyWithFieldAnnotation.defaults();
+
     final fieldElement = classElement.getField(element.name);
     if (fieldElement is! FieldElement) {
-      return const CopyWithField();
+      return defaults;
     }
 
     const checker = TypeChecker.fromRuntime(CopyWithField);
     final annotation = checker.firstAnnotationOf(fieldElement);
     if (annotation is! DartObject) {
-      return const CopyWithField();
+      return defaults;
     }
 
     final reader = ConstantReader(annotation);
-    final immutable = reader.read('immutable').literalValue as bool?;
+    final immutable = reader.peek('immutable')?.boolValue;
 
-    return CopyWithField(
-      immutable: immutable ?? const CopyWithField().immutable,
+    return CopyWithFieldAnnotation(
+      immutable: immutable ?? defaults.immutable,
     );
   }
 }
