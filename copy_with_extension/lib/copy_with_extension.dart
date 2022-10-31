@@ -4,16 +4,16 @@ library copy_with_extension;
 /// Annotation used to indicate that the `copyWith` extension should be generated.
 class CopyWith {
   const CopyWith({
-    this.copyWithNull = false,
-    this.skipFields = false,
+    this.copyWithNull,
+    this.skipFields,
     this.constructor,
   });
 
   /// Set `copyWithNull` to `true` if you want to use `copyWithNull` function that allows you to nullify the fields. E.g. `myInstance.copyWithNull(id: true, name: true)`.
-  final bool copyWithNull;
+  final bool? copyWithNull;
 
   /// Prevent the library from generating `copyWith` functions for individual fields e.g. `instance.copyWith.id("123")`. If you want to use only copyWith(...) function.
-  final bool skipFields;
+  final bool? skipFields;
 
   /// Set `constructor` if you want to use a named constructor. The generated fields will be derived from this constructor.
   final String? constructor;
