@@ -66,7 +66,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final nullConstructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
-        if (v.immutable || !v.nullable) {
+        if (v.fieldAnnotation.immutable || !v.nullable) {
           return r;
         } else {
           return '$r bool ${v.name} = false,';
@@ -76,7 +76,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final nullParamsInput = sortedFields.fold<String>(
       '',
       (r, v) {
-        if (v.immutable || !v.nullable) {
+        if (v.fieldAnnotation.immutable || !v.nullable) {
           return '$r ${v.name}: ${v.name},';
         } else {
           return '$r ${v.name}: ${v.name} == true ? null : this.${v.name},';
@@ -110,7 +110,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     bool skipFields,
   ) {
     final typeAnnotation = type + typeParameterNames;
-    final filteredFields = sortedFields.where((e) => !e.immutable);
+    final filteredFields =
+        sortedFields.where((e) => !e.fieldAnnotation.immutable);
 
     final nonNullableFunctions = skipFields ? "" : filteredFields.map((e) => '''
     @override
@@ -153,7 +154,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final constructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
-        if (v.immutable) return r; // Skip the field
+        if (v.fieldAnnotation.immutable) return r; // Skip the field
 
         if (isAbstract) {
           final type = v.type.endsWith('?') ? v.type : '${v.type}?';
@@ -166,7 +167,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final paramsInput = sortedFields.fold<String>(
       '',
       (r, v) {
-        if (v.immutable) return '$r ${v.name}: _value.${v.name},';
+        if (v.fieldAnnotation.immutable) {
+          return '$r ${v.name}: _value.${v.name},';
+        }
+
         final nullCheckForNonNullable =
             v.nullable ? "" : "|| ${v.name} == null";
 
