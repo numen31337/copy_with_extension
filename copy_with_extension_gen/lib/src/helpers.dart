@@ -38,20 +38,17 @@ List<FieldInfo> sortedConstructorFields(
     );
   }
 
-  for (final parameter in parameters) {
-    if (!parameter.isNamed) {
-      final constructorName = targetConstructor.name.isEmpty
-          ? 'Unnamed constructor'
-          : 'Constructor "${targetConstructor.name}"';
-      throw InvalidGenerationSourceError(
-        '$constructorName for "${element.name}" contains unnamed parameter "${parameter.name}". Constructors annotated with "CopyWith" can contain only named parameters.',
-        element: element,
-      );
-    }
-  }
+  final fields = <FieldInfo>[];
 
-  final fields = parameters.map((v) => FieldInfo(v, element)).toList();
-  fields.sort((lhs, rhs) => lhs.name.compareTo(rhs.name));
+  for (final parameter in parameters) {
+    final field = FieldInfo(
+      parameter,
+      element,
+      isPositioned: parameter.isPositional,
+    );
+
+    fields.add(field);
+  }
 
   return fields;
 }
