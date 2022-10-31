@@ -170,8 +170,13 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         final nullCheckForNonNullable =
             v.nullable ? "" : "|| ${v.name} == null";
 
-        return '''
-        $r ${v.name}:
+        var paramEntry = '$r ';
+
+        if (!v.isPositioned) {
+          paramEntry += '${v.name}:';
+        }
+
+        return paramEntry += '''
         ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
         ? _value.${v.name}
         // ignore: cast_nullable_to_non_nullable
