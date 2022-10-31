@@ -32,6 +32,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
+    // ignore_for_file: unnecessary_non_null_assertion, duplicate_ignore
+
     ${_copyWithProxyPart(
       classAnnotation.constructor,
       classElement.name,
@@ -182,7 +184,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
         return paramEntry += '''
         ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
-        ? _value.${v.name}
+        ? _value.${v.name}${v.nullable ? '' : '!'}
         // ignore: cast_nullable_to_non_nullable
         : ${v.name} as ${v.type},''';
       },
