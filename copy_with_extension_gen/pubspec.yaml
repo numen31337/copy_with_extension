@@ -13,6 +13,7 @@ dependencies:
   build: ^2.0.0
   source_gen: ^1.0.0
   copy_with_extension: ^4.0.0
+  meta: ^1.8.0
 
 dev_dependencies:
   equatable: ^2.0.5
