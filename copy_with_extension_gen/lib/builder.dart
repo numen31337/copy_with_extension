@@ -9,14 +9,22 @@
 library copy_with_extension_gen.builder;
 
 import 'package:build/build.dart' show Builder, BuilderOptions;
+import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart' show SharedPartBuilder;
 import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
+
+late Settings _settings;
+Settings get settings => _settings;
 
 /// Supports `package:build_runner` creation and configuration of
 /// `copy_with_extension_gen`.
 ///
 /// Not meant to be invoked by hand-authored code.
-Builder copyWith(BuilderOptions _) => SharedPartBuilder(
-      [CopyWithGenerator()],
-      'copyWith',
-    );
+Builder copyWith(BuilderOptions config) {
+  _settings = Settings.fromConfig(config.config);
+
+  return SharedPartBuilder(
+    [CopyWithGenerator()],
+    'copyWith',
+  );
+}
