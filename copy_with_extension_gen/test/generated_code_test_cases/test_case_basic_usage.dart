@@ -1,6 +1,8 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
+// ignore_for_file: unnecessary_non_null_assertion, duplicate_ignore
+
 abstract class _$BasicClassCWProxy<T extends Iterable<int>> {
   BasicClass<T> id(String id);
 
@@ -45,7 +47,7 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
   }) {
     return BasicClass<T>(
       id: id == const $CopyWithPlaceholder() || id == null
-          ? _value.id
+          ? _value.id!
           // ignore: cast_nullable_to_non_nullable
           : id as String,
       optional: optional == const $CopyWithPlaceholder()
