@@ -7,8 +7,11 @@ import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /// Represents a single class field with the additional metadata needed for code generation.
 class FieldInfo {
-  FieldInfo(ParameterElement element, ClassElement classElement)
-      : name = element.name,
+  FieldInfo(
+    ParameterElement element,
+    ClassElement classElement, {
+    required this.isPositioned,
+  })  : name = element.name,
         type = element.type.getDisplayString(withNullability: true),
         immutable = _readFieldAnnotation(element, classElement).immutable,
         nullable = element.type.nullabilitySuffix != NullabilitySuffix.none;
@@ -17,6 +20,10 @@ class FieldInfo {
   final String name;
   final bool nullable;
   final String type;
+
+  /// if the field is positioned in the constructor
+
+  final bool isPositioned;
 
   @override
   String toString() {
