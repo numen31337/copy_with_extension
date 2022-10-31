@@ -25,10 +25,10 @@ class CopyWith {
 /// Additional field related options for the `CopyWith`.
 @Target({TargetKind.field})
 class CopyWithField {
-  const CopyWithField({this.immutable = false});
+  const CopyWithField({this.immutable});
 
   /// Indicates that the field should be hidden in the generated `copyWith` method. By setting this flag to `true` the field will always be copied as it and excluded from `copyWith` interface.
-  final bool immutable;
+  final bool? immutable;
 }
 
 /// This placeholder object is a default value for nullable fields to handle cases when the user wants to nullify the value.
