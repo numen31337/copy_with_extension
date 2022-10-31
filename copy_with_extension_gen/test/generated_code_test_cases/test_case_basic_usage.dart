@@ -48,12 +48,12 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as String,
-      immutable: _value.immutable,
-      nullableImmutable: _value.nullableImmutable,
       optional: optional == const $CopyWithPlaceholder()
           ? _value.optional
           // ignore: cast_nullable_to_non_nullable
           : optional as T?,
+      immutable: _value.immutable,
+      nullableImmutable: _value.nullableImmutable,
     );
   }
 }
