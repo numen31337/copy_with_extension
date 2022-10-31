@@ -7,16 +7,16 @@ import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /// Represents a single class field with the additional metadata needed for code generation.
 class FieldInfo {
-  final String name;
-  final String type;
-  final bool immutable;
-  final bool nullable;
-
   FieldInfo(ParameterElement element, ClassElement classElement)
       : name = element.name,
         type = element.type.getDisplayString(withNullability: true),
         immutable = _readFieldAnnotation(element, classElement).immutable,
         nullable = element.type.nullabilitySuffix != NullabilitySuffix.none;
+
+  final bool immutable;
+  final String name;
+  final bool nullable;
+  final String type;
 
   @override
   String toString() {
