@@ -1,7 +1,10 @@
 /// Provides `CopyWith` annotation class used by [copy_with_extension_gen](https://pub.dev/packages/copy_with_extension_gen).
 library copy_with_extension;
 
+import 'package:meta/meta_meta.dart';
+
 /// Annotation used to indicate that the `copyWith` extension should be generated.
+@Target({TargetKind.classType})
 class CopyWith {
   const CopyWith({
     this.copyWithNull,
@@ -20,6 +23,7 @@ class CopyWith {
 }
 
 /// Additional field related options for the `CopyWith`.
+@Target({TargetKind.field})
 class CopyWithField {
   const CopyWithField({this.immutable = false});
 
