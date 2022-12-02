@@ -2,8 +2,6 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:source_gen_test/annotations.dart';
 
 @ShouldGenerate(r'''
-// ignore_for_file: unnecessary_non_null_assertion, duplicate_ignore
-
 abstract class _$BasicClassCWProxy<T extends Iterable<int>> {
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
   ///
@@ -38,6 +36,7 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
   }) {
     return BasicClass<T>(
       id: id == const $CopyWithPlaceholder() || id == null
+          // ignore: unnecessary_non_null_assertion
           ? _value.id!
           // ignore: cast_nullable_to_non_nullable
           : id as String,

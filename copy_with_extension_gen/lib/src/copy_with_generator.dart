@@ -37,8 +37,6 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
-    // ignore_for_file: unnecessary_non_null_assertion, duplicate_ignore
-
     ${_copyWithProxyPart(
       classAnnotation.constructor,
       classElement.name,
@@ -171,6 +169,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         }
       },
     );
+
     final paramsInput = sortedFields.fold<String>(
       '',
       (r, v) {
@@ -181,14 +180,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         final nullCheckForNonNullable =
             v.nullable ? "" : "|| ${v.name} == null";
 
-        var paramEntry = '$r ';
-
-        if (!v.isPositioned) {
-          paramEntry += '${v.name}:';
-        }
-
-        return paramEntry += '''
+        /// The `!` operator is needed to overcome a possible issue described here https://github.com/numen31337/copy_with_extension/pull/69#issue-1433703875
+        return '''$r ${v.isPositioned ? "" : '${v.name}:'}
         ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
+        ${v.nullable ? '' : '// ignore: unnecessary_non_null_assertion'}
         ? _value.${v.name}${v.nullable ? '' : '!'}
         // ignore: cast_nullable_to_non_nullable
         : ${v.name} as ${v.type},''';
