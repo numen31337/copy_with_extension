@@ -3,11 +3,16 @@ import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
+import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart'
     show ConstantReader, GeneratorForAnnotation, InvalidGenerationSourceError;
 
 /// A `Generator` for `package:build_runner`
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
+  CopyWithGenerator(this.settings) : super();
+
+  Settings settings;
+
   @override
   String generateForAnnotatedElement(
     Element element,
@@ -23,7 +28,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final ClassElement classElement = element;
     final privacyPrefix = element.isPrivate ? "_" : "";
-    final classAnnotation = readClassAnnotation(annotation);
+    final classAnnotation = readClassAnnotation(settings, annotation);
 
     final sortedFields =
         sortedConstructorFields(classElement, classAnnotation.constructor);
@@ -32,8 +37,6 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
-    // ignore_for_file: unnecessary_non_null_assertion, duplicate_ignore
-
     ${_copyWithProxyPart(
       classAnnotation.constructor,
       classElement.name,
@@ -133,9 +136,9 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
       /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOf$type.copyWith(...)`.${skipFields ? "" : " Additionally contains functions for specific fields e.g. `instanceOf$type.copyWith.fieldName(...)`"}
       class _\$${type}CWProxyImpl$typeParameters implements _\$${type}CWProxy$typeParameterNames {
-        final $type$typeParameterNames _value;
-
         const _\$${type}CWProxyImpl(this._value);
+
+        final $type$typeParameterNames _value;
 
         $nonNullableFunctions
 
@@ -166,6 +169,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         }
       },
     );
+
     final paramsInput = sortedFields.fold<String>(
       '',
       (r, v) {
@@ -176,14 +180,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         final nullCheckForNonNullable =
             v.nullable ? "" : "|| ${v.name} == null";
 
-        var paramEntry = '$r ';
-
-        if (!v.isPositioned) {
-          paramEntry += '${v.name}:';
-        }
-
-        return paramEntry += '''
+        /// The `!` operator is needed to overcome a possible issue described here https://github.com/numen31337/copy_with_extension/pull/69#issue-1433703875
+        return '''$r ${v.isPositioned ? "" : '${v.name}:'}
         ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
+        ${v.nullable ? '' : '// ignore: unnecessary_non_null_assertion'}
         ? _value.${v.name}${v.nullable ? '' : '!'}
         // ignore: cast_nullable_to_non_nullable
         : ${v.name} as ${v.type},''';

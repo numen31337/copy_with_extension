@@ -15,7 +15,7 @@ myInstance.copyWithNull(fieldName: true, anotherField: true) // Nullify multiple
 
 ## Usage
 
-#### In your `pubspec.yaml` file:
+#### In your `pubspec.yaml` file
 - Add to `dependencies` section `copy_with_extension: ^4.0.0`
 - Add to `dev_dependencies` section `copy_with_extension_gen: ^4.0.0`
 - Add to `dev_dependencies` section `build_runner: ^2.1.7`
@@ -41,7 +41,7 @@ dev_dependencies:
   copy_with_extension_gen: ^4.0.0
 ```
 
-#### Annotate your class with `CopyWith` annotation:
+#### Annotate your class with `CopyWith` annotation
 
 ```dart
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -59,9 +59,9 @@ class BasicClass {
 
 Make sure that you set the part file as in the example above `part 'your_file_name.g.dart';`.
 
-#### Launch code generation:
+#### Launch code generation
 
-```
+```bash
 flutter pub run build_runner build
 ```
 
@@ -131,12 +131,11 @@ To globally configure the library, you can add a `build.yaml` file to your proje
 targets:
   $default:
     builders:
-
       copy_with_extension_gen:
         enabled: true
         options:
           copy_with_null: true # default is false
-          skip_fields: true # default is false
+          skip_fields: true    # default is false
 ```
 
 ## How this library is better than `freezed`?

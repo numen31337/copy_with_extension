@@ -5,18 +5,15 @@ part 'gen_named_constructor_test.g.dart';
 
 @CopyWith(constructor: "_")
 class CopyWithNamedConstructor {
-  final String? id;
-
   const CopyWithNamedConstructor._({
     this.id,
   });
+
+  final String? id;
 }
 
 @CopyWith(constructor: "first")
 class CopyWithTwoThreeConstructors {
-  final String? id;
-  final String field;
-
   const CopyWithTwoThreeConstructors({
     this.id,
   }) : field = "test";
@@ -30,15 +27,18 @@ class CopyWithTwoThreeConstructors {
     this.id,
     required this.field,
   });
+
+  final String? id;
+  final String field;
 }
 
 @CopyWith(constructor: "_")
 class DefaultValuesConstructor {
+  const DefaultValuesConstructor._({this.anotherField}) : field = "test";
+
   final String? id = "test";
   final String? field;
   final String? anotherField;
-
-  const DefaultValuesConstructor._({this.anotherField}) : field = "test";
 }
 
 void main() {
