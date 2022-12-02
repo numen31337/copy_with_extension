@@ -1,8 +1,6 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
-// ignore_for_file: unnecessary_non_null_assertion, duplicate_ignore
-
 abstract class _$_PrivateWithNullableWithoutFieldsCWProxy<
     T extends Iterable<int>> {
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
@@ -19,9 +17,9 @@ abstract class _$_PrivateWithNullableWithoutFieldsCWProxy<
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOf_PrivateWithNullableWithoutFields.copyWith(...)`.
 class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
     implements _$_PrivateWithNullableWithoutFieldsCWProxy<T> {
-  final _PrivateWithNullableWithoutFields<T> _value;
-
   const _$_PrivateWithNullableWithoutFieldsCWProxyImpl(this._value);
+
+  final _PrivateWithNullableWithoutFields<T> _value;
 
   @override
 
@@ -68,7 +66,7 @@ extension _$_PrivateWithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
 @CopyWith(skipFields: true, copyWithNull: true)
 // ignore: unused_element
 class _PrivateWithNullableWithoutFields<T extends Iterable<int>> {
-  final T? nullable;
-
   const _PrivateWithNullableWithoutFields({this.nullable});
+
+  final T? nullable;
 }

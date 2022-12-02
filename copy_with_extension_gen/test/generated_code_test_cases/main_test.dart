@@ -1,4 +1,3 @@
-import 'package:copy_with_extension_gen/builder.dart';
 import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
@@ -13,10 +12,20 @@ Future<void> main() async {
     'test/generated_code_test_cases',
     'source_gen_entrypoint.dart',
   );
+  final readerForCustomSettingsCase = await initializeLibraryReaderForDirectory(
+    'test/generated_code_test_cases',
+    'custom_settings_test_case.dart',
+  );
 
   initializeBuildLogTracking();
 
-  settings = const Settings(copyWithNull: false, skipFields: false);
+  testAnnotatedElements<CopyWith>(
+    reader,
+    CopyWithGenerator(const Settings(copyWithNull: false, skipFields: false)),
+  );
 
-  testAnnotatedElements<CopyWith>(reader, CopyWithGenerator());
+  testAnnotatedElements<CopyWith>(
+    readerForCustomSettingsCase,
+    CopyWithGenerator(const Settings(copyWithNull: true, skipFields: true)),
+  );
 }
