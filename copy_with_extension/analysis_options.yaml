@@ -4,3 +4,8 @@ analyzer:
   strong-mode:
     implicit-casts: false
     implicit-dynamic: false
+
+linter:
+  rules:
+    cast_nullable_to_non_nullable: true
+    sort_constructors_first: true
