@@ -1,3 +1,7 @@
+## 5.0.0
+* Allow positioned constructor parameters (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
+* Ability to define library defaults settings globally (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
+
 ## 4.0.4
 * Updating `analyzer` to `>=2.0.0 <6.0.0`
 

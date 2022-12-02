@@ -1,3 +1,0 @@
-dependency_overrides:
-  copy_with_extension:
-    path: ../copy_with_extension

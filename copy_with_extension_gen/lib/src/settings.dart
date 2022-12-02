@@ -1,3 +1,4 @@
+/// Global settings for the library. Allows users to globally define default values.
 class Settings {
   const Settings({
     required this.copyWithNull,
