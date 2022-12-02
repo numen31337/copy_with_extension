@@ -1,6 +1,8 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
+// ignore_for_file: unnecessary_non_null_assertion, duplicate_ignore
+
 abstract class _$_PrivateWithNullableWithoutFieldsCWProxy<
     T extends Iterable<int>> {
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
