@@ -3,11 +3,16 @@ import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
+import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart'
     show ConstantReader, GeneratorForAnnotation, InvalidGenerationSourceError;
 
 /// A `Generator` for `package:build_runner`
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
+  Settings settings;
+
+  CopyWithGenerator(this.settings) : super();
+
   @override
   String generateForAnnotatedElement(
     Element element,
@@ -23,7 +28,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final ClassElement classElement = element;
     final privacyPrefix = element.isPrivate ? "_" : "";
-    final classAnnotation = readClassAnnotation(annotation);
+    final classAnnotation = readClassAnnotation(settings, annotation);
 
     final sortedFields =
         sortedConstructorFields(classElement, classAnnotation.constructor);

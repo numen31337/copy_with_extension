@@ -1,4 +1,5 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:test/test.dart' show test, expect;
 
 part 'gen_basic_functionality_test.g.dart';
@@ -43,6 +44,21 @@ class CopyWithProxyChaining {
 }
 
 void main() {
+  test('Default Global Settings Values', () {
+    final randomGlobalSettings = Settings.fromConfig(<String, dynamic>{
+      'test1': 'test1',
+      'test2': 123,
+      'copyWithNull': 123,
+      'skipFields': null,
+    });
+    final emptyGlobalSettings = Settings.fromConfig(<String, dynamic>{});
+
+    expect(randomGlobalSettings.copyWithNull, false);
+    expect(randomGlobalSettings.skipFields, false);
+    expect(emptyGlobalSettings.copyWithNull, false);
+    expect(emptyGlobalSettings.skipFields, false);
+  });
+
   test('CopyWithValues', () {
     expect(
       const CopyWithValues(id: '').copyWith(id: "test").id,

@@ -1,8 +1,8 @@
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, ConstructorElement;
-import 'package:copy_with_extension_gen/builder.dart';
 import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
+import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart'
     show ConstantReader, InvalidGenerationSourceError;
 
@@ -54,7 +54,10 @@ List<FieldInfo> sortedConstructorFields(
 }
 
 /// Restores the `CopyWith` annotation provided by the user.
-CopyWithAnnotation readClassAnnotation(ConstantReader reader) {
+CopyWithAnnotation readClassAnnotation(
+  Settings settings,
+  ConstantReader reader,
+) {
   final generateCopyWithNull = reader.peek('copyWithNull')?.boolValue;
   final skipFields = reader.peek('skipFields')?.boolValue;
   final constructor = reader.peek('constructor')?.stringValue;
