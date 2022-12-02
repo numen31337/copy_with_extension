@@ -76,17 +76,17 @@ extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
 ''')
 @CopyWith()
 class BasicClass<T extends Iterable<int>> {
-  final String id;
-  final T? optional;
-  @CopyWithField(immutable: true)
-  final int immutable;
-  @CopyWithField(immutable: true)
-  final int nullableImmutable;
-
   const BasicClass({
     required this.id,
     this.optional,
     required this.immutable,
     required this.nullableImmutable,
   });
+
+  final String id;
+  final T? optional;
+  @CopyWithField(immutable: true)
+  final int immutable;
+  @CopyWithField(immutable: true)
+  final int nullableImmutable;
 }

@@ -68,7 +68,7 @@ extension _$_PrivateWithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
 @CopyWith(skipFields: true, copyWithNull: true)
 // ignore: unused_element
 class _PrivateWithNullableWithoutFields<T extends Iterable<int>> {
-  final T? nullable;
-
   const _PrivateWithNullableWithoutFields({this.nullable});
+
+  final T? nullable;
 }

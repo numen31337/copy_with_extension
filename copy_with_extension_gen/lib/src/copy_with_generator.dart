@@ -9,9 +9,9 @@ import 'package:source_gen/source_gen.dart'
 
 /// A `Generator` for `package:build_runner`
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
-  Settings settings;
-
   CopyWithGenerator(this.settings) : super();
+
+  Settings settings;
 
   @override
   String generateForAnnotatedElement(
@@ -138,9 +138,9 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
       /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOf$type.copyWith(...)`.${skipFields ? "" : " Additionally contains functions for specific fields e.g. `instanceOf$type.copyWith.fieldName(...)`"}
       class _\$${type}CWProxyImpl$typeParameters implements _\$${type}CWProxy$typeParameterNames {
-        final $type$typeParameterNames _value;
-
         const _\$${type}CWProxyImpl(this._value);
+
+        final $type$typeParameterNames _value;
 
         $nonNullableFunctions
 

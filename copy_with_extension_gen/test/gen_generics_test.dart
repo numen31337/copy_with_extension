@@ -5,17 +5,17 @@ part 'gen_generics_test.g.dart';
 
 @CopyWith(copyWithNull: true)
 class Generics<G, T extends Iterable<G>> {
-  final List<int> basicGeneric;
-  final List<T> genericFromClass;
-  final List<String?> nullableGeneric;
-  final List<List<List<int?>?>>? deepNestedGeneric;
-
   const Generics({
     required this.basicGeneric,
     required this.genericFromClass,
     this.deepNestedGeneric,
     required this.nullableGeneric,
   });
+
+  final List<int> basicGeneric;
+  final List<T> genericFromClass;
+  final List<String?> nullableGeneric;
+  final List<List<List<int?>?>>? deepNestedGeneric;
 }
 
 void main() {
