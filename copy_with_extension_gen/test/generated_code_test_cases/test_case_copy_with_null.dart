@@ -19,9 +19,9 @@ abstract class _$_PrivateWithNullableWithoutFieldsCWProxy<
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOf_PrivateWithNullableWithoutFields.copyWith(...)`.
 class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
     implements _$_PrivateWithNullableWithoutFieldsCWProxy<T> {
-  final _PrivateWithNullableWithoutFields<T> _value;
-
   const _$_PrivateWithNullableWithoutFieldsCWProxyImpl(this._value);
+
+  final _PrivateWithNullableWithoutFields<T> _value;
 
   @override
 

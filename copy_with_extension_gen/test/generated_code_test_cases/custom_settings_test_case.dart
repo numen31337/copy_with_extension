@@ -20,9 +20,9 @@ abstract class _$BasicClassCWProxy<T extends Iterable<int>> {
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfBasicClass.copyWith(...)`.
 class _$BasicClassCWProxyImpl<T extends Iterable<int>>
     implements _$BasicClassCWProxy<T> {
-  final BasicClass<T> _value;
-
   const _$BasicClassCWProxyImpl(this._value);
+
+  final BasicClass<T> _value;
 
   @override
 
