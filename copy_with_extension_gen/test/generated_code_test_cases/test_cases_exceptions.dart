@@ -23,36 +23,3 @@ class WrongConstructor {}
 class NoDefaultConstructor {
   NoDefaultConstructor.nonDefault();
 }
-
-@ShouldThrow(
-  'Unnamed constructor for "ConstructorWithSomeUnnamedFields" contains unnamed parameter "value". Constructors annotated with "CopyWith" can contain only named parameters.',
-)
-@CopyWith()
-class ConstructorWithSomeUnnamedFields {
-  int? test;
-  int value;
-
-  ConstructorWithSomeUnnamedFields(this.value, {this.test});
-}
-
-@ShouldThrow(
-  'Unnamed constructor for "ConstructorWithAllUnnamedFields" contains unnamed parameter "value". Constructors annotated with "CopyWith" can contain only named parameters.',
-)
-@CopyWith()
-class ConstructorWithAllUnnamedFields {
-  int? test;
-  int value;
-
-  ConstructorWithAllUnnamedFields(this.value, this.test);
-}
-
-@ShouldThrow(
-  'Constructor "test" for "NamedConstructorWithSomeUnnamedFields" contains unnamed parameter "value". Constructors annotated with "CopyWith" can contain only named parameters.',
-)
-@CopyWith(constructor: "test")
-class NamedConstructorWithSomeUnnamedFields {
-  int? test;
-  int value;
-
-  NamedConstructorWithSomeUnnamedFields.test(this.value, this.test);
-}

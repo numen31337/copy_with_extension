@@ -32,6 +32,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeAnnotation = classElement.name + typeParametersNames;
 
     return '''
+    // ignore_for_file: unnecessary_non_null_assertion, duplicate_ignore
+
     ${_copyWithProxyPart(
       classAnnotation.constructor,
       classElement.name,
@@ -51,58 +53,6 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ''';
   }
 
-  /// Generates the callable class function for copyWith(...).
-  String _copyWithValuesPart(
-    String typeAnnotation,
-    List<FieldInfo> sortedFields,
-    String? constructor,
-    bool skipFields,
-    bool isAbstract,
-  ) {
-    final constructorInput = sortedFields.fold<String>(
-      '',
-      (r, v) {
-        if (v.immutable) return r; // Skip the field
-
-        if (isAbstract) {
-          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
-          return '$r $type ${v.name},';
-        } else {
-          return '$r Object? ${v.name} = const \$CopyWithPlaceholder(),';
-        }
-      },
-    );
-    final paramsInput = sortedFields.fold<String>(
-      '',
-      (r, v) {
-        if (v.immutable) return '$r ${v.name}: _value.${v.name},';
-        final nullCheckForNonNullable =
-            v.nullable ? "" : "|| ${v.name} == null";
-
-        return '''
-        $r ${v.name}:
-        ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
-        ? _value.${v.name}
-        // ignore: cast_nullable_to_non_nullable
-        : ${v.name} as ${v.type},''';
-      },
-    );
-
-    final constructorBody = isAbstract
-        ? ""
-        : "{ return ${constructorFor(typeAnnotation, constructor)}($paramsInput); }";
-
-    return '''
-        /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.${skipFields ? "" : " You can also use `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
-        /// 
-        /// Usage
-        /// ```dart
-        /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
-        /// ````
-        $typeAnnotation call({$constructorInput}) $constructorBody
-    ''';
-  }
-
   /// Generates the complete `copyWithNull` function.
   String _copyWithNullPart(
     String typeAnnotation,
@@ -118,7 +68,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final nullConstructorInput = sortedFields.fold<String>(
       '',
       (r, v) {
-        if (v.immutable || !v.nullable) {
+        if (v.fieldAnnotation.immutable || !v.nullable) {
           return r;
         } else {
           return '$r bool ${v.name} = false,';
@@ -128,7 +78,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final nullParamsInput = sortedFields.fold<String>(
       '',
       (r, v) {
-        if (v.immutable || !v.nullable) {
+        if (v.fieldAnnotation.immutable || !v.nullable) {
           return '$r ${v.name}: ${v.name},';
         } else {
           return '$r ${v.name}: ${v.name} == true ? null : this.${v.name},';
@@ -162,7 +112,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     bool skipFields,
   ) {
     final typeAnnotation = type + typeParameterNames;
-    final filteredFields = sortedFields.where((e) => !e.immutable);
+    final filteredFields =
+        sortedFields.where((e) => !e.fieldAnnotation.immutable);
 
     final nonNullableFunctions = skipFields ? "" : filteredFields.map((e) => '''
     @override
@@ -191,6 +142,66 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         @override
         ${_copyWithValuesPart(typeAnnotation, sortedFields, constructor, skipFields, false)}
       }
+    ''';
+  }
+
+  /// Generates the callable class function for copyWith(...).
+  String _copyWithValuesPart(
+    String typeAnnotation,
+    List<FieldInfo> sortedFields,
+    String? constructor,
+    bool skipFields,
+    bool isAbstract,
+  ) {
+    final constructorInput = sortedFields.fold<String>(
+      '',
+      (r, v) {
+        if (v.fieldAnnotation.immutable) return r; // Skip the field
+
+        if (isAbstract) {
+          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
+          return '$r $type ${v.name},';
+        } else {
+          return '$r Object? ${v.name} = const \$CopyWithPlaceholder(),';
+        }
+      },
+    );
+    final paramsInput = sortedFields.fold<String>(
+      '',
+      (r, v) {
+        if (v.fieldAnnotation.immutable) {
+          return '$r ${v.name}: _value.${v.name},';
+        }
+
+        final nullCheckForNonNullable =
+            v.nullable ? "" : "|| ${v.name} == null";
+
+        var paramEntry = '$r ';
+
+        if (!v.isPositioned) {
+          paramEntry += '${v.name}:';
+        }
+
+        return paramEntry += '''
+        ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
+        ? _value.${v.name}${v.nullable ? '' : '!'}
+        // ignore: cast_nullable_to_non_nullable
+        : ${v.name} as ${v.type},''';
+      },
+    );
+
+    final constructorBody = isAbstract
+        ? ""
+        : "{ return ${constructorFor(typeAnnotation, constructor)}($paramsInput); }";
+
+    return '''
+        /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.${skipFields ? "" : " You can also use `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support."}
+        /// 
+        /// Usage
+        /// ```dart
+        /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
+        /// ````
+        $typeAnnotation call({$constructorInput}) $constructorBody
     ''';
   }
 }
