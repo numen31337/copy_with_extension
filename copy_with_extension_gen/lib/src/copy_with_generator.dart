@@ -180,7 +180,6 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         final nullCheckForNonNullable =
             v.nullable ? "" : "|| ${v.name} == null";
 
-        /// The `!` operator is needed to overcome a possible issue described here https://github.com/numen31337/copy_with_extension/pull/69#issue-1433703875
         return '''$r ${v.isPositioned ? "" : '${v.name}:'}
         ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
         ? _value.${v.name} : ${v.name} as ${v.type},''';
