@@ -184,8 +184,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         return '''$r ${v.isPositioned ? "" : '${v.name}:'}
         ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
         ? _value.${v.name}${v.nullable ? '!' : ''}
-        // ignore: cast_nullable_to_non_nullable
-        : ${v.name} as ${v.type},''';
+        : ${v.name}${v.nullable ? '!' : ''} as ${v.type},''';
       },
     );
 
