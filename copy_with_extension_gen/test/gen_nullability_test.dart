@@ -27,7 +27,18 @@ class TestNullability {
 
 void main() {
   test('TestNullability', () {
+    // Test for crash in both flows for `dynamicField`, when `dynamicField` is affected and not affected.
     expect(TestNullability(1, 1, [1]).copyWith.integers([2]).dynamicField, 1);
     expect(TestNullability(1, 1, [1]).copyWith.dynamicField(2).dynamicField, 2);
+    expect(
+      TestNullability(1, 1, [1]).copyWith(dynamicField: 2).dynamicField,
+      2,
+    );
+    expect(
+      TestNullability(1, 1, [1])
+          .copyWith(nullableWithNonNullableConstructor: 1)
+          .dynamicField,
+      1,
+    );
   });
 }
