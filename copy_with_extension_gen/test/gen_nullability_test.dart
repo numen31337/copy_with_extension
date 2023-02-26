@@ -40,5 +40,9 @@ void main() {
           .dynamicField,
       1,
     );
+    expect(
+        TestNullability(1, null, [1]).copyWith.dynamicField(1).dynamicField, 1);
+    expect(TestNullability(1, null, [1]).copyWith.integers([2]).dynamicField,
+        null);
   });
 }
