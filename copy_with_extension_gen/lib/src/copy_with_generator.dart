@@ -172,7 +172,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         if (v.fieldAnnotation.immutable) return r; // Skip the field
 
         if (isAbstract) {
-          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
+          final type =
+              v.type.endsWith('?') || v.isDynamic ? v.type : '${v.type}?';
           return '$r $type ${v.name},';
         } else {
           return '$r Object? ${v.name} = const \$CopyWithPlaceholder(),';
