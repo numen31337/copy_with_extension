@@ -6,6 +6,7 @@ part 'gen_nullability_test.g.dart';
 @CopyWith()
 class TestNullability {
   TestNullability(
+    // TODO: Must throw, have a test. This feature doesn't make sense as the constructor accepts non-nullable, but we can't guarantee it.
     int this.nullableWithNonNullableConstructor,
     this.dynamicField,
     this.integers,
