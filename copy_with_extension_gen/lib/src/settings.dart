@@ -5,7 +5,7 @@ class Settings {
     required this.skipFields,
   });
 
-  factory Settings.fromConfig(Map json) {
+  factory Settings.fromConfig(Map<String, dynamic> json) {
     return Settings(
       copyWithNull: json['copy_with_null'] as bool? ?? false,
       skipFields: json['skip_fields'] as bool? ?? false,

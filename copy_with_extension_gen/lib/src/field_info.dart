@@ -6,29 +6,67 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
-/// Represents a single class field with the additional metadata needed for code generation.
+/// Class field info relevant for code generation.
 class FieldInfo {
-  FieldInfo(
+  FieldInfo({required this.name, required this.nullable, required this.type});
+
+  /// Parameter / field type.
+  final String name;
+
+  /// If the type is nullable. `dynamic` is considered non-nullable as it doesn't have nullability flag.
+  final bool nullable;
+
+  /// Type name with nullability flag.
+  final String type;
+
+  /// True if the type is `dynamic`.
+  bool get isDynamic => type == "dynamic";
+}
+
+/// Represents a single class field with the additional metadata needed for code generation.
+class ConstructorParameterInfo extends FieldInfo {
+  ConstructorParameterInfo(
     ParameterElement element,
     ClassElement classElement, {
     required this.isPositioned,
-  })  : name = element.name,
-        type = element.type.getDisplayString(withNullability: true),
-        fieldAnnotation = _readFieldAnnotation(element, classElement),
-        nullable = element.type.nullabilitySuffix != NullabilitySuffix.none;
+  })  : fieldAnnotation = _readFieldAnnotation(element, classElement),
+        classFieldInfo = _classFieldInfo(element.name, classElement),
+        super(
+          name: element.name,
+          nullable: element.type.nullabilitySuffix != NullabilitySuffix.none,
+          type: element.type.getDisplayString(withNullability: true),
+        );
 
+  /// Annotation provided by the user with `CopyWithField`.
   final CopyWithFieldAnnotation fieldAnnotation;
-  final String name;
-  final bool nullable;
-  final String type;
 
-  /// if the field is positioned in the constructor
-
+  /// True if the field is positioned in the constructor
   final bool isPositioned;
+
+  /// Info relevant to the given field taken from the class itself, as contrary to the constructor parameter.
+  /// If `null`, the field with the given name wasn't found on the class.
+  final FieldInfo? classFieldInfo;
 
   @override
   String toString() {
     return 'type:$type name:$name fieldAnnotation:$fieldAnnotation nullable:$nullable';
+  }
+
+  /// Returns the field info for the constructor parameter in the relevant class.
+  static FieldInfo? _classFieldInfo(
+    String fieldName,
+    ClassElement classElement,
+  ) {
+    final field = classElement.fields
+        .where((e) => e.name == fieldName)
+        .fold(null, (previousValue, element) => element);
+    if (field == null) return null;
+
+    return FieldInfo(
+      name: field.name,
+      nullable: field.type.nullabilitySuffix != NullabilitySuffix.none,
+      type: field.type.getDisplayString(withNullability: true),
+    );
   }
 
   /// Restores the `CopyWithField` annotation provided by the user.
