@@ -55,13 +55,7 @@ jobs:
         uses: zgosalvez/github-actions-analyze-dart@v1
 
       - name: Run tests
-        run: |
-          warning_msg=`dart run test`
-          warning_formatted=${warning_msg//$'\n'/}
-          if [[ $warning_formatted =~ "Warning" ]]; then
-            echo $warning_msg
-            echo -n "::warning ::$warning_formatted"
-          fi
+        run: dart run test
 
       - name: Check formatting
         run: dart format --set-exit-if-changed ../
@@ -100,7 +94,7 @@ jobs:
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           relativePath: copy_with_extension
-
+      
       - name: Check Files Are in Sync
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
