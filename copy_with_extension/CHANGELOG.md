@@ -1,3 +1,8 @@
+## 5.0.1
+* [Fix](https://github.com/numen31337/copy_with_extension/issues/72) Warnings when using the `?` operator on a dynamic type.
+* [Fix](https://github.com/numen31337/copy_with_extension/issues/75) Warnings when using the `!` operator on a non-nullable type.
+* [Fix](https://github.com/numen31337/copy_with_extension/issues/74) Crash when object contains a dynamic field that is `null`.
+
 ## 5.0.0
 * Allow positioned constructor parameters (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
 * Ability to define library defaults settings globally (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
