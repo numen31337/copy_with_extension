@@ -21,7 +21,7 @@ class TestNullability {
 
   /// https://github.com/numen31337/copy_with_extension/issues/75
   /// Warnings during compilation when using `!` on non-nullable value.
-  /// Use `dart compile exe test/gen_nullability_test.dart && rm -fr test/gen_nullability_test.exe ` to reproduce the warning.
+  /// Use `dart run copy_with_extension_gen/test/gen_nullability_test.dart` to reproduce the warning.
   final List<int> integers;
 }
 
