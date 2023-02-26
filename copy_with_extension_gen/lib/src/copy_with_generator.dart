@@ -59,7 +59,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   /// Generates the complete `copyWithNull` function.
   String _copyWithNullPart(
     String typeAnnotation,
-    List<FieldInfo> sortedFields,
+    List<ConstructorParameterInfo> sortedFields,
     String? constructor,
     bool skipFields,
   ) {
@@ -111,7 +111,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     String type,
     String typeParameters,
     String typeParameterNames,
-    List<FieldInfo> sortedFields,
+    List<ConstructorParameterInfo> sortedFields,
     bool skipFields,
   ) {
     final typeAnnotation = type + typeParameterNames;
@@ -151,7 +151,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   /// Generates the callable class function for copyWith(...).
   String _copyWithValuesPart(
     String typeAnnotation,
-    List<FieldInfo> sortedFields,
+    List<ConstructorParameterInfo> sortedFields,
     String? constructor,
     bool skipFields,
     bool isAbstract,
