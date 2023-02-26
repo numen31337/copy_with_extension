@@ -8,7 +8,7 @@ import 'package:source_gen/source_gen.dart'
 
 /// Generates a list of `FieldInfo` for each class field that will be a part of the code generation process.
 /// The resulting array is sorted by the field name. `Throws` on error.
-List<FieldInfo> sortedConstructorFields(
+List<ConstructorParameterInfo> sortedConstructorFields(
   ClassElement element,
   String? constructor,
 ) {
@@ -38,10 +38,10 @@ List<FieldInfo> sortedConstructorFields(
     );
   }
 
-  final fields = <FieldInfo>[];
+  final fields = <ConstructorParameterInfo>[];
 
   for (final parameter in parameters) {
-    final field = FieldInfo(
+    final field = ConstructorParameterInfo(
       parameter,
       element,
       isPositioned: parameter.isPositional,

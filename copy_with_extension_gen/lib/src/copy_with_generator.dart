@@ -36,6 +36,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeParametersNames = typeParametersString(classElement, true);
     final typeAnnotation = classElement.name + typeParametersNames;
 
+    for (final field in sortedFields) {
+      if (field.classFieldInfo != null &&
+          field.nullable != field.classFieldInfo?.nullable) {
+        throw InvalidGenerationSourceError(
+          'The nullability of the constructor parameter "${field.name}" does not match the nullability of the corresponding field in the object.',
+          element: element,
+        );
+      }
+    }
+
     return '''
     ${_copyWithProxyPart(
       classAnnotation.constructor,
@@ -59,7 +69,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   /// Generates the complete `copyWithNull` function.
   String _copyWithNullPart(
     String typeAnnotation,
-    List<FieldInfo> sortedFields,
+    List<ConstructorParameterInfo> sortedFields,
     String? constructor,
     bool skipFields,
   ) {
@@ -111,7 +121,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     String type,
     String typeParameters,
     String typeParameterNames,
-    List<FieldInfo> sortedFields,
+    List<ConstructorParameterInfo> sortedFields,
     bool skipFields,
   ) {
     final typeAnnotation = type + typeParameterNames;
@@ -151,7 +161,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   /// Generates the callable class function for copyWith(...).
   String _copyWithValuesPart(
     String typeAnnotation,
-    List<FieldInfo> sortedFields,
+    List<ConstructorParameterInfo> sortedFields,
     String? constructor,
     bool skipFields,
     bool isAbstract,
@@ -162,7 +172,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         if (v.fieldAnnotation.immutable) return r; // Skip the field
 
         if (isAbstract) {
-          final type = v.type.endsWith('?') ? v.type : '${v.type}?';
+          final type =
+              v.type.endsWith('?') || v.isDynamic ? v.type : '${v.type}?';
           return '$r $type ${v.name},';
         } else {
           return '$r Object? ${v.name} = const \$CopyWithPlaceholder(),';
@@ -182,7 +193,9 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
         return '''$r ${v.isPositioned ? "" : '${v.name}:'}
         ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
-        ? _value.${v.name} : ${v.name} as ${v.type},''';
+        ? _value.${v.name}
+        // ignore: cast_nullable_to_non_nullable
+        : ${v.name} as ${v.type},''';
       },
     );
 
