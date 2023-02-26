@@ -6,15 +6,9 @@ part 'gen_nullability_test.g.dart';
 @CopyWith()
 class TestNullability {
   TestNullability(
-    // TODO: Must throw, have a test. This feature doesn't make sense as the constructor accepts non-nullable, but we can't guarantee it.
-    int this.nullableWithNonNullableConstructor,
     this.dynamicField,
     this.integers,
   );
-
-  /// https://github.com/numen31337/copy_with_extension/pull/69
-  /// If a field is nullable, you can change the type of the constructor parameter to be non-nullable.
-  final int? nullableWithNonNullableConstructor;
 
   /// https://github.com/numen31337/copy_with_extension/issues/74
   /// Test for crash on `instance.dynamicField!`.
@@ -29,21 +23,12 @@ class TestNullability {
 void main() {
   test('TestNullability', () {
     // Test for crash in both flows for `dynamicField`, when `dynamicField` is affected and not affected.
-    expect(TestNullability(1, 1, [1]).copyWith.integers([2]).dynamicField, 1);
-    expect(TestNullability(1, 1, [1]).copyWith.dynamicField(2).dynamicField, 2);
+    expect(TestNullability(1, [1]).copyWith.integers([2]).dynamicField, 1);
+    expect(TestNullability(1, [1]).copyWith.dynamicField(2).dynamicField, 2);
+    expect(TestNullability(1, [1]).copyWith(dynamicField: 2).dynamicField, 2);
+    expect(TestNullability(1, [1]).copyWith(integers: [1]).dynamicField, 1);
+    expect(TestNullability(null, [1]).copyWith.dynamicField(1).dynamicField, 1);
     expect(
-      TestNullability(1, 1, [1]).copyWith(dynamicField: 2).dynamicField,
-      2,
-    );
-    expect(
-      TestNullability(1, 1, [1])
-          .copyWith(nullableWithNonNullableConstructor: 1)
-          .dynamicField,
-      1,
-    );
-    expect(
-        TestNullability(1, null, [1]).copyWith.dynamicField(1).dynamicField, 1);
-    expect(TestNullability(1, null, [1]).copyWith.integers([2]).dynamicField,
-        null);
+        TestNullability(null, [1]).copyWith.integers([2]).dynamicField, null);
   });
 }

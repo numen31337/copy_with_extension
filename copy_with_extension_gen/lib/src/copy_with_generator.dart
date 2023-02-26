@@ -36,6 +36,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final typeParametersNames = typeParametersString(classElement, true);
     final typeAnnotation = classElement.name + typeParametersNames;
 
+    for (final field in sortedFields) {
+      if (field.classFieldInfo != null &&
+          field.nullable != field.classFieldInfo?.nullable) {
+        throw InvalidGenerationSourceError(
+          'The nullability of the constructor parameter "${field.name}" does not match the nullability of the corresponding field in the object.',
+          element: element,
+        );
+      }
+    }
+
     return '''
     ${_copyWithProxyPart(
       classAnnotation.constructor,

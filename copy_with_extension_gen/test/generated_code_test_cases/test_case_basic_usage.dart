@@ -45,8 +45,7 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
   }) {
     return BasicClass<T>(
       id: id == const $CopyWithPlaceholder() || id == null
-          // ignore: unnecessary_non_null_assertion
-          ? _value.id!
+          ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as String,
       optional: optional == const $CopyWithPlaceholder()
@@ -69,16 +68,12 @@ extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
 class BasicClass<T extends Iterable<int>> {
   const BasicClass({
     required this.id,
-    this.dyn,
-    required String this.nullableFieldButNonNullableConstructor,
     this.optional,
     required this.immutable,
     required this.nullableImmutable,
   });
 
   final String id;
-  final dynamic dyn;
-  final String? nullableFieldButNonNullableConstructor;
   final T? optional;
   @CopyWithField(immutable: true)
   final int immutable;
