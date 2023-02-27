@@ -26,7 +26,7 @@ class NoDefaultConstructor {
 }
 
 @ShouldThrow(
-  'The nullability of the constructor parameter "nullableWithNonNullableConstructor" does not match the nullability of the corresponding field in the object.',
+  'The constructor parameter "nullableWithNonNullableConstructor" is not nullable, whereas the corresponding class field is nullable. This use case is not supported.',
 )
 @CopyWith()
 class TestNullability {
