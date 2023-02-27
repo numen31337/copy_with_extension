@@ -38,9 +38,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     for (final field in sortedFields) {
       if (field.classFieldInfo != null &&
-          field.nullable != field.classFieldInfo?.nullable) {
+          field.nullable == false &&
+          field.classFieldInfo?.nullable == true) {
         throw InvalidGenerationSourceError(
-          'The nullability of the constructor parameter "${field.name}" does not match the nullability of the corresponding field in the object.',
+          'The constructor parameter "${field.name}" is not nullable, whereas the corresponding class field is nullable. This use case is not supported.',
           element: element,
         );
       }
