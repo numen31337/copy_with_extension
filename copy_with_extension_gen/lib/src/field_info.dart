@@ -59,7 +59,7 @@ class ConstructorParameterInfo extends FieldInfo {
   ) {
     final field = classElement.fields
         .where((e) => e.name == fieldName)
-        .fold(null, (previousValue, element) => element);
+        .fold(null, (FieldElement? previousValue, element) => element);
     if (field == null) return null;
 
     return FieldInfo(
