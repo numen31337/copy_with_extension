@@ -1,3 +1,6 @@
+## 5.0.3
+* Updating `sdk` to `>=3.0.0 <4.0.0`
+
 ## 5.0.2
 * [Fix](https://github.com/numen31337/copy_with_extension/issues/79) Allow having a nullable constructor parameter with a fallback for a non-nullable class field.
 
