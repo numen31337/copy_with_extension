@@ -4,3 +4,4 @@ import 'package:source_gen_test/annotations.dart';
 part 'test_case_basic_usage.dart';
 part 'test_cases_exceptions.dart';
 part 'test_case_copy_with_null.dart';
+part 'test_case_records.dart';

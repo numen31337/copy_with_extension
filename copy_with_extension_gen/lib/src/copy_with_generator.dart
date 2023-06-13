@@ -1,4 +1,5 @@
-import 'package:analyzer/dart/element/element.dart' show ClassElement, Element;
+import 'package:analyzer/dart/element/element.dart'
+    show ClassElement, Element, ElementKind;
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
@@ -19,7 +20,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    if (element is! ClassElement) {
+    if (element is! ClassElement && !_isTypedefRecord(element)) {
       throw InvalidGenerationSourceError(
         'Only classes can be annotated with "CopyWith". "$element" is not a ClassElement.',
         element: element,
@@ -214,4 +215,9 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         $typeAnnotation call({$constructorInput}) $constructorBody
     ''';
   }
+}
+
+bool _isTypedefRecord(Element e) {
+  // TODO: fileds must be of Records' type as well
+  return e.kind != ElementKind.TYPE_ALIAS;
 }
