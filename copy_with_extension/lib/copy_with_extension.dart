@@ -35,3 +35,4 @@ class CopyWithField {
 class $CopyWithPlaceholder {
   const $CopyWithPlaceholder();
 }
+const copyWith = CopyWith();
