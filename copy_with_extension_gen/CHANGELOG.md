@@ -1,3 +1,6 @@
+## 5.0.4
+* Updating `analyzer` to `>=2.0.0 <7.0.0` (thanks [@shilangyu](https://github.com/shilangyu)).
+
 ## 5.0.3
 * Updating `sdk` to `>=3.0.0 <4.0.0`
 
