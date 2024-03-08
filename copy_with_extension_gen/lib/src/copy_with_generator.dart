@@ -5,13 +5,34 @@ import 'package:copy_with_extension_gen/src/field_info.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart'
-    show ConstantReader, GeneratorForAnnotation, InvalidGenerationSourceError;
+    show ConstantReader, GeneratorForAnnotation, InvalidGenerationSourceError, TypeChecker;
 
+const _fieldAnnotationTypeChecker =
+    TypeChecker.fromRuntime(CopyWith);
+    
 /// A `Generator` for `package:build_runner`
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   CopyWithGenerator(this.settings) : super();
 
   Settings settings;
+
+  ClassElement? _findAnnotatedSuperClass(ClassElement classElement) {
+    var superTypeElement = classElement.supertype?.element;
+    if (superTypeElement?.name == "Object") {
+      return null;
+    }
+
+    if (superTypeElement is! ClassElement)
+    {
+      return null;
+    }
+
+    if (_fieldAnnotationTypeChecker.annotationsOf(superTypeElement).isNotEmpty) {
+      return superTypeElement;
+    } else {
+      return _findAnnotatedSuperClass(superTypeElement);
+    }
+  }
 
   @override
   String generateForAnnotatedElement(
@@ -29,6 +50,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     final ClassElement classElement = element;
     final privacyPrefix = element.isPrivate ? "_" : "";
     final classAnnotation = readClassAnnotation(settings, annotation);
+
+    // find nearest superClass with copyWith annotation
+    final superTypeElement = _findAnnotatedSuperClass(classElement);
+    final superTypeParametersNames = superTypeElement != null ? typeParametersString(superTypeElement, true) : null;
 
     final sortedFields =
         sortedConstructorFields(classElement, classAnnotation.constructor);
@@ -49,6 +74,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     return '''
     ${_copyWithProxyPart(
+      '${superTypeElement?.name ?? ''}${superTypeParametersNames ?? ''}',
       classAnnotation.constructor,
       classElement.name,
       typeParametersAnnotation,
@@ -118,6 +144,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
   /// Generates a `CopyWithProxy` class.
   String _copyWithProxyPart(
+    String superTypeAndTypeParameters,
     String? constructor,
     String type,
     String typeParameters,
@@ -138,8 +165,12 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     $type$typeParameterNames ${e.name}(${e.type} ${e.name});
     ''').join("\n");
 
+    final extensionCode = superTypeAndTypeParameters.isNotEmpty
+        ? ' extends _\$${superTypeAndTypeParameters}CWProxy'
+        : '';
+
     return '''
-      abstract class _\$${type}CWProxy$typeParameters {
+      abstract class _\$${type}CWProxy$typeParameters$extensionCode {
         $nonNullableFunctionsInterface
 
         ${_copyWithValuesPart(typeAnnotation, sortedFields, constructor, skipFields, true)};
