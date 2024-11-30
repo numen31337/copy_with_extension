@@ -9,7 +9,7 @@ environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
-  analyzer: ^6.0.0
+  analyzer: ^6.5.0
   build: ^2.0.0
   source_gen: ^1.0.0
   copy_with_extension: ^5.0.0
