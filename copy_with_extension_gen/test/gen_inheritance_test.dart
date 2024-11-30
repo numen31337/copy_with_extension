@@ -22,7 +22,7 @@ mixin Mixin on BasicBaseClass {
 
 @CopyWith()
 class BasicSubClass<T> extends BasicBaseClass {
-  const BasicSubClass({required String id, this.item}) : super(id: id);
+  const BasicSubClass({required super.id, this.item});
 
   final T? item;
 }
@@ -32,15 +32,15 @@ class ComplexSubClass<T, U extends String> extends BasicSubClass<T>
     with Mixin
     implements AbstractClass {
   ComplexSubClass({
-    required String id,
+    required super.id,
     required this.date,
     this.privateField,
     this.abstractString,
     this.listWithGenericType,
     this.listWithTypedType,
     this.listWithType,
-    T? item,
-  }) : super(id: id, item: item);
+    super.item,
+  });
 
   ComplexSubClass.secondConstructor({required String id})
       : this(

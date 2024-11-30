@@ -1,5 +1,5 @@
 /// Provides `CopyWith` annotation class used by [copy_with_extension_gen](https://pub.dev/packages/copy_with_extension_gen).
-library copy_with_extension;
+library;
 
 import 'package:meta/meta_meta.dart';
 
