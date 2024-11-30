@@ -13,7 +13,7 @@ abstract class _$BasicClassCWProxy<T extends Iterable<int>> {
   /// BasicClass<T>(...).copyWith(id: 12, name: "My name")
   /// ````
   BasicClass<T> call({
-    String? id,
+    String id,
     T? optional,
   });
 }
@@ -44,7 +44,7 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
     Object? optional = const $CopyWithPlaceholder(),
   }) {
     return BasicClass<T>(
-      id: id == const $CopyWithPlaceholder() || id == null
+      id: id == const $CopyWithPlaceholder()
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as String,

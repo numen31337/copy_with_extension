@@ -1,3 +1,6 @@
+## 6.0.0
+* **BREAKING** The `copyWith` function no longer accepts `null` for non-nullable fields to prevent ambiguity and errors.
+
 ## 5.0.4
 * Updating `analyzer` to `>=2.0.0 <7.0.0` (thanks [@shilangyu](https://github.com/shilangyu)).
 
