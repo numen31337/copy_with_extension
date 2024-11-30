@@ -173,9 +173,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         if (v.fieldAnnotation.immutable) return r; // Skip the field
 
         if (isAbstract) {
-          final type =
-              v.type.endsWith('?') || v.isDynamic ? v.type : '${v.type}?';
-          return '$r $type ${v.name},';
+          return '$r ${v.type} ${v.name},';
         } else {
           return '$r Object? ${v.name} = const \$CopyWithPlaceholder(),';
         }
@@ -189,11 +187,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
           return '$r ${v.name}: _value.${v.name},';
         }
 
-        final nullCheckForNonNullable =
-            v.nullable ? "" : "|| ${v.name} == null";
-
         return '''$r ${v.isPositioned ? "" : '${v.name}:'}
-        ${v.name} == const \$CopyWithPlaceholder() $nullCheckForNonNullable
+        ${v.name} == const \$CopyWithPlaceholder()
         ? _value.${v.name}
         // ignore: cast_nullable_to_non_nullable
         : ${v.name} as ${v.type},''';

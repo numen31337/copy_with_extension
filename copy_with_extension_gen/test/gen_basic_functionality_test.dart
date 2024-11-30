@@ -67,8 +67,6 @@ void main() {
       const CopyWithValues(id: '').copyWith(id: "test").id,
       "test",
     );
-
-    expect(const CopyWithValues(id: '').copyWith(id: null).id, '');
   });
 
   test('CopyWithValuesOptional', () {
