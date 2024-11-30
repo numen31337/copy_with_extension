@@ -9,7 +9,7 @@ environment:
   sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
-  analyzer: ">=2.0.0 <7.0.0"
+  analyzer: ^6.0.0
   build: ^2.0.0
   source_gen: ^1.0.0
   copy_with_extension: ^5.0.0
@@ -18,6 +18,6 @@ dependencies:
 dev_dependencies:
   equatable: ^2.0.5
   flutter_lints: ^5.0.0
-  build_runner: ">=1.11.5 <3.0.0"
+  build_runner: ^2.0.0
   test: ^1.20.1
   source_gen_test: ^1.0.1
