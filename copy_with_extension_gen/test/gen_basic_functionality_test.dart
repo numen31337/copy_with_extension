@@ -89,6 +89,11 @@ void main() {
       const CopyWithValuesOptional(id: "test").copyWith(id: null).id,
       null,
     );
+
+    expect(
+      const CopyWithValuesOptional(id: "test").copyWith().id,
+      "test",
+    );
   });
 
   test('CopyWithProxy', () {
