@@ -1,6 +1,6 @@
 [![Pub Package](https://img.shields.io/pub/v/copy_with_extension_gen.svg)](https://pub.dev/packages/copy_with_extension_gen)
 
-Provides [Dart Build System](https://pub.dev/packages/build) builder for generating `copyWith` extensions for classes annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension). For more information on how this package works, see [my blog article](https://alexander-kirsch.com/blog/dart-extensions/).
+This package provides a builder for the [Dart Build System](https://pub.dev/packages/build) that generates `copyWith` extensions for classes annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension). For a detailed explanation of how this package works, check out [my blog article](https://alexander-kirsch.com/blog/dart-extensions/).
 
 This library allows you to copy instances of immutable classes modifying specific fields like so:
 
@@ -16,29 +16,25 @@ myInstance.copyWithNull(fieldName: true, anotherField: true) // Nullify multiple
 ## Usage
 
 #### In your `pubspec.yaml` file
-- Add to `dependencies` section `copy_with_extension: ^4.0.0`
-- Add to `dev_dependencies` section `copy_with_extension_gen: ^4.0.0`
+- Add to `dependencies` section `copy_with_extension: ^6.0.0`
+- Add to `dev_dependencies` section `copy_with_extension_gen: ^6.0.0`
 - Add to `dev_dependencies` section `build_runner: ^2.1.7`
-- Set `environment` to at least Dart `2.12.0` version like so: `">=2.12.0 <3.0.0"`
+- Set `environment` to at least Dart `3.0.0` version like so: `">=3.0.0 <4.0.0"`
 
 Your `pubspec.yaml` should look like so:
 
 ```yaml
-name: project_name
-description: project description
-version: 1.0.0
-
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=3.0.0 <4.0.0"
 
 dependencies:
   ...
-  copy_with_extension: ^4.0.0
+  copy_with_extension: ^6.0.0
   
 dev_dependencies:
   ...
   build_runner: ^2.1.7
-  copy_with_extension_gen: ^4.0.0
+  copy_with_extension_gen: ^6.0.0
 ```
 
 #### Annotate your class with `CopyWith` annotation
@@ -57,7 +53,7 @@ class BasicClass {
 }
 ```
 
-Make sure that you set the part file as in the example above `part 'your_file_name.g.dart';`.
+Make sure that you set the part file as shown in the example above: `part 'your_file_name.g.dart';`.
 
 #### Launch code generation
 
@@ -68,33 +64,41 @@ flutter pub run build_runner build
 #### Use
 
 ```dart
-const result = BasicClass(id: "id")
-final copiedOne = result.copyWith.text("test") // Results in BasicClass(id: "id", text: "test");
-final copiedTwo = result.copyWith(id: "foo", text: null) // Results in BasicClass(id: "foo", text: null);
+const result = BasicClass(id: "id");
+final copiedOne = result.copyWith.text("test"); // Results in BasicClass(id: "id", text: "test");
+final copiedTwo = result.copyWith(id: "foo", text: null); // Results in BasicClass(id: "foo", text: null);
 ```
 
 ## Additional features
 
-#### Change several fields at once with copyWith()
-
-You can modify multiple fields at once using `copyWith` as a function like so: `myInstance.copyWith(fieldName: "test", anotherField: "test")`. Passing the `null` value to `non-nullable` fields will be ignored.
+#### Change Multiple Fields Simultaneously
+Modify several fields at once with the `copyWith()` function:
+```dart
+myInstance.copyWith(fieldName: "test", anotherField: "test");
+```
 
 #### Nullifying instance fields
 
-In order to nullify the class fields, an additional `copyWithNull` function can be generated. To make use of it, pass an additional parameter to your class annotation `@CopyWith(generateCopyWithNull: true)`.
+Generate a `copyWithNull` function to nullify class fields. Enable this by using:
+```dart
+@CopyWith(generateCopyWithNull: true)
+class MyClass {
+  ...
+}
+```
 
-#### Immutable fields
+#### Protect Immutable Fields
 
-If you want to prevent a particular field from modifying with `copyWith` method you can add an additional annotation like this:
+Prevent modification of specific fields by using:
 
 ```dart
 @CopyWithField(immutable: true)
 final int myImmutableField;
 ```
 
-By adding this annotation you forcing your generated `copyWith` to always copy this field as it is, without exposing it in the function interface.
+This enforces that the `copyWith` method copies this field without allowing modifications.
 
-#### Custom constructor name
+#### Custom Constructor Name
 
 Set `constructor` if you want to use a named constructor, e.g. a private one. The generated fields will be derived from this constructor.
 
@@ -125,7 +129,7 @@ class SimpleObject {
 
 #### `build.yaml` configuration
 
-To globally configure the library, you can add a `build.yaml` file to your project. The following options are available:
+You can globally configure the library's behavior in your project by adding a `build.yaml` file. This allows you to customize features such as `copyWithNull` and `skipFields` globally across your project.
 
 ```yaml
 targets:
@@ -134,8 +138,8 @@ targets:
       copy_with_extension_gen:
         enabled: true
         options:
-          copy_with_null: true # default is false
-          skip_fields: true    # default is false
+          copy_with_null: true # Default is false. Generate `copyWithNull` functions.
+          skip_fields: true    # Default is false. Prevent generation of individual field methods, e.g. `instance.copyWith.id("123")`.
 ```
 
 ## How this library is better than `freezed`?
