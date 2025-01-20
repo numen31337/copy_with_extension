@@ -2,16 +2,15 @@ part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
 abstract class _$_PrivateWithNullableWithoutFieldsCWProxy<
-    T extends Iterable<int>> {
+  T extends Iterable<int>
+> {
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
   ///
   /// Usage
   /// ```dart
   /// _PrivateWithNullableWithoutFields<T>(...).copyWith(id: 12, name: "My name")
   /// ````
-  _PrivateWithNullableWithoutFields<T> call({
-    T? nullable,
-  });
+  _PrivateWithNullableWithoutFields<T> call({T? nullable});
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOf_PrivateWithNullableWithoutFields.copyWith(...)`.
@@ -22,7 +21,6 @@ class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
   final _PrivateWithNullableWithoutFields<T> _value;
 
   @override
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
   ///
   /// Usage
@@ -33,10 +31,11 @@ class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
     Object? nullable = const $CopyWithPlaceholder(),
   }) {
     return _PrivateWithNullableWithoutFields<T>(
-      nullable: nullable == const $CopyWithPlaceholder()
-          ? _value.nullable
-          // ignore: cast_nullable_to_non_nullable
-          : nullable as T?,
+      nullable:
+          nullable == const $CopyWithPlaceholder()
+              ? _value.nullable
+              // ignore: cast_nullable_to_non_nullable
+              : nullable as T?,
     );
   }
 }
@@ -54,9 +53,7 @@ extension _$_PrivateWithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
   /// ```dart
   /// _PrivateWithNullableWithoutFields<T>(...).copyWithNull(firstField: true, secondField: true)
   /// ````
-  _PrivateWithNullableWithoutFields<T> copyWithNull({
-    bool nullable = false,
-  }) {
+  _PrivateWithNullableWithoutFields<T> copyWithNull({bool nullable = false}) {
     return _PrivateWithNullableWithoutFields<T>(
       nullable: nullable == true ? null : this.nullable,
     );

@@ -1,3 +1,7 @@
+## 6.0.1
+* Updating `analyzer` to `^7.0.0`
+* Updating `source_gen` to `^2.0.0`
+
 ## 6.0.0
 * **BREAKING** The `copyWith` function no longer accepts `null` for non-nullable fields to prevent ambiguity and errors.
 

@@ -9,10 +9,7 @@ abstract class _$BasicClassCWProxy<T extends Iterable<int>> {
   /// ```dart
   /// BasicClass<T>(...).copyWith(id: 12, name: "My name")
   /// ````
-  BasicClass<T> call({
-    String id,
-    T? optional,
-  });
+  BasicClass<T> call({String id, T? optional});
 }
 
 /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfBasicClass.copyWith(...)`.
@@ -23,7 +20,6 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
   final BasicClass<T> _value;
 
   @override
-
   /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
   ///
   /// Usage
@@ -35,14 +31,16 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
     Object? optional = const $CopyWithPlaceholder(),
   }) {
     return BasicClass<T>(
-      id: id == const $CopyWithPlaceholder()
-          ? _value.id
-          // ignore: cast_nullable_to_non_nullable
-          : id as String,
-      optional: optional == const $CopyWithPlaceholder()
-          ? _value.optional
-          // ignore: cast_nullable_to_non_nullable
-          : optional as T?,
+      id:
+          id == const $CopyWithPlaceholder()
+              ? _value.id
+              // ignore: cast_nullable_to_non_nullable
+              : id as String,
+      optional:
+          optional == const $CopyWithPlaceholder()
+              ? _value.optional
+              // ignore: cast_nullable_to_non_nullable
+              : optional as T?,
       immutable: _value.immutable,
       nullableImmutable: _value.nullableImmutable,
     );
@@ -60,9 +58,7 @@ extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
   /// ```dart
   /// BasicClass<T>(...).copyWithNull(firstField: true, secondField: true)
   /// ````
-  BasicClass<T> copyWithNull({
-    bool optional = false,
-  }) {
+  BasicClass<T> copyWithNull({bool optional = false}) {
     return BasicClass<T>(
       id: id,
       optional: optional == true ? null : this.optional,
