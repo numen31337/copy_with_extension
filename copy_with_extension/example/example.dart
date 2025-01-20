@@ -1,4 +1,4 @@
-// ignore_for_file: unused_element
+// ignore_for_file: unused_element, unused_element_parameter
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 
