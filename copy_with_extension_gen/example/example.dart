@@ -2,10 +2,10 @@
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 
-/// Make sure the `part` is specified before running the builder.
-/// part 'example.g.dart'; /// It should not be commented.
+/// Make sure the `part` directive is specified before running the builder.
+/// part 'example.g.dart'; // Do not comment this line.
 
-/// Lets you use it like this: `SimpleObject(id: "test").copyWith(id: "new values", intValue: 10).copyWithNull(intValue: true)`.
+/// Allows you to use it like this: `SimpleObject(id: "test").copyWith(id: "new values", intValue: 10).copyWithNull(intValue: true)`.
 /// Or like this: `SimpleObject(id: "test").copyWith.id("new value")`.
 @CopyWith(copyWithNull: true)
 class SimpleObjectOldStyle {
@@ -15,7 +15,7 @@ class SimpleObjectOldStyle {
   final int? intValue;
 }
 
-/// Won't allow you to copy this object with a modified `id` field after object creation. It will always copy it from the original instance.
+/// Prevents modification of the `id` field after object creation. The value is always copied from the original instance.
 @CopyWith()
 class SimpleObjectImmutableField {
   const SimpleObjectImmutableField({this.id, this.intValue});

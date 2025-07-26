@@ -1,5 +1,5 @@
-import 'package:analyzer/dart/element/element.dart'
-    show ClassElement, ConstructorElement;
+import 'package:analyzer/dart/element/element2.dart'
+    show ClassElement2, ConstructorElement2, Element2;
 import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
@@ -9,14 +9,14 @@ import 'package:source_gen/source_gen.dart'
 /// Generates a list of `FieldInfo` for each class field that will be a part of the code generation process.
 /// The resulting array is sorted by the field name. `Throws` on error.
 List<ConstructorParameterInfo> sortedConstructorFields(
-  ClassElement element,
+  ClassElement2 element,
   String? constructor,
 ) {
   final targetConstructor = constructor != null
-      ? element.getNamedConstructor(constructor)
-      : element.unnamedConstructor;
+      ? element.getNamedConstructor2(constructor)
+      : element.unnamedConstructor2;
 
-  if (targetConstructor is! ConstructorElement) {
+  if (targetConstructor is! ConstructorElement2) {
     if (constructor != null) {
       throw InvalidGenerationSourceError(
         'Named Constructor "$constructor" constructor is missing.',
@@ -24,16 +24,16 @@ List<ConstructorParameterInfo> sortedConstructorFields(
       );
     } else {
       throw InvalidGenerationSourceError(
-        'Default constructor for "${element.name}" is missing.',
+        'Default constructor for $element is missing.',
         element: element,
       );
     }
   }
 
-  final parameters = targetConstructor.parameters;
+  final parameters = targetConstructor.formalParameters;
   if (parameters.isEmpty) {
     throw InvalidGenerationSourceError(
-      'Unnamed constructor for ${element.name} has no parameters or missing.',
+      'Unnamed constructor for $element has no parameters or missing.',
       element: element,
     );
   }
@@ -74,16 +74,28 @@ CopyWithAnnotation readClassAnnotation(
 /// If `nameOnly` is `true`: `class MyClass<T extends String, Y>` returns `<T, Y>`.
 ///
 /// If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
-String typeParametersString(ClassElement classElement, bool nameOnly) {
-  final names = classElement.typeParameters
+String typeParametersString(ClassElement2 classElement, bool nameOnly) {
+  final names = classElement.typeParameters2
       .map(
-        (e) => nameOnly ? e.name : e.getDisplayString(),
+        (e) => nameOnly ? readElementNameOrThrow(e) : e.displayString2(),
       )
       .join(',');
   if (names.isNotEmpty) {
     return '<$names>';
   } else {
     return '';
+  }
+}
+
+String readElementNameOrThrow(Element2 element) {
+  final name = element.name3;
+  if (name is String) {
+    return name;
+  } else {
+    throw InvalidGenerationSourceError(
+      'Name for $element is missing.',
+      element: element,
+    );
   }
 }
 

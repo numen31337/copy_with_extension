@@ -1,4 +1,5 @@
-import 'package:analyzer/dart/element/element.dart' show ClassElement, Element;
+import 'package:analyzer/dart/element/element2.dart'
+    show ClassElement2, Element2;
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
@@ -15,26 +16,27 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
   @override
   String generateForAnnotatedElement(
-    Element element,
+    Element2 element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    if (element is! ClassElement) {
+    if (element is! ClassElement2) {
       throw InvalidGenerationSourceError(
         'Only classes can be annotated with "CopyWith". "$element" is not a ClassElement.',
         element: element,
       );
     }
 
-    final ClassElement classElement = element;
+    final ClassElement2 classElement = element;
     final privacyPrefix = element.isPrivate ? "_" : "";
     final classAnnotation = readClassAnnotation(settings, annotation);
 
+    final className = readElementNameOrThrow(classElement);
     final sortedFields =
         sortedConstructorFields(classElement, classAnnotation.constructor);
     final typeParametersAnnotation = typeParametersString(classElement, false);
     final typeParametersNames = typeParametersString(classElement, true);
-    final typeAnnotation = classElement.name + typeParametersNames;
+    final typeAnnotation = className + typeParametersNames;
 
     for (final field in sortedFields) {
       if (field.classFieldInfo != null &&
@@ -50,17 +52,17 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     return '''
     ${_copyWithProxyPart(
       classAnnotation.constructor,
-      classElement.name,
+      className,
       typeParametersAnnotation,
       typeParametersNames,
       sortedFields,
       classAnnotation.skipFields,
     )}
     
-    extension $privacyPrefix\$${classElement.name}CopyWith$typeParametersAnnotation on ${classElement.name}$typeParametersNames {
-      /// Returns a callable class that can be used as follows: `instanceOf${classElement.name}.copyWith(...)`${classAnnotation.skipFields ? "" : " or like so:`instanceOf${classElement.name}.copyWith.fieldName(...)`"}.
+    extension $privacyPrefix\$${className}CopyWith$typeParametersAnnotation on $className$typeParametersNames {
+      /// Returns a callable class that can be used as follows: `instanceOf$className.copyWith(...)`${classAnnotation.skipFields ? "" : " or like so:`instanceOf$className.copyWith.fieldName(...)`"}.
       // ignore: library_private_types_in_public_api
-      ${"_\$${classElement.name}CWProxy$typeParametersNames get copyWith => _\$${classElement.name}CWProxyImpl$typeParametersNames(this);"}
+      ${"_\$${className}CWProxy$typeParametersNames get copyWith => _\$${className}CWProxyImpl$typeParametersNames(this);"}
 
       ${classAnnotation.copyWithNull ? _copyWithNullPart(typeAnnotation, sortedFields, classAnnotation.constructor, classAnnotation.skipFields) : ""}
     }
@@ -74,7 +76,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     String? constructor,
     bool skipFields,
   ) {
-    /// Return if there is no nullable fields
+    /// Return an empty string when the class has no nullable fields.
     if (sortedFields.where((element) => element.nullable == true).isEmpty) {
       return '';
     }
@@ -101,7 +103,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     );
 
     final description = '''
-    /// Copies the object with the specific fields set to `null`. If you pass `false` as a parameter, nothing will be done and it will be ignored. Don't do it. Prefer `copyWith(field: null)`${skipFields ? "" : " or `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support"}.
+    /// Copies the object with the specified fields set to `null`. Passing `false` has no effect. Prefer `copyWith(field: null)`${skipFields ? "" : " or `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support"}.
     ///
     /// Usage
     /// ```dart

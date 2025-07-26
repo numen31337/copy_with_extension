@@ -1,3 +1,8 @@
+## 7.0.0
+* Migrated to the new analyzer `element2` APIs.
+* Updating `analyzer` to `^7.0.0`
+* Updating `source_gen` to `^3.0.0`
+
 ## 6.0.1
 * Updating `analyzer` to `^7.0.0`
 * Updating `source_gen` to `^2.0.0`

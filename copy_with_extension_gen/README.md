@@ -2,7 +2,7 @@
 
 This package provides a builder for the [Dart Build System](https://pub.dev/packages/build) that generates `copyWith` extensions for classes annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension). For a detailed explanation of how this package works, check out [my blog article](https://alexander-kirsch.com/blog/dart-extensions/).
 
-This library allows you to copy instances of immutable classes modifying specific fields like so:
+This library lets you copy immutable objects and change individual fields as follows:
 
 ```dart
 myInstance.copyWith.fieldName("test") // Change a single field.
@@ -16,12 +16,12 @@ myInstance.copyWithNull(fieldName: true, anotherField: true) // Nullify multiple
 ## Usage
 
 #### In your `pubspec.yaml` file
-- Add to `dependencies` section `copy_with_extension: ^6.0.0`
-- Add to `dev_dependencies` section `copy_with_extension_gen: ^6.0.0`
+- Add to `dependencies` section `copy_with_extension: ^7.0.0`
+- Add to `dev_dependencies` section `copy_with_extension_gen: ^7.0.0`
 - Add to `dev_dependencies` section `build_runner: ^2.1.7`
 - Set `environment` to at least Dart `3.0.0` version like so: `">=3.0.0 <4.0.0"`
 
-Your `pubspec.yaml` should look like so:
+Your `pubspec.yaml` should look like this:
 
 ```yaml
 environment:
@@ -29,12 +29,12 @@ environment:
 
 dependencies:
   ...
-  copy_with_extension: ^6.0.0
+  copy_with_extension: ^7.0.0
   
 dev_dependencies:
   ...
   build_runner: ^2.1.7
-  copy_with_extension_gen: ^6.0.0
+  copy_with_extension_gen: ^7.0.0
 ```
 
 #### Annotate your class with `CopyWith` annotation
@@ -79,9 +79,9 @@ myInstance.copyWith(fieldName: "test", anotherField: "test");
 
 #### Nullifying instance fields
 
-Generate a `copyWithNull` function to nullify class fields. Enable this by using:
+Generate a `copyWithNull` function to nullify class fields. Enable this by setting `copyWithNull` to `true`:
 ```dart
-@CopyWith(generateCopyWithNull: true)
+@CopyWith(copyWithNull: true)
 class MyClass {
   ...
 }
@@ -142,6 +142,6 @@ targets:
           skip_fields: true    # Default is false. Prevent generation of individual field methods, e.g. `instance.copyWith.id("123")`.
 ```
 
-## How this library is better than `freezed`?
+## How is this library better than `freezed`?
 
-It isn't. This library is a non-intrusive alternative for those who only need the `copyWith` functionality and do not want to maintain the codebase in the way implied by the framework. This library only requires from your side the annotation of your class with `CopyWith()` and an indication of the `.part` file, everything else is up to you. [`freezed`](https://pub.dev/packages/freezed), on the other hand, offers many more code generation features but requires your models to be written in a framework-specific manner.
+This package is a lightweight alternative for those who only need the `copyWith` functionality and prefer to keep their classes framework agnostic. You simply annotate your class with `CopyWith()` and specify the `.part` file. [`freezed`](https://pub.dev/packages/freezed) provides many additional features but requires you to structure your models in a framework‑specific way.

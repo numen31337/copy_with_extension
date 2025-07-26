@@ -31,11 +31,10 @@ class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
     Object? nullable = const $CopyWithPlaceholder(),
   }) {
     return _PrivateWithNullableWithoutFields<T>(
-      nullable:
-          nullable == const $CopyWithPlaceholder()
-              ? _value.nullable
-              // ignore: cast_nullable_to_non_nullable
-              : nullable as T?,
+      nullable: nullable == const $CopyWithPlaceholder()
+          ? _value.nullable
+          // ignore: cast_nullable_to_non_nullable
+          : nullable as T?,
     );
   }
 }
@@ -47,7 +46,7 @@ extension _$_PrivateWithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
   _$_PrivateWithNullableWithoutFieldsCWProxy<T> get copyWith =>
       _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T>(this);
 
-  /// Copies the object with the specific fields set to `null`. If you pass `false` as a parameter, nothing will be done and it will be ignored. Don't do it. Prefer `copyWith(field: null)`.
+  /// Copies the object with the specified fields set to `null`. Passing `false` has no effect. Prefer `copyWith(field: null)`.
   ///
   /// Usage
   /// ```dart
