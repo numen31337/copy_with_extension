@@ -102,7 +102,3 @@ String readElementNameOrThrow(Element2 element) {
 /// Returns constructor for the given type and optional named constructor name. E.g. "TestConstructor" or "TestConstructor._private" when "_private" constructor name is provided.
 String constructorFor(String typeAnnotation, String? namedConstructor) =>
     "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
-
-extension IterableExtension<T> on Iterable<T> {
-  T? get safeFirst => isEmpty ? null : first;
-}
