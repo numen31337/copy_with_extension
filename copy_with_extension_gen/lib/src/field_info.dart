@@ -1,9 +1,11 @@
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
-import 'package:analyzer/dart/element/element.dart'
-    show ClassElement, FieldElement, ParameterElement;
+import 'package:analyzer/dart/element/element2.dart'
+    show ClassElement2, FieldElement2, FormalParameterElement;
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
+import 'package:copy_with_extension_gen/src/helpers.dart'
+    show readElementNameOrThrow;
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /// Class field info relevant for code generation.
@@ -26,13 +28,14 @@ class FieldInfo {
 /// Represents a single class field with the additional metadata needed for code generation.
 class ConstructorParameterInfo extends FieldInfo {
   ConstructorParameterInfo(
-    ParameterElement element,
-    ClassElement classElement, {
+    FormalParameterElement element,
+    ClassElement2 classElement, {
     required this.isPositioned,
   })  : fieldAnnotation = _readFieldAnnotation(element, classElement),
-        classFieldInfo = _classFieldInfo(element.name, classElement),
+        classFieldInfo =
+            _classFieldInfo(readElementNameOrThrow(element), classElement),
         super(
-          name: element.name,
+          name: readElementNameOrThrow(element),
           nullable: element.type.nullabilitySuffix != NullabilitySuffix.none,
           type: element.type.getDisplayString(),
         );
@@ -55,15 +58,15 @@ class ConstructorParameterInfo extends FieldInfo {
   /// Returns the field info for the constructor parameter in the relevant class.
   static FieldInfo? _classFieldInfo(
     String fieldName,
-    ClassElement classElement,
+    ClassElement2 classElement,
   ) {
-    final field = classElement.fields
-        .where((e) => e.name == fieldName)
-        .fold<FieldElement?>(null, (previousValue, element) => element);
+    final field = classElement.fields2
+        .where((e) => readElementNameOrThrow(e) == fieldName)
+        .fold<FieldElement2?>(null, (previousValue, element) => element);
     if (field == null) return null;
 
     return FieldInfo(
-      name: field.name,
+      name: readElementNameOrThrow(field),
       nullable: field.type.nullabilitySuffix != NullabilitySuffix.none,
       type: field.type.getDisplayString(),
     );
@@ -71,13 +74,14 @@ class ConstructorParameterInfo extends FieldInfo {
 
   /// Restores the `CopyWithField` annotation provided by the user.
   static CopyWithFieldAnnotation _readFieldAnnotation(
-    ParameterElement element,
-    ClassElement classElement,
+    FormalParameterElement element,
+    ClassElement2 classElement,
   ) {
     const defaults = CopyWithFieldAnnotation.defaults();
 
-    final fieldElement = classElement.getField(element.name);
-    if (fieldElement is! FieldElement) {
+    final fieldElement =
+        classElement.getField2(readElementNameOrThrow(element));
+    if (fieldElement is! FieldElement2) {
       return defaults;
     }
 

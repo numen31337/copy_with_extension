@@ -8,7 +8,7 @@ part of 'source_gen_entrypoint.dart';
 Object wrongAnnotation = Object();
 
 @ShouldThrow(
-  'Unnamed constructor for NoConstructor has no parameters or missing.',
+  'Unnamed constructor for class NoConstructor has no parameters or missing.',
 )
 @CopyWith()
 class NoConstructor {
@@ -19,7 +19,7 @@ class NoConstructor {
 @CopyWith(constructor: "test")
 class WrongConstructor {}
 
-@ShouldThrow('Default constructor for "NoDefaultConstructor" is missing.')
+@ShouldThrow('Default constructor for class NoDefaultConstructor is missing.')
 @CopyWith()
 class NoDefaultConstructor {
   NoDefaultConstructor.nonDefault();

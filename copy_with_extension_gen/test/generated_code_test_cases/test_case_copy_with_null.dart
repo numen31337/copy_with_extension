@@ -31,11 +31,10 @@ class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
     Object? nullable = const $CopyWithPlaceholder(),
   }) {
     return _PrivateWithNullableWithoutFields<T>(
-      nullable:
-          nullable == const $CopyWithPlaceholder()
-              ? _value.nullable
-              // ignore: cast_nullable_to_non_nullable
-              : nullable as T?,
+      nullable: nullable == const $CopyWithPlaceholder()
+          ? _value.nullable
+          // ignore: cast_nullable_to_non_nullable
+          : nullable as T?,
     );
   }
 }
