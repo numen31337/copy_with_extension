@@ -13,13 +13,6 @@ class ByteBuffer {
 
 @CopyWith()
 class NamespaceTestClass {
-  final ns.ByteBuffer? namespacedProperty;
-  final ns1.ByteBuffer? namespacedProperty1;
-  final ns2.Future<ns1.ByteBuffer>? namespacedProperty2;
-  final ByteBuffer regularProperty;
-  final String? stringProperty;
-  final bool? boolProperty;
-
   const NamespaceTestClass({
     this.namespacedProperty,
     this.namespacedProperty1,
@@ -28,6 +21,13 @@ class NamespaceTestClass {
     this.stringProperty,
     this.boolProperty,
   });
+
+  final ns.ByteBuffer? namespacedProperty;
+  final ns1.ByteBuffer? namespacedProperty1;
+  final ns2.Future<ns1.ByteBuffer>? namespacedProperty2;
+  final ByteBuffer regularProperty;
+  final String? stringProperty;
+  final bool? boolProperty;
 }
 
 void main() {

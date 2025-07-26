@@ -1,11 +1,8 @@
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
-import 'package:analyzer/dart/element/element.dart'
-    show ParameterElement, PrefixElement;
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
-import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, FieldElement2, FormalParameterElement;
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart'
     show readElementNameOrThrow;
@@ -40,7 +37,7 @@ class ConstructorParameterInfo extends FieldInfo {
         super(
           name: readElementNameOrThrow(element),
           nullable: element.type.nullabilitySuffix != NullabilitySuffix.none,
-          type: element.type.getDisplayString(),
+          type: _fullTypeName(element),
         );
 
   /// Annotation provided by the user with `CopyWithField`.
@@ -76,17 +73,27 @@ class ConstructorParameterInfo extends FieldInfo {
   }
 
   /// Returns full type name including namespace.
-  static String _fullTypeName(ParameterElement element) {
-    final displayName = element.type.getDisplayString(withNullability: true);
+  static String _fullTypeName(FormalParameterElement element) {
+    final displayName = element.type.getDisplayString();
 
-    final prefix = element.library?.prefixes.safeFirst;
-    final prefixIsFromTheCorrectLibrary =
-        prefix?.library.id != element.type.element?.library?.id;
-    final namespace = prefix is PrefixElement && prefixIsFromTheCorrectLibrary
-        ? prefix.name
-        : null;
+    final parameter = element;
+    final library = parameter.library2;
+    final importedLibrary = parameter.type.element3?.library2;
+    if (library is LibraryElement2 && importedLibrary != null) {
+      final unit = library.fragments.first; // TODO: Check all?
+      for (final PrefixElement2 prefix in unit.prefixes) {
+        for (final LibraryImport import in prefix.imports) {
+          if (import.importedLibrary2 == importedLibrary) {
+            final prefixName = prefix.name3;
+            if (prefixName is String && prefixName.isNotEmpty) {
+              return '$prefixName.$displayName';
+            }
+          }
+        }
+      }
+    }
 
-    return namespace is String ? "$namespace.$displayName" : displayName;
+    return displayName;
   }
 
   /// Restores the `CopyWithField` annotation provided by the user.
