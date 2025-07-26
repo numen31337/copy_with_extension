@@ -12,7 +12,7 @@ dependencies:
   analyzer: ^7.0.0
   build: ^3.0.0
   source_gen: ^3.0.0
-  copy_with_extension: ^6.0.0
+  copy_with_extension: ^7.0.0
   meta: ^1.8.0
 
 dev_dependencies:
