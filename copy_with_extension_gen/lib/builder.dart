@@ -6,9 +6,10 @@
 /// This library is **not** intended to be imported by typical end-users unless
 /// you are creating a custom compilation pipeline. See documentation for
 /// details, and `build.yaml` for how these builders are configured by default.
-library copy_with_extension_gen.builder;
+library;
 
 import 'package:build/build.dart' show Builder, BuilderOptions;
+import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart' show SharedPartBuilder;
 import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
 
@@ -16,7 +17,9 @@ import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
 /// `copy_with_extension_gen`.
 ///
 /// Not meant to be invoked by hand-authored code.
-Builder copyWith(BuilderOptions _) => SharedPartBuilder(
-      [CopyWithGenerator()],
-      'copyWith',
-    );
+Builder copyWith(BuilderOptions config) {
+  return SharedPartBuilder(
+    [CopyWithGenerator(Settings.fromConfig(config.config))],
+    'copyWith',
+  );
+}

@@ -1,3 +1,40 @@
+## 7.0.0
+* Migrated to the new analyzer `element2` APIs.
+* Updating `analyzer` to `^7.0.0`
+* Updating `source_gen` to `^3.0.0`
+
+## 6.0.1
+* Updating `analyzer` to `^7.0.0`
+* Updating `source_gen` to `^2.0.0`
+
+## 6.0.0
+* **BREAKING** The `copyWith` function no longer accepts `null` for non-nullable fields to prevent ambiguity and errors.
+
+## 5.0.4
+* Updating `analyzer` to `>=2.0.0 <7.0.0` (thanks [@shilangyu](https://github.com/shilangyu)).
+
+## 5.0.3
+* Updating `sdk` to `>=3.0.0 <4.0.0`
+
+## 5.0.2
+* [Fix](https://github.com/numen31337/copy_with_extension/issues/79) Allow having a nullable constructor parameter with a fallback for a non-nullable class field.
+
+## 5.0.1
+* [Fix](https://github.com/numen31337/copy_with_extension/issues/72) Warnings when using the `?` operator on a dynamic type.
+* [Fix](https://github.com/numen31337/copy_with_extension/issues/75) Warnings when using the `!` operator on a non-nullable type.
+* [Fix](https://github.com/numen31337/copy_with_extension/issues/74) Crash when object contains a dynamic field that is `null`.
+
+## 5.0.0
+* Allow positioned constructor parameters (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
+* Ability to define library defaults settings globally (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
+
+## 4.0.4
+* Updating `analyzer` to `>=2.0.0 <6.0.0`
+
+## 4.0.3
+* Suppressing [lint warnings](https://github.com/numen31337/copy_with_extension/issues/54) for `library_private_types_in_public_api`.
+* Classes that are declared as private will [get a private](https://github.com/numen31337/copy_with_extension/issues/50) `copyWith` extension.
+
 ## 4.0.2
 * Updating `analyzer` to `>=2.0.0 <5.0.0`
 

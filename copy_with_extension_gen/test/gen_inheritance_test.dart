@@ -4,16 +4,16 @@ import 'package:test/test.dart' show test, expect;
 part 'gen_inheritance_test.g.dart';
 
 abstract class AbstractClass {
-  final String? abstractString;
-
   AbstractClass(this.abstractString);
+
+  final String? abstractString;
 }
 
 @CopyWith()
 class BasicBaseClass {
-  final String id;
-
   const BasicBaseClass({this.id = 'test'});
+
+  final String id;
 }
 
 mixin Mixin on BasicBaseClass {
@@ -22,35 +22,25 @@ mixin Mixin on BasicBaseClass {
 
 @CopyWith()
 class BasicSubClass<T> extends BasicBaseClass {
-  final T? item;
+  const BasicSubClass({required super.id, this.item});
 
-  const BasicSubClass({required String id, this.item}) : super(id: id);
+  final T? item;
 }
 
 @CopyWith()
 class ComplexSubClass<T, U extends String> extends BasicSubClass<T>
     with Mixin
     implements AbstractClass {
-  final DateTime date;
-  @override
-  final String? abstractString;
-  @CopyWithField(immutable: true)
-  final String? privateField;
-  static String staticStr = 'test';
-  final List<T>? listWithGenericType;
-  final List<Iterable<U>?>? listWithTypedType;
-  final List<int>? listWithType;
-
   ComplexSubClass({
-    required String id,
+    required super.id,
     required this.date,
     this.privateField,
     this.abstractString,
     this.listWithGenericType,
     this.listWithTypedType,
     this.listWithType,
-    T? item,
-  }) : super(id: id, item: item);
+    super.item,
+  });
 
   ComplexSubClass.secondConstructor({required String id})
       : this(
@@ -63,6 +53,16 @@ class ComplexSubClass<T, U extends String> extends BasicSubClass<T>
   factory ComplexSubClass.testFactory() {
     return ComplexSubClass.secondConstructor(id: '');
   }
+
+  final DateTime date;
+  @override
+  final String? abstractString;
+  @CopyWithField(immutable: true)
+  final String? privateField;
+  static String staticStr = 'test';
+  final List<T>? listWithGenericType;
+  final List<Iterable<U>?>? listWithTypedType;
+  final List<int>? listWithType;
 
   String get testMethod {
     return 'test';
