@@ -76,7 +76,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     String? constructor,
     bool skipFields,
   ) {
-    /// Return if there is no nullable fields
+    /// Return an empty string when the class has no nullable fields.
     if (sortedFields.where((element) => element.nullable == true).isEmpty) {
       return '';
     }
@@ -103,7 +103,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     );
 
     final description = '''
-    /// Copies the object with the specific fields set to `null`. If you pass `false` as a parameter, nothing will be done and it will be ignored. Don't do it. Prefer `copyWith(field: null)`${skipFields ? "" : " or `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support"}.
+    /// Copies the object with the specified fields set to `null`. Passing `false` has no effect. Prefer `copyWith(field: null)`${skipFields ? "" : " or `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support"}.
     ///
     /// Usage
     /// ```dart

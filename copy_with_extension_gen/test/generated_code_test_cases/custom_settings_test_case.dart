@@ -50,7 +50,7 @@ extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
   // ignore: library_private_types_in_public_api
   _$BasicClassCWProxy<T> get copyWith => _$BasicClassCWProxyImpl<T>(this);
 
-  /// Copies the object with the specific fields set to `null`. If you pass `false` as a parameter, nothing will be done and it will be ignored. Don't do it. Prefer `copyWith(field: null)`.
+  /// Copies the object with the specified fields set to `null`. Passing `false` has no effect. Prefer `copyWith(field: null)`.
   ///
   /// Usage
   /// ```dart
