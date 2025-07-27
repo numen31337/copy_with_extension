@@ -32,6 +32,10 @@ class CopyWithField {
 }
 
 /// This placeholder object is a default value for nullable fields to handle cases when the user wants to nullify the value.
+/// Used internally as the default value for parameters in generated methods.
+///
+/// It allows the generator to differentiate between an explicitly passed `null`
+/// and an omitted parameter when building new instances of the annotated class.
 class $CopyWithPlaceholder {
   const $CopyWithPlaceholder();
 }

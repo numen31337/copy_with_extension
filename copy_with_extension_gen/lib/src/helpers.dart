@@ -6,8 +6,12 @@ import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart'
     show ConstantReader, InvalidGenerationSourceError;
 
-/// Generates a list of `FieldInfo` for each class field that will be a part of the code generation process.
-/// The resulting array is sorted by the field name. `Throws` on error.
+/// Generates a list of [ConstructorParameterInfo] objects representing the
+/// constructor parameters that participate in `copyWith` generation.
+///
+/// The returned list is sorted by parameter name to ensure deterministic output
+/// and will throw an [InvalidGenerationSourceError] if the constructor cannot be
+/// resolved or has no parameters.
 List<ConstructorParameterInfo> sortedConstructorFields(
   ClassElement2 element,
   String? constructor,
@@ -87,6 +91,8 @@ String typeParametersString(ClassElement2 classElement, bool nameOnly) {
   }
 }
 
+/// Returns the name of [element] or throws an
+/// [InvalidGenerationSourceError] if the element has no name.
 String readElementNameOrThrow(Element2 element) {
   final name = element.name3;
   if (name is String) {

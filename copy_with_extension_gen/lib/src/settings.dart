@@ -5,6 +5,8 @@ class Settings {
     required this.skipFields,
   });
 
+  /// Creates [Settings] from a configuration map, typically coming from
+  /// a `build.yaml` file.
   factory Settings.fromConfig(Map<String, dynamic> json) {
     return Settings(
       copyWithNull: json['copy_with_null'] as bool? ?? false,
