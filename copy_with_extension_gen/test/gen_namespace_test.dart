@@ -7,8 +7,8 @@ import 'package:test/test.dart';
 
 part 'gen_namespace_test.g.dart';
 
-class ByteBuffer {
-  const ByteBuffer();
+class Uint16List {
+  const Uint16List();
 }
 
 @CopyWith()
@@ -17,15 +17,15 @@ class NamespaceTestClass {
     this.namespacedProperty,
     this.namespacedProperty1,
     this.namespacedProperty2,
-    this.regularProperty = const ByteBuffer(),
+    this.regularProperty = const Uint16List(),
     this.stringProperty,
     this.boolProperty,
   });
 
-  final ns.ByteBuffer? namespacedProperty;
-  final ns1.ByteBuffer? namespacedProperty1;
-  final ns2.Future<ns1.ByteBuffer>? namespacedProperty2;
-  final ByteBuffer regularProperty;
+  final ns.Uint16List? namespacedProperty;
+  final ns1.Uint16List? namespacedProperty1;
+  final ns2.Future<ns1.Uint16List>? namespacedProperty2;
+  final Uint16List regularProperty;
   final String? stringProperty;
   final bool? boolProperty;
 }
