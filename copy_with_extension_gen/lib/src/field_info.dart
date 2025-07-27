@@ -109,7 +109,7 @@ class ConstructorParameterInfo extends FieldInfo {
     return '${_prefixFor(library, type.element3?.library2)}$displayName$nullability';
   }
 
-  /// Returns the import prefix for [targetLibrary] if one exists in [library].
+  /// Returns the import prefix for `targetLibrary` if one exists in `library`.
   static String _prefixFor(
     LibraryElement2 library,
     LibraryElement2? targetLibrary,
