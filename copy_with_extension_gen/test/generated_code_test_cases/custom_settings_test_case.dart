@@ -8,7 +8,7 @@ abstract class _$BasicClassCWProxy<T extends Iterable<int>> {
   /// Usage
   /// ```dart
   /// BasicClass<T>(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   BasicClass<T> call({String id, T? optional});
 }
 
@@ -25,7 +25,7 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
   /// Usage
   /// ```dart
   /// BasicClass<T>(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   BasicClass<T> call({
     Object? id = const $CopyWithPlaceholder(),
     Object? optional = const $CopyWithPlaceholder(),
@@ -55,7 +55,7 @@ extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
   /// Usage
   /// ```dart
   /// BasicClass<T>(...).copyWithNull(firstField: true, secondField: true)
-  /// ````
+  /// ```
   BasicClass<T> copyWithNull({bool optional = false}) {
     return BasicClass<T>(
       id: id,

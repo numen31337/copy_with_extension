@@ -9,7 +9,7 @@ abstract class _$_PrivateWithNullableWithoutFieldsCWProxy<
   /// Usage
   /// ```dart
   /// _PrivateWithNullableWithoutFields<T>(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   _PrivateWithNullableWithoutFields<T> call({T? nullable});
 }
 
@@ -26,7 +26,7 @@ class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
   /// Usage
   /// ```dart
   /// _PrivateWithNullableWithoutFields<T>(...).copyWith(id: 12, name: "My name")
-  /// ````
+  /// ```
   _PrivateWithNullableWithoutFields<T> call({
     Object? nullable = const $CopyWithPlaceholder(),
   }) {
@@ -51,7 +51,7 @@ extension _$_PrivateWithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
   /// Usage
   /// ```dart
   /// _PrivateWithNullableWithoutFields<T>(...).copyWithNull(firstField: true, secondField: true)
-  /// ````
+  /// ```
   _PrivateWithNullableWithoutFields<T> copyWithNull({bool nullable = false}) {
     return _PrivateWithNullableWithoutFields<T>(
       nullable: nullable == true ? null : this.nullable,
