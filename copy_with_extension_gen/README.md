@@ -16,8 +16,8 @@ myInstance.copyWithNull(fieldName: true, anotherField: true) // Nullify multiple
 ## Usage
 
 #### In your `pubspec.yaml` file
-- Add to `dependencies` section `copy_with_extension: ^7.0.0`
-- Add to `dev_dependencies` section `copy_with_extension_gen: ^7.0.0`
+- Add to `dependencies` section `copy_with_extension: ^7.1.0`
+- Add to `dev_dependencies` section `copy_with_extension_gen: ^7.1.0`
 - Add to `dev_dependencies` section `build_runner: ^2.1.7`
 - Set `environment` to at least Dart `3.0.0` version like so: `">=3.0.0 <4.0.0"`
 
@@ -29,12 +29,12 @@ environment:
 
 dependencies:
   ...
-  copy_with_extension: ^7.0.0
+  copy_with_extension: ^7.1.0
   
 dev_dependencies:
   ...
   build_runner: ^2.1.7
-  copy_with_extension_gen: ^7.0.0
+  copy_with_extension_gen: ^7.1.0
 ```
 
 #### Annotate your class with `CopyWith` annotation
