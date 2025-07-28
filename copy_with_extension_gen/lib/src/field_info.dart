@@ -93,7 +93,7 @@ class ConstructorParameterInfo extends FieldInfo {
       final element = type.element3;
       final name = element != null
           ? '${_prefixFor(library, element.library2)}${element.name3}'
-          : type.getDisplayString(withNullability: false);
+          : _displayStringWithoutNullability(type);
 
       if (type.typeArguments.isNotEmpty) {
         final args = type.typeArguments
@@ -105,7 +105,7 @@ class ConstructorParameterInfo extends FieldInfo {
       }
     }
 
-    final displayName = type.getDisplayString(withNullability: false);
+    final displayName = _displayStringWithoutNullability(type);
     return '${_prefixFor(library, type.element3?.library2)}$displayName$nullability';
   }
 
@@ -128,6 +128,18 @@ class ConstructorParameterInfo extends FieldInfo {
     }
 
     return '';
+  }
+
+  /// Returns the `displayString` of [type] without a trailing question mark.
+  ///
+  /// The analyzer's `withNullability` parameter is deprecated. To omit the
+  /// nullability suffix we obtain the string with nullability information and
+  /// strip the trailing `?` when present.
+  static String _displayStringWithoutNullability(DartType type) {
+    final displayString = type.getDisplayString();
+    return displayString.endsWith('?')
+        ? displayString.substring(0, displayString.length - 1)
+        : displayString;
   }
 
   /// Restores the `CopyWithField` annotation provided by the user.
