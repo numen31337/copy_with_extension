@@ -145,3 +145,11 @@ targets:
 ## How is this library better than `freezed`?
 
 This package is a lightweight alternative for those who only need the `copyWith` functionality and prefer to keep their classes framework agnostic. You simply annotate your class with `CopyWith()` and specify the `.part` file. [`freezed`](https://pub.dev/packages/freezed) provides many additional features but requires you to structure your models in a framework‑specific way.
+
+## How it works
+
+The generated `*.g.dart` file creates an extension on your class that exposes a `copyWith` getter. Calling this getter returns a private proxy class that is both callable and provides methods for each mutable field when `skipFields` is not set.
+
+Each parameter of the proxy's `call` method is typed as `Object?` and defaults to a special constant `$CopyWithPlaceholder`. This sentinel value lets the proxy distinguish between a parameter that was **not** supplied and one that was set to `null`. Fields whose parameter equals `$CopyWithPlaceholder` retain their current value, while any other argument replaces the field value. This approach enables safe nullification of nullable fields without affecting non-nullable ones.
+
+When `copyWithNull` is enabled, an additional `copyWithNull` method is generated to nullify fields by passing boolean flags. The proxy class used by `copyWith` internally invokes the appropriate constructor with the updated field values after resolving these placeholders.
