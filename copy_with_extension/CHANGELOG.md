@@ -1,3 +1,7 @@
+## 7.1.0
+* Added namespace support for classes using import prefixes.
+* Added comments and tests for clarity.
+
 ## 7.0.0
 * Migrated to the new analyzer `element2` APIs.
 * Updating `analyzer` to `^7.0.0`
