@@ -97,8 +97,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        
       - name: Package score
-        uses: docker://axelop/dart_package_analyzer:v3
+        uses: axel-op/dart-package-analyzer@v3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           relativePath: ${{ matrix.package }}
