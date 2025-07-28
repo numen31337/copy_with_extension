@@ -80,20 +80,6 @@ jobs:
             echo $warning_msg
             echo -n "::warning ::$warning_formatted"
           fi
-
-      - name: Check Score - copy_with_extension_gen
-        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
-        uses: axel-op/dart-package-analyzer@v3
-        with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          relativePath: copy_with_extension_gen
-
-      - name: Check Score - copy_with_extension
-        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
-        uses: axel-op/dart-package-analyzer@v3
-        with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          relativePath: copy_with_extension
       
       - name: Check Files Are in Sync
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
@@ -101,3 +87,18 @@ jobs:
           cmp -s example/example.dart ../copy_with_extension/example/example.dart || (echo "::error ::File example.dart is out of sync" && exit 1)
           cmp -s LICENSE ../copy_with_extension/LICENSE || (echo "::error ::File LICENSE is out of sync" && exit 1)
           cmp -s CHANGELOG.md ../copy_with_extension/CHANGELOG.md || (echo "::warning ::File CHANGELOG.md is out of sync")
+
+  package_score:
+    needs: run_tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [copy_with_extension_gen, copy_with_extension]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Package score
+        uses: docker://axelop/dart_package_analyzer:v3
+        with:
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          relativePath: ${{ matrix.package }}
