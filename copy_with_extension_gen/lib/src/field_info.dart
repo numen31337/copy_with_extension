@@ -149,8 +149,16 @@ class ConstructorParameterInfo extends FieldInfo {
   ) {
     const defaults = CopyWithFieldAnnotation.defaults();
 
-    final fieldElement =
-        classElement.getField2(readElementNameOrThrow(element));
+    final fieldName = readElementNameOrThrow(element);
+    final isPrivate = fieldName.startsWith('_');
+    if (isPrivate) {
+      // Treat private parameters as immutable to avoid generating `copyWith`
+      // parameters starting with an underscore. Using such parameters in a
+      // public method results in analyzer errors.
+      return const CopyWithFieldAnnotation(immutable: true);
+    }
+
+    final fieldElement = classElement.getField2(fieldName);
     if (fieldElement is! FieldElement2) {
       return defaults;
     }
