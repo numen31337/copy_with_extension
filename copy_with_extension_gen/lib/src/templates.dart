@@ -176,7 +176,9 @@ String copyWithValuesTemplate(
     '',
     (r, v) {
       if (v.fieldAnnotation.immutable) {
-        return '$r ${v.name}: _value.${v.name},';
+        return v.isPositioned
+            ? '$r _value.${v.name},'
+            : '$r ${v.name}: _value.${v.name},';
       }
 
       return '''$r ${v.isPositioned ? '' : '${v.name}:'}
