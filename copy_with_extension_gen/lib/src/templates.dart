@@ -48,17 +48,17 @@ String extensionTemplate({
 /// Generates the `copyWithNull` method.
 String copyWithNullTemplate(
   String typeAnnotation,
-  List<ConstructorParameterInfo> sortedFields,
+  List<ConstructorParameterInfo> fields,
   String? constructor,
   bool skipFields,
 ) {
   // Return an empty string when the class has no nullable fields.
-  if (sortedFields.where((element) => element.nullable == true).isEmpty) {
+  if (fields.where((element) => element.nullable == true).isEmpty) {
     return '';
   }
 
   // Build the constructor parameter list. Only nullable and mutable fields need a boolean flag to specify nullification.
-  final nullConstructorInput = sortedFields.fold<String>(
+  final nullConstructorInput = fields.fold<String>(
     '',
     (r, v) {
       if (v.fieldAnnotation.immutable || !v.nullable) {
@@ -70,7 +70,7 @@ String copyWithNullTemplate(
   );
 
   // Build the actual invocation parameters for the constructor call.
-  final nullParamsInput = sortedFields.fold<String>(
+  final nullParamsInput = fields.fold<String>(
     '',
     (r, v) {
       if (v.fieldAnnotation.immutable || !v.nullable) {
@@ -104,12 +104,11 @@ String copyWithProxyTemplate(
   String type,
   String typeParameters,
   String typeParameterNames,
-  List<ConstructorParameterInfo> sortedFields,
+  List<ConstructorParameterInfo> fields,
   bool skipFields,
 ) {
   final typeAnnotation = type + typeParameterNames;
-  final filteredFields =
-      sortedFields.where((e) => !e.fieldAnnotation.immutable);
+  final filteredFields = fields.where((e) => !e.fieldAnnotation.immutable);
 
   // Generate proxy methods for each mutable field. These methods allow modification of a single field via `instance.copyWith.fieldName(value)`.
   final nonNullableFunctions = skipFields ? '' : filteredFields.map((e) => '''
@@ -127,7 +126,7 @@ String copyWithProxyTemplate(
       abstract class _\$${type}CWProxy$typeParameters {
         $nonNullableFunctionsInterface
 
-        ${copyWithValuesTemplate(typeAnnotation, sortedFields, constructor, skipFields, true)};
+        ${copyWithValuesTemplate(typeAnnotation, fields, constructor, skipFields, true)};
       }
 
       /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOf$type.copyWith(...)`.${skipFields ? '' : ' Additionally contains functions for specific fields e.g. `instanceOf$type.copyWith.fieldName(...)`'}
@@ -139,7 +138,7 @@ String copyWithProxyTemplate(
         $nonNullableFunctions
 
         @override
-        ${copyWithValuesTemplate(typeAnnotation, sortedFields, constructor, skipFields, false)}
+        ${copyWithValuesTemplate(typeAnnotation, fields, constructor, skipFields, false)}
       }
     ''';
 }
@@ -148,13 +147,13 @@ String copyWithProxyTemplate(
 /// The returned snippet can be used either as an abstract interface (when [isAbstract] is `true`) or as a concrete implementation that instantiates the target class.
 String copyWithValuesTemplate(
   String typeAnnotation,
-  List<ConstructorParameterInfo> sortedFields,
+  List<ConstructorParameterInfo> fields,
   String? constructor,
   bool skipFields,
   bool isAbstract,
 ) {
   // Build the parameter list for the generated function or abstract interface. Immutable fields are excluded entirely.
-  final constructorInput = sortedFields.fold<String>(
+  final constructorInput = fields.fold<String>(
     '',
     (r, v) {
       if (v.fieldAnnotation.immutable) return r;
@@ -170,7 +169,7 @@ String copyWithValuesTemplate(
   );
 
   // Generate the parameters passed to the constructor when creating the new instance. Immutable fields are copied from the existing value.
-  final paramsInput = sortedFields.fold<String>(
+  final paramsInput = fields.fold<String>(
     '',
     (r, v) {
       if (v.fieldAnnotation.immutable) {

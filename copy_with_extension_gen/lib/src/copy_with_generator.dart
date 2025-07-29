@@ -34,15 +34,14 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final classAnnotation = readClassAnnotation(settings, annotation);
     final className = readElementNameOrThrow(element);
-    final sortedFields =
-        sortedConstructorFields(element, classAnnotation.constructor);
+    final fields = constructorFields(element, classAnnotation.constructor);
     final typeParametersAnnotation = typeParametersString(element, false);
     final typeParametersNames = typeParametersString(element, true);
 
     // Verify that constructor and class field nullability match. The generator
     // does not support a non-nullable constructor parameter pointing to a
     // nullable class field.
-    for (final field in sortedFields) {
+    for (final field in fields) {
       if (field.classFieldInfo != null &&
           field.nullable == false &&
           field.classFieldInfo?.nullable == true) {
@@ -58,7 +57,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       className: className,
       typeParametersAnnotation: typeParametersAnnotation,
       typeParametersNames: typeParametersNames,
-      fields: sortedFields,
+      fields: fields,
       skipFields: classAnnotation.skipFields,
       copyWithNull: classAnnotation.copyWithNull,
       constructor: classAnnotation.constructor,

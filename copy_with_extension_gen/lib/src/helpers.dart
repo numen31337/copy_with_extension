@@ -9,10 +9,9 @@ import 'package:source_gen/source_gen.dart'
 /// Generates a list of [ConstructorParameterInfo] objects representing the
 /// constructor parameters that participate in `copyWith` generation.
 ///
-/// The returned list is sorted by parameter name to ensure deterministic output
-/// and will throw an [InvalidGenerationSourceError] if the constructor cannot be
+/// Will throw an [InvalidGenerationSourceError] if the constructor cannot be
 /// resolved or has no parameters.
-List<ConstructorParameterInfo> sortedConstructorFields(
+List<ConstructorParameterInfo> constructorFields(
   ClassElement2 element,
   String? constructor,
 ) {
