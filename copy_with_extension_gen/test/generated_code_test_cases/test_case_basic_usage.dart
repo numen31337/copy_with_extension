@@ -6,16 +6,18 @@ abstract class _$BasicClassCWProxy<T extends Iterable<int>> {
 
   BasicClass<T> optional(T? optional);
 
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BasicClass<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BasicClass<T>(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// BasicClass<T>(...).copyWith(id: 12, name: "My name")
   /// ```
   BasicClass<T> call({String id, T? optional});
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfBasicClass.copyWith(...)`. Additionally contains functions for specific fields e.g. `instanceOfBasicClass.copyWith.fieldName(...)`
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfBasicClass.copyWith(...)` or call `instanceOfBasicClass.copyWith.fieldName(value)` for a single field.
 class _$BasicClassCWProxyImpl<T extends Iterable<int>>
     implements _$BasicClassCWProxy<T> {
   const _$BasicClassCWProxyImpl(this._value);
@@ -29,9 +31,10 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
   BasicClass<T> optional(T? optional) => this(optional: optional);
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored. You can also use `BasicClass<T>(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `BasicClass<T>(...).copyWith.fieldName(value)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// BasicClass<T>(...).copyWith(id: 12, name: "My name")
   /// ```
@@ -55,7 +58,8 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
 }
 
 extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
-  /// Returns a callable class that can be used as follows: `instanceOfBasicClass.copyWith(...)` or like so:`instanceOfBasicClass.copyWith.fieldName(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfBasicClass.copyWith(...)` or `instanceOfBasicClass.copyWith.fieldName(...)`.
   // ignore: library_private_types_in_public_api
   _$BasicClassCWProxy<T> get copyWith => _$BasicClassCWProxyImpl<T>(this);
 }

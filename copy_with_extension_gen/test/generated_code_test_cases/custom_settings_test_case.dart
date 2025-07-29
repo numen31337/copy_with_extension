@@ -3,16 +3,18 @@ import 'package:source_gen_test/annotations.dart';
 
 @ShouldGenerate(r'''
 abstract class _$BasicClassCWProxy<T extends Iterable<int>> {
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// BasicClass<T>(...).copyWith(id: 12, name: "My name")
   /// ```
   BasicClass<T> call({String id, T? optional});
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOfBasicClass.copyWith(...)`.
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfBasicClass.copyWith(...)`.
 class _$BasicClassCWProxyImpl<T extends Iterable<int>>
     implements _$BasicClassCWProxy<T> {
   const _$BasicClassCWProxyImpl(this._value);
@@ -20,9 +22,10 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
   final BasicClass<T> _value;
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// BasicClass<T>(...).copyWith(id: 12, name: "My name")
   /// ```
@@ -46,13 +49,15 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
 }
 
 extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
-  /// Returns a callable class that can be used as follows: `instanceOfBasicClass.copyWith(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfBasicClass.copyWith(...)`.
   // ignore: library_private_types_in_public_api
   _$BasicClassCWProxy<T> get copyWith => _$BasicClassCWProxyImpl<T>(this);
 
-  /// Copies the object with the specified fields set to `null`. Passing `false` has no effect. Prefer `copyWith(field: null)`.
+  /// Returns a copy of the object with the selected fields set to `null`.
+  /// A flag set to `false` leaves the field unchanged. Prefer `copyWith(field: null)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// BasicClass<T>(...).copyWithNull(firstField: true, secondField: true)
   /// ```

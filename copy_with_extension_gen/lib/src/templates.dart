@@ -36,7 +36,8 @@ String extensionTemplate({
     $proxy
 
     extension $privacyPrefix\$${className}CopyWith$typeParametersAnnotation on $className$typeParametersNames {
-      /// Returns a callable class that can be used as follows: `instanceOf$className.copyWith(...)`${skipFields ? "" : " or like so:`instanceOf$className.copyWith.fieldName(...)`"}.
+      /// Returns a callable class used to build a new instance with modified fields.
+      /// Example: `instanceOf$className.copyWith(...)`${skipFields ? "" : " or `instanceOf$className.copyWith.fieldName(...)`"}.
       // ignore: library_private_types_in_public_api
       _\$${className}CWProxy$typeParametersNames get copyWith => _\$${className}CWProxyImpl$typeParametersNames(this);
 
@@ -82,9 +83,10 @@ String copyWithNullTemplate(
   );
 
   final description = '''
-    /// Copies the object with the specified fields set to `null`. Passing `false` has no effect. Prefer `copyWith(field: null)`${skipFields ? '' : ' or `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support'}.
+    /// Returns a copy of the object with the selected fields set to `null`.
+    /// A flag set to `false` leaves the field unchanged. Prefer `copyWith(field: null)`${skipFields ? '' : ' or `copyWith.fieldName(null)` for single-field updates'}.
     ///
-    /// Usage
+    /// Example:
     /// ```dart
     /// $typeAnnotation(...).copyWithNull(firstField: true, secondField: true)
     /// ```''';
@@ -129,7 +131,8 @@ String copyWithProxyTemplate(
         ${copyWithValuesTemplate(typeAnnotation, fields, constructor, skipFields, true)};
       }
 
-      /// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOf$type.copyWith(...)`.${skipFields ? '' : ' Additionally contains functions for specific fields e.g. `instanceOf$type.copyWith.fieldName(...)`'}
+      /// Callable proxy for `copyWith` functionality.
+      /// Use as `instanceOf$type.copyWith(...)`${skipFields ? '' : ' or call `instanceOf$type.copyWith.fieldName(value)` for a single field'}.
       class _\$${type}CWProxyImpl$typeParameters implements _\$${type}CWProxy$typeParameterNames {
         const _\$${type}CWProxyImpl(this._value);
 
@@ -189,9 +192,10 @@ String copyWithValuesTemplate(
       : '{ return ${constructorFor(typeAnnotation, constructor)}($paramsInput); }';
 
   return '''
-        /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.${skipFields ? '' : ' You can also use `$typeAnnotation(...).copyWith.fieldName(...)` to override fields one at a time with nullification support.'}
+        /// Creates a new instance with the provided field values.
+        /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored.${skipFields ? '' : ' To update a single field use `$typeAnnotation(...).copyWith.fieldName(value)`.'}
         ///
-        /// Usage
+        /// Example:
         /// ```dart
         /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
         /// ```

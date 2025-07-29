@@ -4,16 +4,18 @@ part of 'source_gen_entrypoint.dart';
 abstract class _$_PrivateWithNullableWithoutFieldsCWProxy<
   T extends Iterable<int>
 > {
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// _PrivateWithNullableWithoutFields<T>(...).copyWith(id: 12, name: "My name")
   /// ```
   _PrivateWithNullableWithoutFields<T> call({T? nullable});
 }
 
-/// Proxy class for `copyWith` functionality. This is a callable class and can be used as follows: `instanceOf_PrivateWithNullableWithoutFields.copyWith(...)`.
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOf_PrivateWithNullableWithoutFields.copyWith(...)`.
 class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
     implements _$_PrivateWithNullableWithoutFieldsCWProxy<T> {
   const _$_PrivateWithNullableWithoutFieldsCWProxyImpl(this._value);
@@ -21,9 +23,10 @@ class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
   final _PrivateWithNullableWithoutFields<T> _value;
 
   @override
-  /// This function **does support** nullification of nullable fields. All `null` values passed to `non-nullable` fields will be ignored.
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// _PrivateWithNullableWithoutFields<T>(...).copyWith(id: 12, name: "My name")
   /// ```
@@ -41,14 +44,16 @@ class _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T extends Iterable<int>>
 
 extension _$_PrivateWithNullableWithoutFieldsCopyWith<T extends Iterable<int>>
     on _PrivateWithNullableWithoutFields<T> {
-  /// Returns a callable class that can be used as follows: `instanceOf_PrivateWithNullableWithoutFields.copyWith(...)`.
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOf_PrivateWithNullableWithoutFields.copyWith(...)`.
   // ignore: library_private_types_in_public_api
   _$_PrivateWithNullableWithoutFieldsCWProxy<T> get copyWith =>
       _$_PrivateWithNullableWithoutFieldsCWProxyImpl<T>(this);
 
-  /// Copies the object with the specified fields set to `null`. Passing `false` has no effect. Prefer `copyWith(field: null)`.
+  /// Returns a copy of the object with the selected fields set to `null`.
+  /// A flag set to `false` leaves the field unchanged. Prefer `copyWith(field: null)`.
   ///
-  /// Usage
+  /// Example:
   /// ```dart
   /// _PrivateWithNullableWithoutFields<T>(...).copyWithNull(firstField: true, secondField: true)
   /// ```
