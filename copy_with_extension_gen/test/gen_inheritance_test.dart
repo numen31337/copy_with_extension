@@ -1,5 +1,5 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart' show test, expect;
+import 'package:test/test.dart' show test, expect, throwsNoSuchMethodError;
 
 part 'gen_inheritance_test.g.dart';
 
@@ -74,6 +74,20 @@ class ComplexSubClass<T, U extends String> extends BasicSubClass<T>
   }
 }
 
+class ImmutableBase {
+  const ImmutableBase({required this.id});
+
+  @CopyWithField(immutable: true)
+  final String id;
+}
+
+@CopyWith()
+class ImmutableChild extends ImmutableBase {
+  const ImmutableChild({required super.id, required this.name});
+
+  final String name;
+}
+
 void main() {
   test('BasicSubClass', () {
     final result = const BasicSubClass<bool>(id: 'test')
@@ -135,5 +149,17 @@ void main() {
 
     expect(result.abstractString, null);
     expect(result.copyWith.abstractString("test").abstractString, "test");
+  });
+
+  test('Inherited immutable field', () {
+    const child = ImmutableChild(id: '123', name: 'orig');
+
+    final updated = child.copyWith(name: 'changed');
+
+    expect(updated.id, '123');
+    expect(updated.name, 'changed');
+
+    final dynamic proxy = child.copyWith;
+    expect(() => proxy.id(2), throwsNoSuchMethodError);
   });
 }
