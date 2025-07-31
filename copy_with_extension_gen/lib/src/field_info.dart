@@ -62,9 +62,7 @@ class ConstructorParameterInfo extends FieldInfo {
     String fieldName,
     ClassElement2 classElement,
   ) {
-    final field = classElement.fields2
-        .where((e) => readElementNameOrThrow(e) == fieldName)
-        .fold<FieldElement2?>(null, (previousValue, element) => element);
+    final field = _lookupField(classElement, fieldName);
     if (field == null) return null;
 
     return FieldInfo(
@@ -158,7 +156,7 @@ class ConstructorParameterInfo extends FieldInfo {
       return const CopyWithFieldAnnotation(immutable: true);
     }
 
-    final fieldElement = classElement.getField2(fieldName);
+    final fieldElement = _lookupField(classElement, fieldName);
     if (fieldElement is! FieldElement2) {
       return defaults;
     }
@@ -175,5 +173,24 @@ class ConstructorParameterInfo extends FieldInfo {
     return CopyWithFieldAnnotation(
       immutable: immutable ?? defaults.immutable,
     );
+  }
+
+  /// Returns [FieldElement2] for [fieldName] searching the entire inheritance
+  /// hierarchy starting from [classElement].
+  static FieldElement2? _lookupField(
+    ClassElement2 classElement,
+    String fieldName,
+  ) {
+    final ownField = classElement.getField2(fieldName);
+    if (ownField is FieldElement2) return ownField;
+
+    for (final supertype in classElement.allSupertypes) {
+      final candidate = supertype.element3.getField2(fieldName);
+      if (candidate is FieldElement2) {
+        return candidate;
+      }
+    }
+
+    return null;
   }
 }
