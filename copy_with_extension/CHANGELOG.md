@@ -1,3 +1,7 @@
+## 8.0.0
+* **BREAKING** Private constructor parameters are now treated as immutable to avoid [invalid](https://github.com/numen31337/copy_with_extension/issues/85) `copyWith` parameter names.
+* **BREAKING** Field annotations are [inherited](https://github.com/numen31337/copy_with_extension/issues/70) from parent classes.
+
 ## 7.1.0
 * Added namespace support for classes using import prefixes.
 * Added comments and tests for clarity.
@@ -29,8 +33,8 @@
 * [Fix](https://github.com/numen31337/copy_with_extension/issues/74) Crash when object contains a dynamic field that is `null`.
 
 ## 5.0.0
-* Allow positioned constructor parameters (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
-* Ability to define library defaults settings globally (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
+* Allow positional constructor parameters (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
+* Ability to define library default settings globally (thanks [@mrgnhnt96](https://github.com/mrgnhnt96)).
 
 ## 4.0.4
 * Updating `analyzer` to `>=2.0.0 <6.0.0`
@@ -69,21 +73,21 @@
 * Updating dependencies.
 
 ## 2.0.0-nullsafety.1 Null Safety
-* Introduces support of null safety.
+* Introduces support for null safety.
 
 ## 1.4.0 Improving generic compatibility
-* Fixes issue with generating code for some classes with generic type parameters.
+* Fixes an issue with generating code for some classes with generic type parameters.
 
 ## 1.3.1 README Update
 * Update README.md
 
 ## 1.3.0 Immutable Fields
 * Fixes the `boolean-expression-must-not-be-null-exception` issue
-* Introduces `immutable` field annotation
+* Introduces the `immutable` field annotation
 
 ## 1.2.0 Generic Types
 
-* Introducing Generic Types Supports
+* Introducing support for generic types
 
 ## 1.1.0 copyWithNull
 
@@ -103,4 +107,4 @@
 
 ## 1.0.0 Initial release
 
-* Lets you generate a `copyWith` extension for objects annotated with `@CopyWith()`.
+* Allows you to generate a `copyWith` extension for objects annotated with `@CopyWith()`.
