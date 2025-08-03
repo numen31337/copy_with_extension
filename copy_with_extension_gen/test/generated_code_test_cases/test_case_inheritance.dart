@@ -1,9 +1,10 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
-abstract class _$BasicChildCWProxy {
+abstract class _$BasicChildCWProxy extends _$BasicClassCWProxy<Iterable<int>> {
   BasicChild childField(String childField);
 
+  @override
   BasicChild id(String id);
 
   /// Creates a new instance with the provided field values.
@@ -13,14 +14,18 @@ abstract class _$BasicChildCWProxy {
   /// ```dart
   /// BasicChild(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   BasicChild call({String childField, String id});
 }
 
 /// Callable proxy for `copyWith` functionality.
 /// Use as `instanceOfBasicChild.copyWith(...)` or call `instanceOfBasicChild.copyWith.fieldName(value)` for a single field.
-class _$BasicChildCWProxyImpl implements _$BasicChildCWProxy {
-  const _$BasicChildCWProxyImpl(this._value);
+class _$BasicChildCWProxyImpl extends _$BasicClassCWProxyImpl<Iterable<int>>
+    implements _$BasicChildCWProxy {
+  const _$BasicChildCWProxyImpl(this._value) : super(_value);
 
+  @override
+  // ignore: overridden_fields
   final BasicChild _value;
 
   @override
@@ -65,10 +70,12 @@ extension $BasicChildCopyWith on BasicChild {
 ''')
 @CopyWith()
 class BasicChild extends BasicClass<Iterable<int>> {
-  BasicChild(this.childField,
-      {required super.id,
-      required super.immutable,
-      required super.nullableImmutable});
+  BasicChild(
+    this.childField, {
+    required super.id,
+    required super.immutable,
+    required super.nullableImmutable,
+  });
 
   final String childField;
 }

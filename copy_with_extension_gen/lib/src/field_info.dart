@@ -33,9 +33,15 @@ class ConstructorParameterInfo extends FieldInfo {
     FormalParameterElement element,
     ClassElement2 classElement, {
     required this.isPositioned,
+    ClassElement2? annotatedSuper,
   })  : fieldAnnotation = _readFieldAnnotation(element, classElement),
         classFieldInfo =
             _classFieldInfo(readElementNameOrThrow(element), classElement),
+        isInherited = _isInherited(
+          readElementNameOrThrow(element),
+          classElement,
+          annotatedSuper,
+        ),
         super(
           name: readElementNameOrThrow(element),
           nullable: element.type.nullabilitySuffix != NullabilitySuffix.none,
@@ -48,9 +54,14 @@ class ConstructorParameterInfo extends FieldInfo {
   /// True if the field is positioned in the constructor
   final bool isPositioned;
 
-  /// Info relevant to the given field taken from the class itself, as contrary to the constructor parameter.
-  /// If `null`, the field with the given name wasn't found on the class.
+  /// Info relevant to the given field taken from the class itself, as contrary
+  /// to the constructor parameter. If `null`, the field with the given name
+  /// wasn't found on the class or its superclasses.
   final FieldInfo? classFieldInfo;
+
+  /// `true` if this field is declared in a superclass rather than the current
+  /// class. Used to annotate overridden members in generated proxies.
+  final bool isInherited;
 
   @override
   String toString() {
@@ -70,6 +81,33 @@ class ConstructorParameterInfo extends FieldInfo {
       nullable: field.type.nullabilitySuffix != NullabilitySuffix.none,
       type: field.type.getDisplayString(),
     );
+  }
+
+  /// Determines whether [fieldName] is declared on a superclass of
+  /// [classElement].
+  static bool _isInherited(
+    String fieldName,
+    ClassElement2 classElement,
+    ClassElement2? annotatedSuper,
+  ) {
+    if (classElement.getField2(fieldName) != null) return false;
+
+    if (annotatedSuper != null) {
+      if (annotatedSuper.getField2(fieldName) != null) return true;
+      for (final type in annotatedSuper.allSupertypes) {
+        if (type.element3.getField2(fieldName) != null) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    for (final type in classElement.allSupertypes) {
+      if (type.element3.getField2(fieldName) != null) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// Returns full type name including namespace for all nested type arguments.

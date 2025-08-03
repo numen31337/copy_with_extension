@@ -13,8 +13,9 @@ import 'package:source_gen/source_gen.dart'
 /// resolved or has no parameters.
 List<ConstructorParameterInfo> constructorFields(
   ClassElement2 element,
-  String? constructor,
-) {
+  String? constructor, {
+  ClassElement2? annotatedSuper,
+}) {
   final targetConstructor = constructor != null
       ? element.getNamedConstructor2(constructor)
       : element.unnamedConstructor2;
@@ -48,6 +49,7 @@ List<ConstructorParameterInfo> constructorFields(
       parameter,
       element,
       isPositioned: parameter.isPositional,
+      annotatedSuper: annotatedSuper,
     );
 
     fields.add(field);
@@ -79,9 +81,7 @@ CopyWithAnnotation readClassAnnotation(
 /// If `nameOnly` is `false`: `class MyClass<T extends String, Y>` returns `<T extends String, Y>`.
 String typeParametersString(ClassElement2 classElement, bool nameOnly) {
   final names = classElement.typeParameters2
-      .map(
-        (e) => nameOnly ? readElementNameOrThrow(e) : e.displayString2(),
-      )
+      .map((e) => nameOnly ? readElementNameOrThrow(e) : e.displayString2())
       .join(',');
   if (names.isNotEmpty) {
     return '<$names>';

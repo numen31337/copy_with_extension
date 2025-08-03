@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/element2.dart'
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
+import 'package:copy_with_extension_gen/src/inheritance.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:copy_with_extension_gen/src/templates.dart';
 import 'package:source_gen/source_gen.dart'
@@ -34,7 +35,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     final classAnnotation = readClassAnnotation(settings, annotation);
     final className = readElementNameOrThrow(element);
-    final fields = constructorFields(element, classAnnotation.constructor);
+
+    // Locate the nearest annotated superclass before gathering fields so
+    // inherited parameters can be tracked relative to that superclass only.
+    final superInfo = findAnnotatedSuper(element);
+
+    final fields = constructorFields(
+      element,
+      classAnnotation.constructor,
+      annotatedSuper: superInfo?.element,
+    );
     final typeParametersAnnotation = typeParametersString(element, false);
     final typeParametersNames = typeParametersString(element, true);
 
@@ -61,6 +71,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       skipFields: classAnnotation.skipFields,
       copyWithNull: classAnnotation.copyWithNull,
       constructor: classAnnotation.constructor,
+      superInfo: superInfo,
     );
   }
 }
