@@ -65,4 +65,11 @@ void main() {
     expect(updated.id, 1);
     expect(updated.name, isNull);
   });
+
+  test('explicit null for non-nullable field is ignored', () {
+    final original = TestNullability(1, [1], constructorFallback: 1);
+    final proxy = original.copyWith as dynamic;
+    final result = proxy(integers: null) as TestNullability;
+    expect(result.integers, [1]);
+  });
 }

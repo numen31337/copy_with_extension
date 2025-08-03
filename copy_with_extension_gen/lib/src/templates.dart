@@ -197,9 +197,12 @@ String copyWithValuesTemplate(
           ? '$r _value.${v.name},'
           : '$r ${v.name}: _value.${v.name},';
     }
+    final placeholder = v.nullable || v.isDynamic
+        ? '${v.name} == const \$CopyWithPlaceholder()'
+        : '${v.name} == const \$CopyWithPlaceholder() || ${v.name} == null';
 
     return '''$r ${v.isPositioned ? '' : '${v.name}:'}
-        ${v.name} == const \$CopyWithPlaceholder()
+        $placeholder
         ? _value.${v.name}
         // ignore: cast_nullable_to_non_nullable
         : ${v.name} as ${v.type},''';
