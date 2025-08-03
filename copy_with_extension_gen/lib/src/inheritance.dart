@@ -83,9 +83,6 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
 String _typeArguments(LibraryElement2 library, ParameterizedType type) {
   final args = type.typeArguments;
   if (args.isEmpty) return '';
-  final names = args.map((e) {
-    final name = typeNameWithPrefix(library, e);
-    return name.endsWith('?') ? name.substring(0, name.length - 1) : name;
-  }).join(',');
+  final names = args.map((e) => typeNameWithPrefix(library, e)).join(',');
   return '<$names>';
 }

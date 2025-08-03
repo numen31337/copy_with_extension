@@ -1,7 +1,7 @@
 import 'dart:typed_data' as ns;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart' show expect, isA, test;
+import 'package:test/test.dart' show expect, isA, test, isNull;
 
 part 'gen_inheritance_chain_test.g.dart';
 
@@ -39,6 +39,17 @@ class CopyD extends NoCopyC {
 
   final bool d;
   final ns.Uint16List? data;
+}
+
+@CopyWith()
+class Parent<T> {
+  Parent(this.value);
+  final T value;
+}
+
+@CopyWith()
+class Child extends Parent<int?> {
+  Child(super.value);
 }
 
 void main() {
@@ -91,4 +102,10 @@ void main() {
       expect(fielded._secret, 0);
     },
   );
+
+  test('Nullable generic type arguments are preserved in inheritance', () {
+    final result = Child(1).copyWith.value(null);
+    expect(result, isA<Child>());
+    expect(result.value, isNull);
+  });
 }
