@@ -22,11 +22,10 @@ abstract class _$BasicChildCWProxy extends _$BasicClassCWProxy<Iterable<int>> {
 /// Use as `instanceOfBasicChild.copyWith(...)` or call `instanceOfBasicChild.copyWith.fieldName(value)` for a single field.
 class _$BasicChildCWProxyImpl extends _$BasicClassCWProxyImpl<Iterable<int>>
     implements _$BasicChildCWProxy {
-  const _$BasicChildCWProxyImpl(this._value) : super(_value);
+  const _$BasicChildCWProxyImpl(BasicChild super._value);
 
   @override
-  // ignore: overridden_fields
-  final BasicChild _value;
+  BasicChild get _value => super._value as BasicChild;
 
   @override
   BasicChild childField(String childField) => call(childField: childField);

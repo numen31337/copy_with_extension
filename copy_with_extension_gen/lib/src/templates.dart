@@ -155,9 +155,9 @@ String copyWithProxyTemplate(
       /// Callable proxy for `copyWith` functionality.
       /// Use as `instanceOf$type.copyWith(...)`${skipFields ? '' : ' or call `instanceOf$type.copyWith.fieldName(value)` for a single field'}.
       class _\$${type}CWProxyImpl$typeParameters$extendsImpl implements _\$${type}CWProxy$typeParameterNames {
-        const _\$${type}CWProxyImpl(this._value)${superInfo != null ? ' : super(_value);' : ';'}
+        const _\$${type}CWProxyImpl(${superInfo != null ? '$type$typeParameterNames super._value' : 'this._value'});
 
-        ${superInfo != null ? '@override\n        // ignore: overridden_fields\n        ' : ''}final $type$typeParameterNames _value;
+        ${superInfo != null ? '@override\n        $type$typeParameterNames get _value => super._value as $type$typeParameterNames;' : 'final $type$typeParameterNames _value;'}
 
         $nonNullableFunctions
 
