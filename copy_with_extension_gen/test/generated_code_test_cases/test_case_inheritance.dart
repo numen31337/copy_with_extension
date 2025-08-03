@@ -29,10 +29,10 @@ class _$BasicChildCWProxyImpl extends _$BasicClassCWProxyImpl<Iterable<int>>
   final BasicChild _value;
 
   @override
-  BasicChild childField(String childField) => this(childField: childField);
+  BasicChild childField(String childField) => call(childField: childField);
 
   @override
-  BasicChild id(String id) => this(id: id);
+  BasicChild id(String id) => super.id(id) as BasicChild;
 
   @override
   /// Creates a new instance with the provided field values.

@@ -25,10 +25,10 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
   final BasicClass<T> _value;
 
   @override
-  BasicClass<T> id(String id) => this(id: id);
+  BasicClass<T> id(String id) => call(id: id);
 
   @override
-  BasicClass<T> optional(T? optional) => this(optional: optional);
+  BasicClass<T> optional(T? optional) => call(optional: optional);
 
   @override
   /// Creates a new instance with the provided field values.

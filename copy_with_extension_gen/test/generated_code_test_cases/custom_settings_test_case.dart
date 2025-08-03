@@ -63,10 +63,10 @@ extension $BasicClassCopyWith<T extends Iterable<int>> on BasicClass<T> {
   /// ```
   BasicClass<T> copyWithNull({bool optional = false}) {
     return BasicClass<T>(
-      id: this.id,
+      id: id,
       optional: optional == true ? null : this.optional,
-      immutable: this.immutable,
-      nullableImmutable: this.nullableImmutable,
+      immutable: immutable,
+      nullableImmutable: nullableImmutable,
     );
   }
 }

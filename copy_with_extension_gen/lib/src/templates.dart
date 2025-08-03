@@ -69,7 +69,7 @@ String copyWithNullTemplate(
   final nullParamsInput = fields.fold<String>('', (r, v) {
     final prefix = v.isPositioned ? '' : '${v.name}:';
     if (v.fieldAnnotation.immutable || !v.nullable) {
-      return '$r $prefix this.${v.name},';
+      return '$r $prefix ${v.name},';
     } else {
       return '$r $prefix ${v.name} == true ? null : this.${v.name},';
     }
@@ -116,17 +116,23 @@ String copyWithProxyTemplate(
       ? ''
       : ' extends _\$${superInfo.name}CWProxyImpl${superInfo.typeParametersAnnotation}';
 
-  // Generate proxy methods for each mutable field. These methods allow modification of a single field via `instance.copyWith.fieldName(value)`.
+  // Generate proxy methods for each mutable field. These methods allow
+  // modification of a single field via `instance.copyWith.fieldName(value)`.
+  // Inherited fields delegate to the superclass implementation to avoid
+  // duplicating logic.
   final nonNullableFunctions = skipFields
       ? ''
-      : filteredFields
-          .map(
-            (e) => '''
+      : filteredFields.map((e) {
+          final shouldDelegate =
+              superInfo != null && !superInfo.skipFields && e.isInherited;
+          final body = shouldDelegate
+              ? 'super.${e.name}(${e.name}) as $type$typeParameterNames'
+              : 'call(${e.name}: ${e.name})';
+          return '''
     @override
-    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => this(${e.name}: ${e.name});
-    ''',
-          )
-          .join('\n');
+    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => $body;
+    ''';
+        }).join('\n');
 
   // Interface used by the proxy class. It mirrors the proxy methods above.
   final nonNullableFunctionsInterface = skipFields
