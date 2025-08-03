@@ -1,5 +1,5 @@
 import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, Element2;
+    show ClassElement2, Element2, LibraryElement2;
 import 'package:analyzer/dart/element/type.dart' show ParameterizedType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
@@ -51,11 +51,12 @@ class AnnotatedCopyWithSuper {
 /// Returns `null` when no annotated superclass is found.
 AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
   const checker = TypeChecker.fromRuntime(CopyWith);
+  final library = classElement.library2;
   for (final supertype in classElement.allSupertypes) {
     final element = supertype.element3;
     if (element is ClassElement2 && checker.hasAnnotationOf(element)) {
       final name = readElementNameOrThrow(element as Element2);
-      final generics = _typeArguments(supertype);
+      final generics = _typeArguments(library, supertype);
       return AnnotatedCopyWithSuper(
         name: name,
         typeParametersAnnotation: generics,
@@ -69,11 +70,11 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
 
 /// Extracts the raw type arguments of [type] as `<T, U>` or returns an
 /// empty string when the type is not generic.
-String _typeArguments(ParameterizedType type) {
+String _typeArguments(LibraryElement2 library, ParameterizedType type) {
   final args = type.typeArguments;
   if (args.isEmpty) return '';
   final names = args.map((e) {
-    final name = e.getDisplayString();
+    final name = typeNameWithPrefix(library, e);
     return name.endsWith('?') ? name.substring(0, name.length - 1) : name;
   }).join(',');
   return '<$names>';

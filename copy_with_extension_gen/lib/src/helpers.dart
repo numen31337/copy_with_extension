@@ -1,5 +1,14 @@
 import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, ConstructorElement2, Element2;
+    show
+        ClassElement2,
+        ConstructorElement2,
+        Element2,
+        LibraryElement2,
+        LibraryImport,
+        PrefixElement2;
+import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/dart/element/type.dart'
+    show DartType, ParameterizedType;
 import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
@@ -107,3 +116,54 @@ String readElementNameOrThrow(Element2 element) {
 /// Returns constructor for the given type and optional named constructor name. E.g. "TestConstructor" or "TestConstructor._private" when "_private" constructor name is provided.
 String constructorFor(String typeAnnotation, String? namedConstructor) =>
     "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
+
+/// Recursively builds the display name for [type] including any import
+/// prefixes required to reference symbols from other libraries.
+String typeNameWithPrefix(LibraryElement2 library, DartType type) {
+  final nullability =
+      type.nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
+
+  if (type is ParameterizedType) {
+    final element = type.element3;
+    final name = element != null
+        ? '${_prefixFor(library, element.library2)}${element.name3}'
+        : displayStringWithoutNullability(type);
+
+    if (type.typeArguments.isNotEmpty) {
+      final args = type.typeArguments
+          .map((t) => typeNameWithPrefix(library, t))
+          .join(', ');
+      return '$name<$args>$nullability';
+    } else {
+      return '$name$nullability';
+    }
+  }
+
+  final displayName = displayStringWithoutNullability(type);
+  return '${_prefixFor(library, type.element3?.library2)}$displayName$nullability';
+}
+
+/// Returns the import prefix for [targetLibrary] if one exists in [library].
+String _prefixFor(LibraryElement2 library, LibraryElement2? targetLibrary) {
+  if (targetLibrary == null) return '';
+  final unit = library.fragments.first;
+  for (final PrefixElement2 prefix in unit.prefixes) {
+    for (final LibraryImport import in prefix.imports) {
+      if (import.importedLibrary2 == targetLibrary) {
+        final prefixName = prefix.name3;
+        if (prefixName is String && prefixName.isNotEmpty) {
+          return '$prefixName.';
+        }
+      }
+    }
+  }
+  return '';
+}
+
+/// Returns the `displayString` of [type] without a trailing question mark.
+String displayStringWithoutNullability(DartType type) {
+  final displayString = type.getDisplayString();
+  return displayString.endsWith('?')
+      ? displayString.substring(0, displayString.length - 1)
+      : displayString;
+}

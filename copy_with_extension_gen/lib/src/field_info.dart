@@ -1,13 +1,9 @@
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
 import 'package:analyzer/dart/element/nullability_suffix.dart';
-import 'package:analyzer/dart/element/type.dart'
-    show ParameterizedType, DartType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
 import 'package:analyzer/dart/element/element2.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
-import 'package:copy_with_extension_gen/src/helpers.dart'
-    show readElementNameOrThrow;
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /// Class field info relevant for code generation.
@@ -35,8 +31,10 @@ class ConstructorParameterInfo extends FieldInfo {
     required this.isPositioned,
     ClassElement2? annotatedSuper,
   })  : fieldAnnotation = _readFieldAnnotation(element, classElement),
-        classFieldInfo =
-            _classFieldInfo(readElementNameOrThrow(element), classElement),
+        classFieldInfo = _classFieldInfo(
+          readElementNameOrThrow(element),
+          classElement,
+        ),
         isInherited = _isInherited(
           readElementNameOrThrow(element),
           classElement,
@@ -117,65 +115,7 @@ class ConstructorParameterInfo extends FieldInfo {
       return element.type.getDisplayString();
     }
 
-    return _typeNameWithPrefix(library, element.type);
-  }
-
-  /// Recursively builds the name for the `type` including import prefixes.
-  static String _typeNameWithPrefix(LibraryElement2 library, DartType type) {
-    final nullability =
-        type.nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
-
-    if (type is ParameterizedType) {
-      final element = type.element3;
-      final name = element != null
-          ? '${_prefixFor(library, element.library2)}${element.name3}'
-          : _displayStringWithoutNullability(type);
-
-      if (type.typeArguments.isNotEmpty) {
-        final args = type.typeArguments
-            .map((t) => _typeNameWithPrefix(library, t))
-            .join(', ');
-        return '$name<$args>$nullability';
-      } else {
-        return '$name$nullability';
-      }
-    }
-
-    final displayName = _displayStringWithoutNullability(type);
-    return '${_prefixFor(library, type.element3?.library2)}$displayName$nullability';
-  }
-
-  /// Returns the import prefix for `targetLibrary` if one exists in `library`.
-  static String _prefixFor(
-    LibraryElement2 library,
-    LibraryElement2? targetLibrary,
-  ) {
-    if (targetLibrary == null) return '';
-    final unit = library.fragments.first;
-    for (final PrefixElement2 prefix in unit.prefixes) {
-      for (final LibraryImport import in prefix.imports) {
-        if (import.importedLibrary2 == targetLibrary) {
-          final prefixName = prefix.name3;
-          if (prefixName is String && prefixName.isNotEmpty) {
-            return '$prefixName.';
-          }
-        }
-      }
-    }
-
-    return '';
-  }
-
-  /// Returns the `displayString` of [type] without a trailing question mark.
-  ///
-  /// The analyzer's `withNullability` parameter is deprecated. To omit the
-  /// nullability suffix we obtain the string with nullability information and
-  /// strip the trailing `?` when present.
-  static String _displayStringWithoutNullability(DartType type) {
-    final displayString = type.getDisplayString();
-    return displayString.endsWith('?')
-        ? displayString.substring(0, displayString.length - 1)
-        : displayString;
+    return typeNameWithPrefix(library, element.type);
   }
 
   /// Restores the `CopyWithField` annotation provided by the user.
@@ -208,9 +148,7 @@ class ConstructorParameterInfo extends FieldInfo {
     final reader = ConstantReader(annotation);
     final immutable = reader.peek('immutable')?.boolValue;
 
-    return CopyWithFieldAnnotation(
-      immutable: immutable ?? defaults.immutable,
-    );
+    return CopyWithFieldAnnotation(immutable: immutable ?? defaults.immutable);
   }
 
   /// Returns [FieldElement2] for [fieldName] searching the entire inheritance
