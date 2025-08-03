@@ -3,7 +3,7 @@ import 'package:analyzer/dart/element/element2.dart'
 import 'package:analyzer/dart/element/type.dart' show ParameterizedType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
-import 'package:source_gen/source_gen.dart' show TypeChecker;
+import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /*
  * Proxy inheritance is implemented by having each generated proxy extend
@@ -26,6 +26,7 @@ class AnnotatedCopyWithSuper {
     required this.typeParametersAnnotation,
     required this.typeParametersNames,
     required this.element,
+    required this.skipFields,
   });
 
   /// The simple name of the superclass.
@@ -43,6 +44,10 @@ class AnnotatedCopyWithSuper {
 
   /// The element for the superclass, used for field lookups.
   final ClassElement2 element;
+
+  /// Whether the superclass suppressed field-specific methods using
+  /// `skipFields: true`.
+  final bool skipFields;
 }
 
 /// Walks the inheritance chain of [classElement] and returns information
@@ -57,11 +62,16 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
     if (element is ClassElement2 && checker.hasAnnotationOf(element)) {
       final name = readElementNameOrThrow(element as Element2);
       final generics = _typeArguments(library, supertype);
+      final annotation = checker.firstAnnotationOf(element);
+      final skipFields = annotation == null
+          ? false
+          : ConstantReader(annotation).peek('skipFields')?.boolValue ?? false;
       return AnnotatedCopyWithSuper(
         name: name,
         typeParametersAnnotation: generics,
         typeParametersNames: generics,
         element: element,
+        skipFields: skipFields,
       );
     }
   }

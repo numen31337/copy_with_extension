@@ -133,7 +133,7 @@ String copyWithProxyTemplate(
       : filteredFields
           .map(
             (e) => '''
-    ${superInfo != null && e.isInherited ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}(${e.type} ${e.name});
+    ${superInfo != null && !superInfo.skipFields && e.isInherited ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}(${e.type} ${e.name});
     ''',
           )
           .join('\n');
