@@ -1,5 +1,5 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart' show test, expect;
+import 'package:test/test.dart' show test, expect, isA, isNull;
 
 part 'gen_nullability_test.g.dart';
 
@@ -20,6 +20,14 @@ class TestNullability {
   /// https://github.com/numen31337/copy_with_extension/issues/79
   /// Case when a class has non-nullable type, but the constructor accepts nullable and falls back.
   final int constructorFallback;
+}
+
+@CopyWith(copyWithNull: true)
+class PositionalNull {
+  const PositionalNull(this.id, this.name);
+
+  final int id;
+  final String? name;
 }
 
 void main() {
@@ -48,5 +56,13 @@ void main() {
             .constructorFallback(2)
             .constructorFallback,
         2);
+  });
+
+  test('copyWithNull works with positional nullable fields', () {
+    const original = PositionalNull(1, 'name');
+    final updated = original.copyWithNull(name: true);
+    expect(updated, isA<PositionalNull>());
+    expect(updated.id, 1);
+    expect(updated.name, isNull);
   });
 }

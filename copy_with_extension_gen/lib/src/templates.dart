@@ -67,10 +67,11 @@ String copyWithNullTemplate(
 
   // Build the actual invocation parameters for the constructor call.
   final nullParamsInput = fields.fold<String>('', (r, v) {
+    final prefix = v.isPositioned ? '' : '${v.name}:';
     if (v.fieldAnnotation.immutable || !v.nullable) {
-      return '$r ${v.name}: ${v.name},';
+      return '$r $prefix this.${v.name},';
     } else {
-      return '$r ${v.name}: ${v.name} == true ? null : this.${v.name},';
+      return '$r $prefix ${v.name} == true ? null : this.${v.name},';
     }
   });
 
