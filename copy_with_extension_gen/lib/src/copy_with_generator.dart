@@ -38,13 +38,28 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     // Locate the nearest annotated superclass before gathering fields so
     // inherited parameters can be tracked relative to that superclass only.
-    final superInfo = findAnnotatedSuper(element);
+    var superInfo = findAnnotatedSuper(element);
 
     final fields = constructorFields(
       element,
       classAnnotation.constructor,
       annotatedSuper: superInfo?.element,
     );
+
+    if (superInfo != null) {
+      final superCtor = superInfo.constructor != null
+          ? superInfo.element.getNamedConstructor2(superInfo.constructor!)
+          : superInfo.element.unnamedConstructor2;
+      final requiredParams = superCtor?.formalParameters
+              .where((p) => p.isRequiredNamed || p.isRequiredPositional)
+              .map((p) => readElementNameOrThrow(p))
+              .toSet() ??
+          {};
+      final fieldNames = fields.map((e) => e.name).toSet();
+      if (!fieldNames.containsAll(requiredParams)) {
+        superInfo = null;
+      }
+    }
     final typeParametersAnnotation = typeParametersString(element, false);
     final typeParametersNames = typeParametersString(element, true);
 

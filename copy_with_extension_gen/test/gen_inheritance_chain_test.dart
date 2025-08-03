@@ -52,6 +52,11 @@ class Child extends Parent<int?> {
   Child(super.value);
 }
 
+@CopyWith()
+class ChildWithNullable extends CopyB<int?> {
+  ChildWithNullable(int? value) : super(a: '', b: value);
+}
+
 void main() {
   test(
     'Deep chain preserves subclass fields, generics, namespaces and private constructor params',
@@ -107,5 +112,12 @@ void main() {
     final result = Child(1).copyWith.value(null);
     expect(result, isA<Child>());
     expect(result.value, isNull);
+  });
+
+  test('Nullable generic type arguments are preserved in inheritance chain',
+      () {
+    final result = ChildWithNullable(1).copyWith.b(null);
+    expect(result, isA<ChildWithNullable>());
+    expect(result.b, isNull);
   });
 }

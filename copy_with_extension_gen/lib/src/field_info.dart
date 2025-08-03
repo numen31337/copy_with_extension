@@ -30,18 +30,19 @@ class ConstructorParameterInfo extends FieldInfo {
     ClassElement2 classElement, {
     required this.isPositioned,
     ClassElement2? annotatedSuper,
+    String? fieldName,
   })  : fieldAnnotation = _readFieldAnnotation(element, classElement),
         classFieldInfo = _classFieldInfo(
-          readElementNameOrThrow(element),
+          fieldName ?? readElementNameOrThrow(element),
           classElement,
         ),
         isInherited = _isInherited(
-          readElementNameOrThrow(element),
+          fieldName ?? readElementNameOrThrow(element),
           classElement,
           annotatedSuper,
         ),
         super(
-          name: readElementNameOrThrow(element),
+          name: fieldName ?? readElementNameOrThrow(element),
           nullable: element.type.nullabilitySuffix != NullabilitySuffix.none,
           type: _fullTypeName(element),
         );

@@ -1,3 +1,11 @@
+import 'package:analyzer/dart/ast/ast.dart'
+    show
+        ConstructorDeclaration,
+        ConstructorFieldInitializer,
+        NamedExpression,
+        SimpleIdentifier,
+        SuperConstructorInvocation;
+import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
 import 'package:analyzer/dart/element/element2.dart'
     show
         ClassElement2,
@@ -50,21 +58,65 @@ List<ConstructorParameterInfo> constructorFields(
       element: element,
     );
   }
+  final paramFieldMap = _superInitializerFieldMap(targetConstructor);
 
   final fields = <ConstructorParameterInfo>[];
 
   for (final parameter in parameters) {
+    final paramName = readElementNameOrThrow(parameter);
+    final fieldName = paramFieldMap[paramName];
+
     final field = ConstructorParameterInfo(
       parameter,
       element,
       isPositioned: parameter.isPositional,
       annotatedSuper: annotatedSuper,
+      fieldName: fieldName,
     );
 
-    fields.add(field);
+    if (field.classFieldInfo != null) {
+      fields.add(field);
+    }
   }
 
   return fields;
+}
+
+/// Builds a map of constructor parameter names to their corresponding field
+/// names when parameters are forwarded to a superclass with different names.
+Map<String, String> _superInitializerFieldMap(ConstructorElement2 constructor) {
+  final library = constructor.library2;
+  final session = library.session;
+
+  final parsed = session.getParsedLibraryByElement2(library);
+  if (parsed is! ParsedLibraryResult) return const {};
+  final declaration = parsed.getFragmentDeclaration(constructor.firstFragment);
+  final node = declaration?.node;
+  if (node is! ConstructorDeclaration) return const {};
+
+  final result = <String, String>{};
+
+  for (final initializer in node.initializers) {
+    if (initializer is ConstructorFieldInitializer) {
+      final fieldName = initializer.fieldName.name;
+      final expression = initializer.expression;
+      if (expression is SimpleIdentifier) {
+        result[expression.name] = fieldName;
+      }
+    } else if (initializer is SuperConstructorInvocation) {
+      for (final arg in initializer.argumentList.arguments) {
+        if (arg is NamedExpression) {
+          final fieldName = arg.name.label.name;
+          final expr = arg.expression;
+          if (expr is SimpleIdentifier) {
+            result[expr.name] = fieldName;
+          }
+        }
+      }
+    }
+  }
+
+  return result;
 }
 
 /// Restores the `CopyWith` annotation provided by the user.

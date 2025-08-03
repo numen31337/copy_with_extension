@@ -27,6 +27,7 @@ class AnnotatedCopyWithSuper {
     required this.typeParametersNames,
     required this.element,
     required this.skipFields,
+    required this.constructor,
   });
 
   /// The simple name of the superclass.
@@ -48,6 +49,9 @@ class AnnotatedCopyWithSuper {
   /// Whether the superclass suppressed field-specific methods using
   /// `skipFields: true`.
   final bool skipFields;
+
+  /// Named constructor used by the superclass, if any.
+  final String? constructor;
 }
 
 /// Walks the inheritance chain of [classElement] and returns information
@@ -63,15 +67,18 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
       final name = readElementNameOrThrow(element as Element2);
       final generics = _typeArguments(library, supertype);
       final annotation = checker.firstAnnotationOf(element);
-      final skipFields = annotation == null
-          ? false
-          : ConstantReader(annotation).peek('skipFields')?.boolValue ?? false;
+      final annotationReader =
+          annotation == null ? null : ConstantReader(annotation);
+      final skipFields =
+          annotationReader?.peek('skipFields')?.boolValue ?? false;
+      final constructor = annotationReader?.peek('constructor')?.stringValue;
       return AnnotatedCopyWithSuper(
         name: name,
         typeParametersAnnotation: generics,
         typeParametersNames: generics,
         element: element,
         skipFields: skipFields,
+        constructor: constructor,
       );
     }
   }
