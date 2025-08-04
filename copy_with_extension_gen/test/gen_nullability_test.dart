@@ -30,6 +30,12 @@ class PositionalNull {
   final String? name;
 }
 
+@CopyWith(copyWithNull: true)
+class DynamicHolder {
+  DynamicHolder(this.value);
+  final dynamic value;
+}
+
 void main() {
   test('TestNullability', () {
     // Test for crash in both flows for `dynamicField`, when `dynamicField` is affected and not affected.
@@ -71,5 +77,18 @@ void main() {
     final proxy = original.copyWith as dynamic;
     final result = proxy(integers: null) as TestNullability;
     expect(result.integers, [1]);
+  });
+
+  test('dynamic field null handling in copyWith and copyWithNull', () {
+    final original = DynamicHolder('value');
+
+    final viaCopyWith = original.copyWith(value: null);
+    expect(viaCopyWith.value, isNull);
+
+    final viaCopyWithNull = original.copyWithNull(value: true);
+    expect(viaCopyWithNull.value, isNull);
+
+    final unchanged = original.copyWithNull();
+    expect(unchanged.value, 'value');
   });
 }

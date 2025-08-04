@@ -201,7 +201,7 @@ String copyWithValuesTemplate(
           ? '$r _value.${v.name},'
           : '$r ${v.name}: _value.${v.name},';
     }
-    final placeholder = v.nullable || v.isDynamic
+    final placeholder = v.nullable
         ? '${v.name} == const \$CopyWithPlaceholder()'
         : '${v.name} == const \$CopyWithPlaceholder() || ${v.name} == null';
 

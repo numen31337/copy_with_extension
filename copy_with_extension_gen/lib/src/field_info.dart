@@ -1,5 +1,6 @@
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
 import 'package:analyzer/dart/element/nullability_suffix.dart';
+import 'package:analyzer/dart/element/type.dart' show DynamicType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
 import 'package:analyzer/dart/element/element2.dart';
@@ -13,7 +14,7 @@ class FieldInfo {
   /// Parameter / field type.
   final String name;
 
-  /// If the type is nullable. `dynamic` is considered non-nullable as it doesn't have nullability flag.
+  /// If the type is nullable. `dynamic` lacks a nullability flag but accepts `null`, so it's treated as nullable.
   final bool nullable;
 
   /// Type name with nullability flag.
@@ -43,7 +44,8 @@ class ConstructorParameterInfo extends FieldInfo {
         ),
         super(
           name: fieldName ?? readElementNameOrThrow(element),
-          nullable: element.type.nullabilitySuffix != NullabilitySuffix.none,
+          nullable: element.type.nullabilitySuffix != NullabilitySuffix.none ||
+              element.type is DynamicType,
           type: _fullTypeName(element),
         );
 
@@ -77,7 +79,8 @@ class ConstructorParameterInfo extends FieldInfo {
 
     return FieldInfo(
       name: readElementNameOrThrow(field),
-      nullable: field.type.nullabilitySuffix != NullabilitySuffix.none,
+      nullable: field.type.nullabilitySuffix != NullabilitySuffix.none ||
+          field.type is DynamicType,
       type: field.type.getDisplayString(),
     );
   }
