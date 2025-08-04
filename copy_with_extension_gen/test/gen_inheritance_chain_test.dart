@@ -95,6 +95,18 @@ class BoundedChild<S extends int> extends BaseBound<List<S>> {
   final S extra;
 }
 
+@CopyWith()
+class ReorderParent<A, B> {
+  ReorderParent(this.a, this.b);
+  final A a;
+  final B b;
+}
+
+@CopyWith()
+class ReorderChild<X, Y> extends ReorderParent<Y, X> {
+  ReorderChild(super.a, super.b);
+}
+
 void main() {
   test(
     'Deep chain preserves subclass fields, generics, namespaces and private constructor params',
@@ -212,5 +224,11 @@ void main() {
     final baseCopy = base.copyWith(value: const [4]);
     expect(baseCopy, isA<BaseBound<List<int>>>());
     expect(baseCopy.value, [4]);
+  });
+
+  test('copyWith preserves subclass type with reordered generics', () {
+    final child = ReorderChild<int, String>('s', 1);
+    final copy = child.copyWith.a('t');
+    expect(copy, isA<ReorderChild<int, String>>());
   });
 }

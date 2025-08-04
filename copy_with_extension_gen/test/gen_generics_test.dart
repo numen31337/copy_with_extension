@@ -1,5 +1,5 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart' show test, expect;
+import 'package:test/test.dart' show test, expect, isA;
 
 part 'gen_generics_test.g.dart';
 
@@ -16,6 +16,17 @@ class Generics<G, T extends Iterable<G>> {
   final List<T> genericFromClass;
   final List<String?> nullableGeneric;
   final List<List<List<int?>?>>? deepNestedGeneric;
+}
+
+@CopyWith()
+class Node<T extends Node<T>> {
+  Node(this.next);
+  final T? next;
+}
+
+@CopyWith()
+class IntNode extends Node<IntNode> {
+  IntNode(super.next);
 }
 
 void main() {
@@ -76,5 +87,10 @@ void main() {
       generic.copyWith.deepNestedGeneric([]).deepNestedGeneric.runtimeType,
       <List<List<int?>?>>[].runtimeType,
     );
+  });
+
+  test('F-bounded generics', () {
+    final copy = IntNode(null).copyWith.next(IntNode(null));
+    expect(copy, isA<IntNode>());
   });
 }
