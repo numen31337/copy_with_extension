@@ -1,19 +1,13 @@
 import 'package:analyzer/dart/ast/ast.dart'
     show
-        CascadeExpression,
         ConstructorDeclaration,
         ConstructorFieldInitializer,
         Expression,
-        MethodInvocation,
         NamedExpression,
-        ParenthesizedExpression,
-        PostfixExpression,
-        PrefixExpression,
-        PrefixedIdentifier,
-        PropertyAccess,
         SimpleIdentifier,
         SuperConstructorInvocation;
 import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
+import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
 import 'package:analyzer/dart/element/element2.dart'
     show
         ClassElement2,
@@ -102,22 +96,27 @@ Map<String, String> _superInitializerFieldMap(ConstructorElement2 constructor) {
   final node = declaration?.node;
   if (node is! ConstructorDeclaration) return const {};
 
+  final parameterNames = constructor.formalParameters
+      .map((p) => readElementNameOrThrow(p))
+      .toSet();
+
   final result = <String, String>{};
 
   for (final initializer in node.initializers) {
     if (initializer is ConstructorFieldInitializer) {
       final fieldName = initializer.fieldName.name;
-      final paramName = _extractForwardedParameter(initializer.expression);
+      final paramName =
+          _extractForwardedParameter(initializer.expression, parameterNames);
       if (paramName != null) {
         result[paramName] = fieldName;
       }
     } else if (initializer is SuperConstructorInvocation) {
       for (final arg in initializer.argumentList.arguments) {
         if (arg is NamedExpression) {
-          final fieldName = arg.name.label.name;
-          final paramName = _extractForwardedParameter(arg.expression);
+          final paramName =
+              _extractForwardedParameter(arg.expression, parameterNames);
           if (paramName != null) {
-            result[paramName] = fieldName;
+            result[paramName] = arg.name.label.name;
           }
         }
       }
@@ -132,38 +131,32 @@ Map<String, String> _superInitializerFieldMap(ConstructorElement2 constructor) {
 ///
 /// This walks the expression tree to find the underlying [SimpleIdentifier]
 /// serving as the root target of any property access or method invocation.
-String? _extractForwardedParameter(Expression expression) {
-  if (expression is SimpleIdentifier) return expression.name;
-  if (expression is PrefixedIdentifier) {
-    return _extractForwardedParameter(expression.prefix);
-  }
-  if (expression is PropertyAccess) {
-    final target = expression.target;
-    if (target != null) {
-      return _extractForwardedParameter(target);
-    }
-    return null;
-  }
-  if (expression is MethodInvocation) {
-    final target = expression.target;
-    if (target != null) {
-      return _extractForwardedParameter(target);
-    }
-    return null;
-  }
-  if (expression is ParenthesizedExpression) {
-    return _extractForwardedParameter(expression.expression);
-  }
-  if (expression is CascadeExpression) {
-    return _extractForwardedParameter(expression.target);
-  }
-  if (expression is PostfixExpression) {
-    return _extractForwardedParameter(expression.operand);
-  }
-  if (expression is PrefixExpression) {
-    return _extractForwardedParameter(expression.operand);
+String? _extractForwardedParameter(
+  Expression expression,
+  Set<String> parameterNames,
+) {
+  final visitor = _ForwardedParameterVisitor(parameterNames);
+  expression.accept(visitor);
+  if (visitor.names.length == 1) {
+    return visitor.names.first;
   }
   return null;
+}
+
+class _ForwardedParameterVisitor extends RecursiveAstVisitor<void> {
+  _ForwardedParameterVisitor(this.candidates);
+
+  final Set<String> candidates;
+  final Set<String> names = {};
+
+  @override
+  void visitSimpleIdentifier(SimpleIdentifier node) {
+    final name = node.name;
+    if (candidates.contains(name)) {
+      names.add(name);
+    }
+    super.visitSimpleIdentifier(node);
+  }
 }
 
 /// Restores the `CopyWith` annotation provided by the user.
