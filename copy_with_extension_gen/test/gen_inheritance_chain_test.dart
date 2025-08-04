@@ -57,6 +57,13 @@ class ChildWithNullable extends CopyB<int?> {
   ChildWithNullable(int? value) : super(a: '', b: value);
 }
 
+@CopyWith(skipFields: true)
+class ChildWithSkip extends Parent<int> {
+  ChildWithSkip(super.value, {this.extra});
+
+  final String? extra;
+}
+
 void main() {
   test(
     'Deep chain preserves subclass fields, generics, namespaces and private constructor params',
@@ -119,5 +126,14 @@ void main() {
     final result = ChildWithNullable(1).copyWith.b(null);
     expect(result, isA<ChildWithNullable>());
     expect(result.b, isNull);
+  });
+
+  test('Superclass field methods return subclass type when subclass skips fields', () {
+    final child = ChildWithSkip(1, extra: 'foo');
+
+    final result = child.copyWith.value(2);
+    expect(result, isA<ChildWithSkip>());
+    expect(result.value, 2);
+    expect(result.extra, 'foo');
   });
 }

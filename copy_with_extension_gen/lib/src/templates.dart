@@ -116,34 +116,38 @@ String copyWithProxyTemplate(
       ? ''
       : ' extends _\$${superInfo.name}CWProxyImpl${superInfo.typeParametersAnnotation}';
 
+  // Determine which fields require proxy methods. When [skipFields] is true,
+  // only inherited fields need to be overridden to adjust the return type.
+  final fieldsForProxyMethods = filteredFields.where(
+    (e) =>
+        !skipFields ||
+        (superInfo != null && !superInfo.skipFields && e.isInherited),
+  );
+
   // Generate proxy methods for each mutable field. These methods allow
   // modification of a single field via `instance.copyWith.fieldName(value)`.
   // Inherited fields delegate to the superclass implementation to avoid
   // duplicating logic.
-  final nonNullableFunctions = skipFields
-      ? ''
-      : filteredFields.map((e) {
-          final shouldDelegate =
-              superInfo != null && !superInfo.skipFields && e.isInherited;
-          final body = shouldDelegate
-              ? 'super.${e.name}(${e.name}) as $type$typeParameterNames'
-              : 'call(${e.name}: ${e.name})';
-          return '''
+  final nonNullableFunctions = fieldsForProxyMethods.map((e) {
+    final shouldDelegate =
+        superInfo != null && !superInfo.skipFields && e.isInherited;
+    final body = shouldDelegate
+        ? 'super.${e.name}(${e.name}) as $type$typeParameterNames'
+        : 'call(${e.name}: ${e.name})';
+    return '''
     @override
     $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => $body;
     ''';
-        }).join('\n');
+  }).join('\n');
 
   // Interface used by the proxy class. It mirrors the proxy methods above.
-  final nonNullableFunctionsInterface = skipFields
-      ? ''
-      : filteredFields
-          .map(
-            (e) => '''
+  final nonNullableFunctionsInterface = fieldsForProxyMethods
+      .map(
+        (e) => '''
     ${superInfo != null && !superInfo.skipFields && e.isInherited ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}(${e.type} ${e.name});
     ''',
-          )
-          .join('\n');
+      )
+      .join('\n');
 
   return '''
       abstract class _\$${type}CWProxy$typeParameters$extendsProxy {
