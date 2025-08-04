@@ -64,6 +64,23 @@ class ChildWithSkip extends Parent<int> {
   final String? extra;
 }
 
+@CopyWith()
+class GrandGeneric<T> {
+  const GrandGeneric(this.value);
+
+  final T value;
+}
+
+@CopyWith()
+class ParentGeneric<U> extends GrandGeneric<List<U>> {
+  const ParentGeneric(super.value);
+}
+
+@CopyWith()
+class ChildGeneric<V> extends ParentGeneric<Set<V>> {
+  const ChildGeneric(super.value);
+}
+
 void main() {
   test(
     'Deep chain preserves subclass fields, generics, namespaces and private constructor params',
@@ -128,12 +145,40 @@ void main() {
     expect(result.b, isNull);
   });
 
-  test('Superclass field methods return subclass type when subclass skips fields', () {
+  test(
+      'Superclass field methods return subclass type when subclass skips fields',
+      () {
     final child = ChildWithSkip(1, extra: 'foo');
 
     final result = child.copyWith.value(2);
     expect(result, isA<ChildWithSkip>());
     expect(result.value, 2);
     expect(result.extra, 'foo');
+  });
+
+  test('copyWith handles deep generic inheritance chains', () {
+    final leaf = ChildGeneric<int>([
+      {1}
+    ]);
+
+    final leafCopy = leaf.copyWith.value([
+      {2}
+    ]);
+    expect(leafCopy, isA<ChildGeneric<int>>());
+    expect(leafCopy.value.single.contains(2), true);
+
+    ParentGeneric<Set<int>> parent = leaf;
+    final parentCopy = parent.copyWith(value: [
+      {3}
+    ]);
+    expect(parentCopy, isA<ParentGeneric<Set<int>>>());
+    expect(parentCopy.value.single.contains(3), true);
+
+    GrandGeneric<List<Set<int>>> grand = leaf;
+    final grandCopy = grand.copyWith.value([
+      {4}
+    ]);
+    expect(grandCopy, isA<GrandGeneric<List<Set<int>>>>());
+    expect(grandCopy.value.single.contains(4), true);
   });
 }
