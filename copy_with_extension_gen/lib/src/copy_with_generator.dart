@@ -40,6 +40,15 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     // inherited parameters can be tracked relative to that superclass only.
     var superInfo = findAnnotatedSuper(element);
 
+    // When `skipFields` is enabled and the closest annotated superclass is not
+    // the direct parent, avoid proxy inheritance to ensure field-specific
+    // methods from ancestors are not exposed.
+    if (classAnnotation.skipFields &&
+        superInfo != null &&
+        element.supertype?.element3 != superInfo.element) {
+      superInfo = null;
+    }
+
     final fields = constructorFields(
       element,
       classAnnotation.constructor,
