@@ -60,13 +60,11 @@ List<ConstructorParameterInfo> constructorFields(
       element: element,
     );
   }
-  final paramFieldMap = _superInitializerFieldMap(targetConstructor);
-
   final fields = <ConstructorParameterInfo>[];
 
   for (final parameter in parameters) {
     final paramName = readElementNameOrThrow(parameter);
-    final fieldName = paramFieldMap[paramName];
+    final fieldName = _resolveFieldName(element, targetConstructor, paramName);
 
     final field = ConstructorParameterInfo(
       parameter,
@@ -111,6 +109,9 @@ Map<String, String> _superInitializerFieldMap(ConstructorElement2 constructor) {
         result[paramName] = fieldName;
       }
     } else if (initializer is SuperConstructorInvocation) {
+      var positionalIndex = 0;
+      final superParams =
+          constructor.superConstructor2?.formalParameters ?? const [];
       for (final arg in initializer.argumentList.arguments) {
         if (arg is NamedExpression) {
           final paramName =
@@ -118,6 +119,13 @@ Map<String, String> _superInitializerFieldMap(ConstructorElement2 constructor) {
           if (paramName != null) {
             result[paramName] = arg.name.label.name;
           }
+        } else {
+          final paramName = _extractForwardedParameter(arg, parameterNames);
+          if (paramName != null && positionalIndex < superParams.length) {
+            final superParam = superParams[positionalIndex];
+            result[paramName] = readElementNameOrThrow(superParam);
+          }
+          positionalIndex++;
         }
       }
     }
@@ -157,6 +165,38 @@ class _ForwardedParameterVisitor extends RecursiveAstVisitor<void> {
     }
     super.visitSimpleIdentifier(node);
   }
+}
+
+String? _resolveFieldName(
+  ClassElement2 element,
+  ConstructorElement2 constructor,
+  String paramName,
+) {
+  final map = _superInitializerFieldMap(constructor);
+  final forwarded = map[paramName];
+  final candidate = forwarded ?? paramName;
+  if (_hasField(element, candidate)) {
+    return candidate;
+  }
+  if (forwarded == null) {
+    return null;
+  }
+  final superConstructor = constructor.superConstructor2;
+  final superClass = element.supertype?.element3 as ClassElement2?;
+  if (superConstructor == null || superClass == null) {
+    return null;
+  }
+  return _resolveFieldName(superClass, superConstructor, forwarded);
+}
+
+bool _hasField(ClassElement2 element, String fieldName) {
+  if (element.getField2(fieldName) != null) return true;
+  for (final type in element.allSupertypes) {
+    if (type.element3.getField2(fieldName) != null) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /// Restores the `CopyWith` annotation provided by the user.
