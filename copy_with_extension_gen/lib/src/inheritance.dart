@@ -23,6 +23,7 @@ import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 class AnnotatedCopyWithSuper {
   const AnnotatedCopyWithSuper({
     required this.name,
+    required this.prefix,
     required this.typeArguments,
     required this.element,
     required this.skipFields,
@@ -32,6 +33,9 @@ class AnnotatedCopyWithSuper {
 
   /// The simple name of the superclass.
   final String name;
+
+  /// Import prefix used to reference the superclass, if any.
+  final String prefix;
 
   /// Raw type arguments provided to the superclass.
   final List<DartType> typeArguments;
@@ -72,6 +76,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
     final element = supertype.element3;
     if (element is ClassElement2 && checker.hasAnnotationOf(element)) {
       final name = readElementNameOrThrow(element as Element2);
+      final prefix = libraryImportPrefix(library, element.library2);
       final annotation = checker.firstAnnotationOf(element);
       final annotationReader =
           annotation == null ? null : ConstantReader(annotation);
@@ -80,6 +85,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
       final constructor = annotationReader?.peek('constructor')?.stringValue;
       return AnnotatedCopyWithSuper(
         name: name,
+        prefix: prefix,
         typeArguments: supertype.typeArguments,
         element: element,
         skipFields: skipFields,

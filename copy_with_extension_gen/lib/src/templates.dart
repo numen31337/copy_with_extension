@@ -111,10 +111,10 @@ String copyWithProxyTemplate(
   // subclass' proxy compatible with the superclass and allows chaining.
   final extendsProxy = superInfo == null
       ? ''
-      : ' extends _\$${superInfo.name}CWProxy${superInfo.typeArgumentsAnnotation()}';
+      : ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxy${superInfo.typeArgumentsAnnotation()}';
   final extendsImpl = superInfo == null
       ? ''
-      : ' extends _\$${superInfo.name}CWProxyImpl${superInfo.typeArgumentsAnnotation()}';
+      : ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxyImpl${superInfo.typeArgumentsAnnotation()}';
 
   // Determine which fields require proxy methods. When [skipFields] is true,
   // only inherited fields need to be overridden to adjust the return type.

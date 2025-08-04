@@ -225,7 +225,7 @@ String typeNameWithPrefix(LibraryElement2 library, DartType type) {
   if (type is ParameterizedType) {
     final element = type.element3;
     final name = element != null
-        ? '${_prefixFor(library, element.library2)}${element.name3}'
+        ? '${libraryImportPrefix(library, element.library2)}${element.name3}'
         : displayStringWithoutNullability(type);
 
     if (type.typeArguments.isNotEmpty) {
@@ -239,11 +239,12 @@ String typeNameWithPrefix(LibraryElement2 library, DartType type) {
   }
 
   final displayName = displayStringWithoutNullability(type);
-  return '${_prefixFor(library, type.element3?.library2)}$displayName$nullability';
+  return '${libraryImportPrefix(library, type.element3?.library2)}$displayName$nullability';
 }
 
 /// Returns the import prefix for [targetLibrary] if one exists in [library].
-String _prefixFor(LibraryElement2 library, LibraryElement2? targetLibrary) {
+String libraryImportPrefix(
+    LibraryElement2 library, LibraryElement2? targetLibrary) {
   if (targetLibrary == null) return '';
   final unit = library.fragments.first;
   for (final PrefixElement2 prefix in unit.prefixes) {
