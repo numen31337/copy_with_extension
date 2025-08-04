@@ -27,6 +27,7 @@ class AnnotatedCopyWithSuper {
     required this.typeArguments,
     required this.element,
     required this.skipFields,
+    required this.copyWithNull,
     required this.constructor,
     required this.originLibrary,
   });
@@ -46,6 +47,9 @@ class AnnotatedCopyWithSuper {
   /// Whether the superclass suppressed field-specific methods using
   /// `skipFields: true`.
   final bool skipFields;
+
+  /// Whether the superclass enables `copyWithNull` generation.
+  final bool copyWithNull;
 
   /// Named constructor used by the superclass, if any.
   final String? constructor;
@@ -82,6 +86,8 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
           annotation == null ? null : ConstantReader(annotation);
       final skipFields =
           annotationReader?.peek('skipFields')?.boolValue ?? false;
+      final copyWithNull =
+          annotationReader?.peek('copyWithNull')?.boolValue ?? false;
       final constructor = annotationReader?.peek('constructor')?.stringValue;
       return AnnotatedCopyWithSuper(
         name: name,
@@ -89,6 +95,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
         typeArguments: supertype.typeArguments,
         element: element,
         skipFields: skipFields,
+        copyWithNull: copyWithNull,
         constructor: constructor,
         originLibrary: library,
       );

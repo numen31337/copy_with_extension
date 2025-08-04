@@ -82,6 +82,13 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       }
     }
 
+    var generateCopyWithNull = classAnnotation.copyWithNull;
+    if (!generateCopyWithNull &&
+        superInfo?.copyWithNull == true &&
+        fields.any((f) => f.nullable && !f.fieldAnnotation.immutable)) {
+      generateCopyWithNull = true;
+    }
+
     return extensionTemplate(
       isPrivate: element.isPrivate,
       className: className,
@@ -89,7 +96,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       typeParametersNames: typeParametersNames,
       fields: fields,
       skipFields: classAnnotation.skipFields,
-      copyWithNull: classAnnotation.copyWithNull,
+      copyWithNull: generateCopyWithNull,
       constructor: classAnnotation.constructor,
       superInfo: superInfo,
     );

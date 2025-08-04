@@ -52,6 +52,13 @@ class ChildNull extends ParentNull {
   final bool? d;
 }
 
+@CopyWith(skipFields: true)
+class ChildNullSkip extends ParentNull {
+  const ChildNullSkip({super.a, super.b, required this.c});
+
+  final int c;
+}
+
 void main() {
   test('TestNullability', () {
     // Test for crash in both flows for `dynamicField`, when `dynamicField` is affected and not affected.
@@ -117,5 +124,16 @@ void main() {
     expect(result.b, 1);
     expect(result.c, 2.0);
     expect(result.d, isNull);
+  });
+
+  test('copyWithNull nullifies inherited field and preserves child type', () {
+    final child = ChildNullSkip(a: 'a', b: 1, c: 3);
+
+    final dynamic result = child.copyWithNull(a: true);
+    expect(result, isA<ChildNullSkip>());
+    final childResult = result as ChildNullSkip;
+    expect(childResult.a, isNull);
+    expect(childResult.b, 1);
+    expect(childResult.c, 3);
   });
 }
