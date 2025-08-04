@@ -36,6 +36,22 @@ class DynamicHolder {
   final dynamic value;
 }
 
+@CopyWith(copyWithNull: true)
+class ParentNull {
+  const ParentNull({this.a, this.b});
+
+  final String? a;
+  final int? b;
+}
+
+@CopyWith(copyWithNull: true)
+class ChildNull extends ParentNull {
+  const ChildNull({super.a, super.b, this.c, this.d});
+
+  final double? c;
+  final bool? d;
+}
+
 void main() {
   test('TestNullability', () {
     // Test for crash in both flows for `dynamicField`, when `dynamicField` is affected and not affected.
@@ -90,5 +106,16 @@ void main() {
 
     final unchanged = original.copyWithNull();
     expect(unchanged.value, 'value');
+  });
+
+  test('copyWithNull nullifies inherited and subclass fields', () {
+    final child = ChildNull(a: 'a', b: 1, c: 2.0, d: true);
+
+    final result = child.copyWithNull(a: true, d: true);
+    expect(result, isA<ChildNull>());
+    expect(result.a, isNull);
+    expect(result.b, 1);
+    expect(result.c, 2.0);
+    expect(result.d, isNull);
   });
 }

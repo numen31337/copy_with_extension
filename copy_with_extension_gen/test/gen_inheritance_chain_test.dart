@@ -81,6 +81,20 @@ class ChildGeneric<V> extends ParentGeneric<Set<V>> {
   const ChildGeneric(super.value);
 }
 
+@CopyWith()
+class BaseBound<T> {
+  const BaseBound({required this.value});
+
+  final T value;
+}
+
+@CopyWith()
+class BoundedChild<S extends int> extends BaseBound<List<S>> {
+  const BoundedChild({required super.value, required this.extra});
+
+  final S extra;
+}
+
 void main() {
   test(
     'Deep chain preserves subclass fields, generics, namespaces and private constructor params',
@@ -180,5 +194,23 @@ void main() {
     ]);
     expect(grandCopy, isA<GrandGeneric<List<Set<int>>>>());
     expect(grandCopy.value.single.contains(4), true);
+  });
+
+  test('Nested generics with bounds propagate through inheritance', () {
+    final child = BoundedChild<int>(value: const [1], extra: 2);
+
+    final valueCopy = child.copyWith.value(const [3]);
+    expect(valueCopy, isA<BoundedChild<int>>());
+    expect(valueCopy.value, [3]);
+    expect(valueCopy.extra, 2);
+
+    final extraCopy = child.copyWith.extra(3);
+    expect(extraCopy.extra, 3);
+    expect(extraCopy.value, [1]);
+
+    BaseBound<List<int>> base = child;
+    final baseCopy = base.copyWith(value: const [4]);
+    expect(baseCopy, isA<BaseBound<List<int>>>());
+    expect(baseCopy.value, [4]);
   });
 }

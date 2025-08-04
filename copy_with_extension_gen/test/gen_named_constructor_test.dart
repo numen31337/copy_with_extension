@@ -1,5 +1,5 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart' show test, expect;
+import 'package:test/test.dart' show expect, isA, test;
 
 part 'gen_named_constructor_test.g.dart';
 
@@ -41,6 +41,20 @@ class DefaultValuesConstructor {
   final String? anotherField;
 }
 
+@CopyWith(constructor: 'named')
+class SuperNamed {
+  const SuperNamed.named({required this.a});
+
+  final int a;
+}
+
+@CopyWith()
+class SubNamed extends SuperNamed {
+  const SubNamed({required super.a, required this.b}) : super.named();
+
+  final String b;
+}
+
 void main() {
   test('CopyWithNamedConstructor', () {
     expect(
@@ -74,5 +88,19 @@ void main() {
     expect(result.id, "test");
     expect(result.field, "test");
     expect(result.anotherField, "123");
+  });
+
+  test('Subclass proxy respects superclass named constructor', () {
+    final original = SubNamed(a: 1, b: 'b');
+
+    final updated = original.copyWith(a: 2, b: 'c');
+    expect(updated, isA<SubNamed>());
+    expect(updated.a, 2);
+    expect(updated.b, 'c');
+
+    final baseUpdated = original.copyWith(a: 3);
+    expect(baseUpdated, isA<SubNamed>());
+    expect(baseUpdated.a, 3);
+    expect(baseUpdated.b, 'b');
   });
 }
