@@ -67,7 +67,7 @@ String copyWithNullTemplate(
 
   // Build the actual invocation parameters for the constructor call.
   final nullParamsInput = fields.fold<String>('', (r, v) {
-    final prefix = v.isPositioned ? '' : '${v.name}:';
+    final prefix = v.isPositioned ? '' : '${v.constructorParamName}:';
     if (v.fieldAnnotation.immutable || !v.nullable) {
       return '$r $prefix ${v.name},';
     } else {
@@ -111,10 +111,10 @@ String copyWithProxyTemplate(
   // subclass' proxy compatible with the superclass and allows chaining.
   final extendsProxy = superInfo == null
       ? ''
-      : ' extends _\$${superInfo.name}CWProxy${superInfo.typeParametersAnnotation}';
+      : ' extends _\$${superInfo.name}CWProxy${superInfo.typeArgumentsAnnotation()}';
   final extendsImpl = superInfo == null
       ? ''
-      : ' extends _\$${superInfo.name}CWProxyImpl${superInfo.typeParametersAnnotation}';
+      : ' extends _\$${superInfo.name}CWProxyImpl${superInfo.typeArgumentsAnnotation()}';
 
   // Determine which fields require proxy methods. When [skipFields] is true,
   // only inherited fields need to be overridden to adjust the return type.
@@ -199,13 +199,13 @@ String copyWithValuesTemplate(
     if (v.fieldAnnotation.immutable) {
       return v.isPositioned
           ? '$r _value.${v.name},'
-          : '$r ${v.name}: _value.${v.name},';
+          : '$r ${v.constructorParamName}: _value.${v.name},';
     }
     final placeholder = v.nullable
         ? '${v.name} == const \$CopyWithPlaceholder()'
         : '${v.name} == const \$CopyWithPlaceholder() || ${v.name} == null';
 
-    return '''$r ${v.isPositioned ? '' : '${v.name}:'}
+    return '''$r ${v.isPositioned ? '' : '${v.constructorParamName}:'}
         $placeholder
         ? _value.${v.name}
         // ignore: cast_nullable_to_non_nullable

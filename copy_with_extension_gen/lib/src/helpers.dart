@@ -1,8 +1,16 @@
 import 'package:analyzer/dart/ast/ast.dart'
     show
+        CascadeExpression,
         ConstructorDeclaration,
         ConstructorFieldInitializer,
+        Expression,
+        MethodInvocation,
         NamedExpression,
+        ParenthesizedExpression,
+        PostfixExpression,
+        PrefixExpression,
+        PrefixedIdentifier,
+        PropertyAccess,
         SimpleIdentifier,
         SuperConstructorInvocation;
 import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
@@ -99,17 +107,17 @@ Map<String, String> _superInitializerFieldMap(ConstructorElement2 constructor) {
   for (final initializer in node.initializers) {
     if (initializer is ConstructorFieldInitializer) {
       final fieldName = initializer.fieldName.name;
-      final expression = initializer.expression;
-      if (expression is SimpleIdentifier) {
-        result[expression.name] = fieldName;
+      final paramName = _extractForwardedParameter(initializer.expression);
+      if (paramName != null) {
+        result[paramName] = fieldName;
       }
     } else if (initializer is SuperConstructorInvocation) {
       for (final arg in initializer.argumentList.arguments) {
         if (arg is NamedExpression) {
           final fieldName = arg.name.label.name;
-          final expr = arg.expression;
-          if (expr is SimpleIdentifier) {
-            result[expr.name] = fieldName;
+          final paramName = _extractForwardedParameter(arg.expression);
+          if (paramName != null) {
+            result[paramName] = fieldName;
           }
         }
       }
@@ -117,6 +125,45 @@ Map<String, String> _superInitializerFieldMap(ConstructorElement2 constructor) {
   }
 
   return result;
+}
+
+/// Attempts to extract the simple identifier name of a parameter that is
+/// forwarded to another field or super constructor through [expression].
+///
+/// This walks the expression tree to find the underlying [SimpleIdentifier]
+/// serving as the root target of any property access or method invocation.
+String? _extractForwardedParameter(Expression expression) {
+  if (expression is SimpleIdentifier) return expression.name;
+  if (expression is PrefixedIdentifier) {
+    return _extractForwardedParameter(expression.prefix);
+  }
+  if (expression is PropertyAccess) {
+    final target = expression.target;
+    if (target != null) {
+      return _extractForwardedParameter(target);
+    }
+    return null;
+  }
+  if (expression is MethodInvocation) {
+    final target = expression.target;
+    if (target != null) {
+      return _extractForwardedParameter(target);
+    }
+    return null;
+  }
+  if (expression is ParenthesizedExpression) {
+    return _extractForwardedParameter(expression.expression);
+  }
+  if (expression is CascadeExpression) {
+    return _extractForwardedParameter(expression.target);
+  }
+  if (expression is PostfixExpression) {
+    return _extractForwardedParameter(expression.operand);
+  }
+  if (expression is PrefixExpression) {
+    return _extractForwardedParameter(expression.operand);
+  }
+  return null;
 }
 
 /// Restores the `CopyWith` annotation provided by the user.

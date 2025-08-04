@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/element/element2.dart'
     show ClassElement2, Element2, LibraryElement2;
-import 'package:analyzer/dart/element/type.dart' show ParameterizedType;
+import 'package:analyzer/dart/element/type.dart' show DartType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/helpers.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
@@ -23,25 +23,18 @@ import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 class AnnotatedCopyWithSuper {
   const AnnotatedCopyWithSuper({
     required this.name,
-    required this.typeParametersAnnotation,
-    required this.typeParametersNames,
+    required this.typeArguments,
     required this.element,
     required this.skipFields,
     required this.constructor,
+    required this.originLibrary,
   });
 
   /// The simple name of the superclass.
   final String name;
 
-  /// Type arguments as they appear in source, e.g. `<T, U>`.
-  final String typeParametersAnnotation;
-
-  /// The same type arguments but used for proxy interfaces.
-  ///
-  /// Since `ParameterizedType` does not expose bounds, these two strings
-  /// are currently identical. Keeping both allows the implementation to
-  /// change independently in the future.
-  final String typeParametersNames;
+  /// Raw type arguments provided to the superclass.
+  final List<DartType> typeArguments;
 
   /// The element for the superclass, used for field lookups.
   final ClassElement2 element;
@@ -52,6 +45,19 @@ class AnnotatedCopyWithSuper {
 
   /// Named constructor used by the superclass, if any.
   final String? constructor;
+
+  /// Library in which the subclass is defined. Needed to resolve import
+  /// prefixes when rendering [typeArguments].
+  final LibraryElement2 originLibrary;
+
+  /// Returns the type arguments as they appear in source, e.g. `<T, U>`.
+  String typeArgumentsAnnotation() {
+    if (typeArguments.isEmpty) return '';
+    final names = typeArguments
+        .map((e) => typeNameWithPrefix(originLibrary, e))
+        .join(',');
+    return '<$names>';
+  }
 }
 
 /// Walks the inheritance chain of [classElement] and returns information
@@ -65,7 +71,6 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
     final element = supertype.element3;
     if (element is ClassElement2 && checker.hasAnnotationOf(element)) {
       final name = readElementNameOrThrow(element as Element2);
-      final generics = _typeArguments(library, supertype);
       final annotation = checker.firstAnnotationOf(element);
       final annotationReader =
           annotation == null ? null : ConstantReader(annotation);
@@ -74,22 +79,13 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
       final constructor = annotationReader?.peek('constructor')?.stringValue;
       return AnnotatedCopyWithSuper(
         name: name,
-        typeParametersAnnotation: generics,
-        typeParametersNames: generics,
+        typeArguments: supertype.typeArguments,
         element: element,
         skipFields: skipFields,
         constructor: constructor,
+        originLibrary: library,
       );
     }
   }
   return null;
-}
-
-/// Extracts the raw type arguments of [type] as `<T, U>` or returns an
-/// empty string when the type is not generic.
-String _typeArguments(LibraryElement2 library, ParameterizedType type) {
-  final args = type.typeArguments;
-  if (args.isEmpty) return '';
-  final names = args.map((e) => typeNameWithPrefix(library, e)).join(',');
-  return '<$names>';
 }

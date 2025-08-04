@@ -32,7 +32,8 @@ class ConstructorParameterInfo extends FieldInfo {
     required this.isPositioned,
     ClassElement2? annotatedSuper,
     String? fieldName,
-  })  : fieldAnnotation = _readFieldAnnotation(element, classElement),
+  })  : constructorParamName = readElementNameOrThrow(element),
+        fieldAnnotation = _readFieldAnnotation(element, classElement),
         classFieldInfo = _classFieldInfo(
           fieldName ?? readElementNameOrThrow(element),
           classElement,
@@ -54,6 +55,9 @@ class ConstructorParameterInfo extends FieldInfo {
 
   /// True if the field is positioned in the constructor
   final bool isPositioned;
+
+  /// Name of the parameter as declared in the constructor.
+  final String constructorParamName;
 
   /// Info relevant to the given field taken from the class itself, as contrary
   /// to the constructor parameter. If `null`, the field with the given name
