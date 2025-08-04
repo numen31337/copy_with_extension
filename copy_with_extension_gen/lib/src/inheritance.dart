@@ -67,7 +67,8 @@ class AnnotatedCopyWithSuper {
 AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
   const checker = TypeChecker.fromRuntime(CopyWith);
   final library = classElement.library2;
-  for (final supertype in classElement.allSupertypes) {
+  var supertype = classElement.supertype;
+  while (supertype != null) {
     final element = supertype.element3;
     if (element is ClassElement2 && checker.hasAnnotationOf(element)) {
       final name = readElementNameOrThrow(element as Element2);
@@ -86,6 +87,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
         originLibrary: library,
       );
     }
+    supertype = supertype.superclass;
   }
   return null;
 }
