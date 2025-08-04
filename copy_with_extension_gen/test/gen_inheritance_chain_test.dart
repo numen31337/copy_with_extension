@@ -1,7 +1,8 @@
 import 'dart:typed_data' as ns;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart' show expect, isA, test, isNull;
+import 'package:test/test.dart'
+    show expect, isA, test, isNull, throwsNoSuchMethodError;
 
 part 'gen_inheritance_chain_test.g.dart';
 
@@ -107,6 +108,20 @@ class ReorderChild<X, Y> extends ReorderParent<Y, X> {
   ReorderChild(super.a, super.b);
 }
 
+@CopyWith()
+class A {
+  A({this.a});
+
+  final int? a;
+}
+
+@CopyWith()
+class B extends A {
+  B({required this.b}) : super();
+
+  final int b;
+}
+
 void main() {
   test(
     'Deep chain preserves subclass fields, generics, namespaces and private constructor params',
@@ -181,6 +196,20 @@ void main() {
     expect(result.value, 2);
     expect(result.extra, 'foo');
   });
+
+  test(
+    'Subclass omitting optional super field does not inherit parent proxy',
+    () {
+      final b = B(b: 0);
+
+      final dynamic proxy = b.copyWith;
+      expect(() => proxy.a(1), throwsNoSuchMethodError);
+
+      final result = b.copyWith.b(1);
+      expect(result, isA<B>());
+      expect(result.b, 1);
+    },
+  );
 
   test('copyWith handles deep generic inheritance chains', () {
     final leaf = ChildGeneric<int>([

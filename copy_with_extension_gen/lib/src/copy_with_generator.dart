@@ -56,16 +56,12 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     );
 
     if (superInfo != null) {
-      final superCtor = superInfo.constructor != null
-          ? superInfo.element.getNamedConstructor2(superInfo.constructor!)
-          : superInfo.element.unnamedConstructor2;
-      final requiredParams = superCtor?.formalParameters
-              .where((p) => p.isRequiredNamed || p.isRequiredPositional)
-              .map((p) => readElementNameOrThrow(p))
-              .toSet() ??
-          {};
+      final superFields = constructorFields(
+        superInfo.element,
+        superInfo.constructor,
+      ).where((f) => !f.fieldAnnotation.immutable).map((f) => f.name).toSet();
       final fieldNames = fields.map((e) => e.name).toSet();
-      if (!fieldNames.containsAll(requiredParams)) {
+      if (!fieldNames.containsAll(superFields)) {
         superInfo = null;
       }
     }
