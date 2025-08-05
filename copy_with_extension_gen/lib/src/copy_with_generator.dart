@@ -35,8 +35,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       );
     }
 
-    final classAnnotation =
-        AnnotationUtils.readClassAnnotation(settings, annotation);
+    final classAnnotation = AnnotationUtils.readClassAnnotation(
+      settings,
+      annotation,
+    );
     final className = ElementUtils.readElementNameOrThrow(element);
 
     // Locate the nearest annotated superclass before gathering fields so
@@ -68,18 +70,22 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         superInfo = null;
       }
     }
-    final typeParametersAnnotation =
-        ElementUtils.typeParametersString(element, false);
-    final typeParametersNames =
-        ElementUtils.typeParametersString(element, true);
+    final typeParametersAnnotation = ElementUtils.typeParametersString(
+      element,
+      false,
+    );
+    final typeParametersNames = ElementUtils.typeParametersString(
+      element,
+      true,
+    );
 
     // Verify that constructor and class field nullability match. The generator
     // does not support a non-nullable constructor parameter pointing to a
     // nullable class field.
     for (final field in fields) {
-      if (field.classFieldInfo != null &&
+      if (field.classField != null &&
           field.nullable == false &&
-          field.classFieldInfo?.nullable == true) {
+          field.classFieldNullable) {
         throw InvalidGenerationSourceError(
           'The constructor parameter "${field.name}" is not nullable, whereas the corresponding class field is nullable. This use case is not supported.',
           element: element,

@@ -1,92 +1,72 @@
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
+import 'package:analyzer/dart/element/element2.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart' show DynamicType;
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:copy_with_extension_gen/src/element_utils.dart';
-import 'package:analyzer/dart/element/element2.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
+import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
-/// Class field info relevant for code generation.
-class FieldInfo {
-  FieldInfo({required this.name, required this.nullable, required this.type});
-
-  /// Parameter / field type.
-  final String name;
-
-  /// If the type is nullable. `dynamic` lacks a nullability flag but accepts `null`, so it's treated as nullable.
-  final bool nullable;
-
-  /// Type name with nullability flag.
-  final String type;
-
-  /// True if the type is `dynamic`.
-  bool get isDynamic => type == "dynamic";
-}
-
 /// Represents a single class field with the additional metadata needed for code generation.
-class ConstructorParameterInfo extends FieldInfo {
+class ConstructorParameterInfo {
   ConstructorParameterInfo(
     FormalParameterElement element,
     ClassElement2 classElement, {
     required this.isPositioned,
     ClassElement2? annotatedSuper,
     String? fieldName,
-  })  : constructorParamName = ElementUtils.readElementNameOrThrow(element),
+  })  : name = fieldName ?? ElementUtils.readElementNameOrThrow(element),
+        constructorParamName = ElementUtils.readElementNameOrThrow(element),
         fieldAnnotation = _readFieldAnnotation(element, classElement),
-        classFieldInfo = _classFieldInfo(
-          fieldName ?? ElementUtils.readElementNameOrThrow(element),
+        classField = _lookupField(
           classElement,
+          fieldName ?? ElementUtils.readElementNameOrThrow(element),
         ),
         isInherited = _isInherited(
           fieldName ?? ElementUtils.readElementNameOrThrow(element),
           classElement,
           annotatedSuper,
         ),
-        super(
-          name: fieldName ?? ElementUtils.readElementNameOrThrow(element),
-          nullable: element.type.nullabilitySuffix != NullabilitySuffix.none ||
-              element.type is DynamicType,
-          type: _fullTypeName(element),
-        );
-
-  /// Annotation provided by the user with `CopyWithField`.
-  final CopyWithFieldAnnotation fieldAnnotation;
-
-  /// True if the field is positioned in the constructor
-  final bool isPositioned;
+        nullable = element.type.nullabilitySuffix != NullabilitySuffix.none ||
+            element.type is DynamicType,
+        type = _fullTypeName(element);
 
   /// Name of the parameter as declared in the constructor.
   final String constructorParamName;
 
-  /// Info relevant to the given field taken from the class itself, as contrary
-  /// to the constructor parameter. If `null`, the field with the given name
-  /// wasn't found on the class or its superclasses.
-  final FieldInfo? classFieldInfo;
+  /// Parameter / field type.
+  final String name;
+
+  /// If the type is nullable. `dynamic` lacks a nullability flag but accepts
+  /// `null`, so it's treated as nullable.
+  final bool nullable;
+
+  /// Type name with nullability flag.
+  final String type;
+
+  /// Annotation provided by the user with `CopyWithField`.
+  final CopyWithFieldAnnotation fieldAnnotation;
+
+  /// True if the field is positioned in the constructor.
+  final bool isPositioned;
+
+  /// Field element taken from the class itself. If `null`, the field with the
+  /// given name wasn't found on the class or its superclasses.
+  final FieldElement2? classField;
 
   /// `true` if this field is declared in a superclass rather than the current
   /// class. Used to annotate overridden members in generated proxies.
   final bool isInherited;
 
+  /// Returns `true` if the corresponding class field is nullable.
+  bool get classFieldNullable =>
+      classField != null &&
+      (classField!.type.nullabilitySuffix != NullabilitySuffix.none ||
+          classField!.type is DynamicType);
+
   @override
   String toString() {
     return 'type:$type name:$name fieldAnnotation:$fieldAnnotation nullable:$nullable';
-  }
-
-  /// Returns the field info for the constructor parameter in the relevant class.
-  static FieldInfo? _classFieldInfo(
-    String fieldName,
-    ClassElement2 classElement,
-  ) {
-    final field = _lookupField(classElement, fieldName);
-    if (field == null) return null;
-
-    return FieldInfo(
-      name: ElementUtils.readElementNameOrThrow(field),
-      nullable: field.type.nullabilitySuffix != NullabilitySuffix.none ||
-          field.type is DynamicType,
-      type: field.type.getDisplayString(),
-    );
   }
 
   /// Determines whether [fieldName] is declared on a superclass of

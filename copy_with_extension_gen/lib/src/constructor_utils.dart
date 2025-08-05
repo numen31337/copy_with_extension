@@ -2,7 +2,7 @@ import 'package:analyzer/dart/element/element2.dart'
     show ClassElement2, ConstructorElement2;
 import 'package:copy_with_extension_gen/src/constructor_field_resolver.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
-import 'package:copy_with_extension_gen/src/field_info.dart';
+import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
 
 /// Utilities related to constructors.
@@ -59,7 +59,7 @@ class ConstructorUtils {
         fieldName: fieldName,
       );
 
-      if (field.classFieldInfo != null) {
+      if (field.classField != null) {
         fields.add(field);
       }
     }
@@ -71,6 +71,8 @@ class ConstructorUtils {
   /// name. E.g. `TestConstructor` or `TestConstructor._private` when `_private`
   /// constructor name is provided.
   static String constructorFor(
-          String typeAnnotation, String? namedConstructor) =>
+    String typeAnnotation,
+    String? namedConstructor,
+  ) =>
       "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
 }

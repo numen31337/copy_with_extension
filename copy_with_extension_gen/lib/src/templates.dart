@@ -1,4 +1,4 @@
-import 'package:copy_with_extension_gen/src/field_info.dart';
+import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
 
