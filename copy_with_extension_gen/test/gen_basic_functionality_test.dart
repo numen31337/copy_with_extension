@@ -1,15 +1,13 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
-import 'package:test/test.dart' show test, expect, group;
+import 'package:test/test.dart';
 
 part 'gen_basic_functionality_test.g.dart';
 
 @CopyWith()
 class CopyWithValues {
-  const CopyWithValues({
-    required this.id,
-  });
+  const CopyWithValues({required this.id});
 
   final String id;
 }
@@ -23,10 +21,7 @@ class CopyWithValuesOptional {
 
 @CopyWith()
 class CopyWithProxy {
-  const CopyWithProxy({
-    this.id,
-    this.immutable,
-  });
+  const CopyWithProxy({this.id, this.immutable});
 
   final String? id;
   @CopyWithField(immutable: true)
@@ -35,10 +30,7 @@ class CopyWithProxy {
 
 @CopyWith()
 class CopyWithProxyChaining {
-  const CopyWithProxyChaining({
-    this.id,
-    this.field,
-  });
+  const CopyWithProxyChaining({this.id, this.field});
 
   final String? id;
   final String? field;
@@ -74,67 +66,70 @@ void main() {
     });
   });
 
-  test('CopyWithValues', () {
-    expect(
-      const CopyWithValues(id: '').copyWith(id: "test").id,
-      "test",
-    );
+  group('CopyWithValues', () {
+    test('updates field', () {
+      expect(const CopyWithValues(id: '').copyWith(id: 'test').id, 'test');
+    });
   });
 
-  test('CopyWithValuesOptional', () {
-    expect(
-      const CopyWithValuesOptional().copyWith(id: "test").id,
-      "test",
-    );
+  group('CopyWithValuesOptional', () {
+    test('updates field', () {
+      expect(const CopyWithValuesOptional().copyWith(id: 'test').id, 'test');
+    });
 
-    expect(
-      const CopyWithValuesOptional(id: "test").copyWithNull(id: true).id,
-      null,
-    );
+    test('copyWithNull nullifies field', () {
+      expect(
+        const CopyWithValuesOptional(id: 'test').copyWithNull(id: true).id,
+        null,
+      );
+    });
 
-    expect(
-      const CopyWithValuesOptional(id: "test").copyWith.id(null).id,
-      null,
-    );
+    test('proxy method accepts null', () {
+      expect(
+        const CopyWithValuesOptional(id: 'test').copyWith.id(null).id,
+        null,
+      );
+    });
 
-    expect(
-      const CopyWithValuesOptional(id: "test").copyWith(id: null).id,
-      null,
-    );
+    test('call with explicit null', () {
+      expect(
+        const CopyWithValuesOptional(id: 'test').copyWith(id: null).id,
+        null,
+      );
+    });
 
-    expect(
-      const CopyWithValuesOptional(id: "test").copyWith().id,
-      "test",
-    );
+    test('no changes preserve value', () {
+      expect(const CopyWithValuesOptional(id: 'test').copyWith().id, 'test');
+    });
   });
 
-  test('CopyWithProxy', () {
-    expect(
-      const CopyWithProxy().copyWith.id("test").id,
-      "test",
-    );
+  group('CopyWithProxy', () {
+    test('proxy updates field', () {
+      expect(const CopyWithProxy().copyWith.id('test').id, 'test');
+    });
 
-    expect(
-      const CopyWithProxy(id: "test").copyWith.id(null).id,
-      null,
-    );
+    test('proxy accepts null', () {
+      expect(const CopyWithProxy(id: 'test').copyWith.id(null).id, null);
+    });
+
+    test('immutable field is preserved', () {
+      const original = CopyWithProxy(immutable: 'init');
+      final result = original.copyWith.id('new');
+
+      expect(result.immutable, 'init');
+    });
   });
 
-  test('Immutable field is preserved', () {
-    const original = CopyWithProxy(immutable: 'init');
-    final result = original.copyWith.id('new');
+  group('CopyWithProxyChaining', () {
+    test('multiple proxy calls update fields', () {
+      final result = const CopyWithProxyChaining()
+          .copyWith
+          .id('test')
+          .copyWith
+          .field('testField');
 
-    expect(result.immutable, 'init');
-  });
-
-  test('CopyWithProxyChaining', () {
-    final result = const CopyWithProxyChaining()
-        .copyWith
-        .id("test")
-        .copyWith
-        .field("testField");
-
-    expect(result.id, "test");
-    expect(result.field, "testField");
+      expect(result.id, 'test');
+      expect(result.field, 'testField');
+    });
   });
 }

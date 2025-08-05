@@ -1,6 +1,5 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart'
-    show test, expect, isA, isNull, throwsNoSuchMethodError;
+import 'package:test/test.dart';
 
 part 'gen_nullability_test.g.dart';
 
@@ -73,31 +72,67 @@ class ChildNoNullable extends ParentNoNullable {
 }
 
 void main() {
-  test('TestNullability', () {
-    // Test for crash in both flows for `dynamicField`, when `dynamicField` is affected and not affected.
-    expect(TestNullability(1, [1]).copyWith.integers([2]).dynamicField, 1);
-    expect(TestNullability(1, [1]).copyWith.dynamicField(2).dynamicField, 2);
-    expect(TestNullability(1, [1]).copyWith(dynamicField: 2).dynamicField, 2);
-    expect(TestNullability(1, [1]).copyWith(integers: [1]).dynamicField, 1);
-    expect(TestNullability(null, [1]).copyWith.dynamicField(1).dynamicField, 1);
-    expect(
-        TestNullability(null, [1]).copyWith.integers([2]).dynamicField, null);
+  group('TestNullability dynamic field', () {
+    test('unaffected when other field changes', () {
+      expect(TestNullability(1, [1]).copyWith.integers([2]).dynamicField, 1);
+    });
 
-    // Test fallback is working
-    expect(
-        TestNullability(1, [1], constructorFallback: 1).constructorFallback, 1);
-    expect(
-        TestNullability(1, [1], constructorFallback: 1)
-            .copyWith
-            .constructorFallback(null)
-            .constructorFallback,
-        0);
-    expect(
-        TestNullability(1, [1], constructorFallback: 1)
-            .copyWith
-            .constructorFallback(2)
-            .constructorFallback,
-        2);
+    test('updated via proxy method', () {
+      expect(TestNullability(1, [1]).copyWith.dynamicField(2).dynamicField, 2);
+    });
+
+    test('updated via named parameter', () {
+      expect(TestNullability(1, [1]).copyWith(dynamicField: 2).dynamicField, 2);
+    });
+
+    test('remains when integers updated', () {
+      expect(TestNullability(1, [1]).copyWith(integers: [1]).dynamicField, 1);
+    });
+
+    test('null initial value updated', () {
+      expect(
+        TestNullability(null, [1]).copyWith.dynamicField(1).dynamicField,
+        1,
+      );
+    });
+
+    test('null initial value unaffected', () {
+      expect(
+        TestNullability(null, [1]).copyWith.integers([2]).dynamicField,
+        null,
+      );
+    });
+
+    group('constructor fallback', () {
+      test('default value remains', () {
+        expect(
+          TestNullability(1, [1], constructorFallback: 1).constructorFallback,
+          1,
+        );
+      });
+
+      test('null resets to fallback', () {
+        expect(
+          TestNullability(
+            1,
+            [1],
+            constructorFallback: 1,
+          ).copyWith.constructorFallback(null).constructorFallback,
+          0,
+        );
+      });
+
+      test('value is updated', () {
+        expect(
+          TestNullability(
+            1,
+            [1],
+            constructorFallback: 1,
+          ).copyWith.constructorFallback(2).constructorFallback,
+          2,
+        );
+      });
+    });
   });
 
   test('copyWithNull works with positional nullable fields', () {

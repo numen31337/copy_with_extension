@@ -1,7 +1,7 @@
-import 'dart:io';
-
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart' show expect, test, contains, isNot;
+import 'package:test/test.dart';
+
+import 'test_utils.dart';
 
 import 'gen_private_fields_parent.dart' as pp;
 
@@ -24,21 +24,22 @@ class ChildWithPrivateSuper extends pp.PrivateParent {
 }
 
 void main() {
-  test('copyWith ignores private constructor parameters', () {
-    const instance = PrivateFields(1, null, id: 1);
-    final result = instance.copyWith(id: 2);
-    expect(result._hidden, 1);
-    expect(result._hidden2, null);
-    expect(result.id, 2);
-  });
+  group('private fields', () {
+    test('copyWith ignores private constructor parameters', () {
+      const instance = PrivateFields(1, null, id: 1);
+      final result = instance.copyWith(id: 2);
+      expect(result._hidden, 1);
+      expect(result._hidden2, null);
+      expect(result.id, 2);
+    });
 
-  test('subclass skips private super fields from other libraries', () async {
-    final content =
-        await File('test/gen_private_fields_test.g.dart').readAsString();
-    expect(content, isNot(contains('_secret')));
+    test('subclass skips private super fields from other libraries', () async {
+      final content = await readGeneratedFile('gen_private_fields_test.g.dart');
+      expect(content, isNot(contains('_secret')));
 
-    const child = ChildWithPrivateSuper(1, 5);
-    final copy = child.copyWith(childField: 2);
-    expect(copy.childField, 2);
+      const child = ChildWithPrivateSuper(1, 5);
+      final copy = child.copyWith(childField: 2);
+      expect(copy.childField, 2);
+    });
   });
 }

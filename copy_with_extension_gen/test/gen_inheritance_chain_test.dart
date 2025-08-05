@@ -1,8 +1,7 @@
 import 'dart:typed_data' as ns;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart'
-    show expect, isA, test, isNull, throwsNoSuchMethodError;
+import 'package:test/test.dart';
 
 part 'gen_inheritance_chain_test.g.dart';
 
@@ -179,23 +178,26 @@ void main() {
     expect(result.value, isNull);
   });
 
-  test('Nullable generic type arguments are preserved in inheritance chain',
-      () {
-    final result = ChildWithNullable(1).copyWith.b(null);
-    expect(result, isA<ChildWithNullable>());
-    expect(result.b, isNull);
-  });
+  test(
+    'Nullable generic type arguments are preserved in inheritance chain',
+    () {
+      final result = ChildWithNullable(1).copyWith.b(null);
+      expect(result, isA<ChildWithNullable>());
+      expect(result.b, isNull);
+    },
+  );
 
   test(
-      'Superclass field methods return subclass type when subclass skips fields',
-      () {
-    final child = ChildWithSkip(1, extra: 'foo');
+    'Superclass field methods return subclass type when subclass skips fields',
+    () {
+      final child = ChildWithSkip(1, extra: 'foo');
 
-    final result = child.copyWith.value(2);
-    expect(result, isA<ChildWithSkip>());
-    expect(result.value, 2);
-    expect(result.extra, 'foo');
-  });
+      final result = child.copyWith.value(2);
+      expect(result, isA<ChildWithSkip>());
+      expect(result.value, 2);
+      expect(result.extra, 'foo');
+    },
+  );
 
   test(
     'Subclass omitting optional super field does not inherit parent proxy',
@@ -213,25 +215,27 @@ void main() {
 
   test('copyWith handles deep generic inheritance chains', () {
     final leaf = ChildGeneric<int>([
-      {1}
+      {1},
     ]);
 
     final leafCopy = leaf.copyWith.value([
-      {2}
+      {2},
     ]);
     expect(leafCopy, isA<ChildGeneric<int>>());
     expect(leafCopy.value.single.contains(2), true);
 
     ParentGeneric<Set<int>> parent = leaf;
-    final parentCopy = parent.copyWith(value: [
-      {3}
-    ]);
+    final parentCopy = parent.copyWith(
+      value: [
+        {3},
+      ],
+    );
     expect(parentCopy, isA<ParentGeneric<Set<int>>>());
     expect(parentCopy.value.single.contains(3), true);
 
     GrandGeneric<List<Set<int>>> grand = leaf;
     final grandCopy = grand.copyWith.value([
-      {4}
+      {4},
     ]);
     expect(grandCopy, isA<GrandGeneric<List<Set<int>>>>());
     expect(grandCopy.value.single.contains(4), true);
