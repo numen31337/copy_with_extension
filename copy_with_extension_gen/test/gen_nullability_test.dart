@@ -1,5 +1,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:test/test.dart' show test, expect, isA, isNull;
+import 'package:test/test.dart'
+    show test, expect, isA, isNull, throwsNoSuchMethodError;
 
 part 'gen_nullability_test.g.dart';
 
@@ -57,6 +58,18 @@ class ChildNullSkip extends ParentNull {
   const ChildNullSkip({super.a, super.b, required this.c});
 
   final int c;
+}
+
+@CopyWith(copyWithNull: true)
+class ParentNoNullable {
+  const ParentNoNullable(this.a);
+
+  final int a;
+}
+
+@CopyWith()
+class ChildNoNullable extends ParentNoNullable {
+  ChildNoNullable(super.a);
 }
 
 void main() {
@@ -135,5 +148,11 @@ void main() {
     expect(childResult.a, isNull);
     expect(childResult.b, 1);
     expect(childResult.c, 3);
+  });
+
+  test('copyWithNull does not exist on the subclass without copyWithNull', () {
+    final child = ChildNoNullable(1);
+    final result = (child as dynamic);
+    expect(() => result.copyWithNull(), throwsNoSuchMethodError);
   });
 }
