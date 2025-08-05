@@ -59,7 +59,10 @@ class ConstructorUtils {
         fieldName: fieldName,
       );
 
-      if (field.classField != null) {
+      final classField = field.classField;
+      final isAccessible = classField != null &&
+          (!classField.isPrivate || classField.library2 == element.library2);
+      if (isAccessible) {
         fields.add(field);
       }
     }
