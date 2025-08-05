@@ -55,6 +55,14 @@ class SubNamed extends SuperNamed {
   final String b;
 }
 
+@CopyWith(constructor: 'other')
+class SubNamedOther extends SuperNamed {
+  const SubNamedOther.other({required super.a, required this.b})
+      : super.named();
+
+  final String b;
+}
+
 void main() {
   test('CopyWithNamedConstructor', () {
     expect(
@@ -100,6 +108,20 @@ void main() {
 
     final baseUpdated = original.copyWith(a: 3);
     expect(baseUpdated, isA<SubNamed>());
+    expect(baseUpdated.a, 3);
+    expect(baseUpdated.b, 'b');
+  });
+
+  test('Subclass with its own named constructor uses correct constructors', () {
+    final original = SubNamedOther.other(a: 1, b: 'b');
+
+    final updated = original.copyWith(a: 2, b: 'c');
+    expect(updated, isA<SubNamedOther>());
+    expect(updated.a, 2);
+    expect(updated.b, 'c');
+
+    final baseUpdated = original.copyWith(a: 3);
+    expect(baseUpdated, isA<SubNamedOther>());
     expect(baseUpdated.a, 3);
     expect(baseUpdated.b, 'b');
   });
