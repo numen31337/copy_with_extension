@@ -2,7 +2,7 @@ import 'package:analyzer/dart/constant/value.dart' show DartObject;
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart' show DynamicType;
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:copy_with_extension_gen/src/helpers.dart';
+import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:analyzer/dart/element/element2.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
@@ -32,19 +32,19 @@ class ConstructorParameterInfo extends FieldInfo {
     required this.isPositioned,
     ClassElement2? annotatedSuper,
     String? fieldName,
-  })  : constructorParamName = readElementNameOrThrow(element),
+  })  : constructorParamName = ElementUtils.readElementNameOrThrow(element),
         fieldAnnotation = _readFieldAnnotation(element, classElement),
         classFieldInfo = _classFieldInfo(
-          fieldName ?? readElementNameOrThrow(element),
+          fieldName ?? ElementUtils.readElementNameOrThrow(element),
           classElement,
         ),
         isInherited = _isInherited(
-          fieldName ?? readElementNameOrThrow(element),
+          fieldName ?? ElementUtils.readElementNameOrThrow(element),
           classElement,
           annotatedSuper,
         ),
         super(
-          name: fieldName ?? readElementNameOrThrow(element),
+          name: fieldName ?? ElementUtils.readElementNameOrThrow(element),
           nullable: element.type.nullabilitySuffix != NullabilitySuffix.none ||
               element.type is DynamicType,
           type: _fullTypeName(element),
@@ -82,7 +82,7 @@ class ConstructorParameterInfo extends FieldInfo {
     if (field == null) return null;
 
     return FieldInfo(
-      name: readElementNameOrThrow(field),
+      name: ElementUtils.readElementNameOrThrow(field),
       nullable: field.type.nullabilitySuffix != NullabilitySuffix.none ||
           field.type is DynamicType,
       type: field.type.getDisplayString(),
@@ -123,7 +123,7 @@ class ConstructorParameterInfo extends FieldInfo {
       return element.type.getDisplayString();
     }
 
-    return typeNameWithPrefix(library, element.type);
+    return ElementUtils.typeNameWithPrefix(library, element.type);
   }
 
   /// Restores the `CopyWithField` annotation provided by the user.
@@ -133,7 +133,7 @@ class ConstructorParameterInfo extends FieldInfo {
   ) {
     const defaults = CopyWithFieldAnnotation.defaults();
 
-    final fieldName = readElementNameOrThrow(element);
+    final fieldName = ElementUtils.readElementNameOrThrow(element);
     final isPrivate = fieldName.startsWith('_');
     if (isPrivate) {
       // Treat private parameters as immutable to avoid generating `copyWith`

@@ -2,7 +2,9 @@ import 'package:analyzer/dart/element/element2.dart'
     show ClassElement2, Element2;
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:copy_with_extension_gen/src/helpers.dart';
+import 'package:copy_with_extension_gen/src/annotation_utils.dart';
+import 'package:copy_with_extension_gen/src/constructor_utils.dart';
+import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:copy_with_extension_gen/src/templates.dart';
@@ -33,8 +35,9 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       );
     }
 
-    final classAnnotation = readClassAnnotation(settings, annotation);
-    final className = readElementNameOrThrow(element);
+    final classAnnotation =
+        AnnotationUtils.readClassAnnotation(settings, annotation);
+    final className = ElementUtils.readElementNameOrThrow(element);
 
     // Locate the nearest annotated superclass before gathering fields so
     // inherited parameters can be tracked relative to that superclass only.
@@ -49,14 +52,14 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       superInfo = null;
     }
 
-    final fields = constructorFields(
+    final fields = ConstructorUtils.constructorFields(
       element,
       classAnnotation.constructor,
       annotatedSuper: superInfo?.element,
     );
 
     if (superInfo != null) {
-      final superFields = constructorFields(
+      final superFields = ConstructorUtils.constructorFields(
         superInfo.element,
         superInfo.constructor,
       ).where((f) => !f.fieldAnnotation.immutable).map((f) => f.name).toSet();
@@ -65,8 +68,10 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         superInfo = null;
       }
     }
-    final typeParametersAnnotation = typeParametersString(element, false);
-    final typeParametersNames = typeParametersString(element, true);
+    final typeParametersAnnotation =
+        ElementUtils.typeParametersString(element, false);
+    final typeParametersNames =
+        ElementUtils.typeParametersString(element, true);
 
     // Verify that constructor and class field nullability match. The generator
     // does not support a non-nullable constructor parameter pointing to a

@@ -10,7 +10,7 @@ import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
 import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
 import 'package:analyzer/dart/element/element2.dart'
     show ClassElement2, ConstructorElement2;
-import 'package:copy_with_extension_gen/src/helpers.dart';
+import 'package:copy_with_extension_gen/src/element_utils.dart';
 
 /// Resolves constructor parameters to the corresponding class fields.
 ///
@@ -54,7 +54,7 @@ class ConstructorFieldResolver {
     if (node is! ConstructorDeclaration) return const {};
 
     final parameterNames = constructor.formalParameters
-        .map((p) => readElementNameOrThrow(p))
+        .map((p) => ElementUtils.readElementNameOrThrow(p))
         .toSet();
 
     final result = <String, String>{};
@@ -82,7 +82,8 @@ class ConstructorFieldResolver {
             final paramName = _extractForwardedParameter(arg, parameterNames);
             if (paramName != null && positionalIndex < superParams.length) {
               final superParam = superParams[positionalIndex];
-              result[paramName] = readElementNameOrThrow(superParam);
+              result[paramName] =
+                  ElementUtils.readElementNameOrThrow(superParam);
             }
             positionalIndex++;
           }

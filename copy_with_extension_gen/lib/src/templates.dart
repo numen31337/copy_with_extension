@@ -1,5 +1,5 @@
 import 'package:copy_with_extension_gen/src/field_info.dart';
-import 'package:copy_with_extension_gen/src/helpers.dart';
+import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
 
 /// Builds the entire extension code snippet.
@@ -87,7 +87,7 @@ String copyWithNullTemplate(
   return '''
       $description
       $typeAnnotation copyWithNull({$nullConstructorInput}) {
-        return ${constructorFor(typeAnnotation, constructor)}($nullParamsInput);
+        return ${ConstructorUtils.constructorFor(typeAnnotation, constructor)}($nullParamsInput);
       }
      ''';
 }
@@ -214,7 +214,7 @@ String copyWithValuesTemplate(
 
   final constructorBody = isAbstract
       ? ''
-      : '{ return ${constructorFor(typeAnnotation, constructor)}($paramsInput); }';
+      : '{ return ${ConstructorUtils.constructorFor(typeAnnotation, constructor)}($paramsInput); }';
 
   return '''
         /// Creates a new instance with the provided field values.

@@ -2,7 +2,7 @@ import 'package:analyzer/dart/element/element2.dart'
     show ClassElement2, Element2, LibraryElement2;
 import 'package:analyzer/dart/element/type.dart' show DartType;
 import 'package:copy_with_extension/copy_with_extension.dart';
-import 'package:copy_with_extension_gen/src/helpers.dart';
+import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /*
@@ -62,7 +62,7 @@ class AnnotatedCopyWithSuper {
   String typeArgumentsAnnotation() {
     if (typeArguments.isEmpty) return '';
     final names = typeArguments
-        .map((e) => typeNameWithPrefix(originLibrary, e))
+        .map((e) => ElementUtils.typeNameWithPrefix(originLibrary, e))
         .join(',');
     return '<$names>';
   }
@@ -79,8 +79,9 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
   while (supertype != null) {
     final element = supertype.element3;
     if (element is ClassElement2 && checker.hasAnnotationOf(element)) {
-      final name = readElementNameOrThrow(element as Element2);
-      final prefix = libraryImportPrefix(library, element.library2);
+      final name = ElementUtils.readElementNameOrThrow(element as Element2);
+      final prefix =
+          ElementUtils.libraryImportPrefix(library, element.library2);
       final annotation = checker.firstAnnotationOf(element);
       final annotationReader =
           annotation == null ? null : ConstantReader(annotation);
