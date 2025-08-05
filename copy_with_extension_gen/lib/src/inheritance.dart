@@ -1,5 +1,5 @@
 import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, Element2, LibraryElement2;
+    show ClassElement2, Element2, FieldElement2, LibraryElement2;
 import 'package:analyzer/dart/element/type.dart' show DartType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
@@ -104,4 +104,25 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
     supertype = supertype.superclass;
   }
   return null;
+}
+
+/// Returns `true` when [field] originates from a class annotated with
+/// `@CopyWith` where `skipFields` is `false`.
+///
+/// The check walks up the inheritance chain starting from the field's
+/// declaring class and returns `false` if no such ancestor is found.
+bool hasNonSkippedFieldProxy(FieldElement2? field) {
+  if (field == null) return false;
+  const checker = TypeChecker.fromRuntime(CopyWith);
+  var current = field.enclosingElement2 as ClassElement2?;
+  while (current != null) {
+    if (checker.hasAnnotationOf(current)) {
+      final annotation = checker.firstAnnotationOf(current);
+      final skipFields =
+          ConstantReader(annotation).peek('skipFields')?.boolValue ?? false;
+      return !skipFields;
+    }
+    current = current.supertype?.element3 as ClassElement2?;
+  }
+  return false;
 }

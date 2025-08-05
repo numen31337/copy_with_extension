@@ -133,7 +133,9 @@ String copyWithProxyTemplate(
   final fieldsForProxyMethods = uniqueFilteredFields.where(
     (e) =>
         !skipFields ||
-        (superInfo != null && !superInfo.skipFields && e.isInherited),
+        (superInfo != null &&
+            e.isInherited &&
+            hasNonSkippedFieldProxy(e.classField)),
   );
 
   // Generate proxy methods for each mutable field. These methods allow
@@ -141,8 +143,9 @@ String copyWithProxyTemplate(
   // Inherited fields delegate to the superclass implementation to avoid
   // duplicating logic.
   final nonNullableFunctions = fieldsForProxyMethods.map((e) {
-    final shouldDelegate =
-        superInfo != null && !superInfo.skipFields && e.isInherited;
+    final shouldDelegate = superInfo != null &&
+        e.isInherited &&
+        hasNonSkippedFieldProxy(e.classField);
     final body = shouldDelegate
         ? 'super.${e.name}(${e.name}) as $type$typeParameterNames'
         : 'call(${e.name}: ${e.name})';
@@ -156,7 +159,7 @@ String copyWithProxyTemplate(
   final nonNullableFunctionsInterface = fieldsForProxyMethods
       .map(
         (e) => '''
-    ${superInfo != null && !superInfo.skipFields && e.isInherited ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}(${e.type} ${e.name});
+    ${superInfo != null && e.isInherited && hasNonSkippedFieldProxy(e.classField) ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}(${e.type} ${e.name});
     ''',
       )
       .join('\n');
