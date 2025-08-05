@@ -1,27 +1,18 @@
-import 'package:analyzer/dart/ast/ast.dart'
-    show
-        ConstructorDeclaration,
-        ConstructorFieldInitializer,
-        Expression,
-        NamedExpression,
-        SimpleIdentifier,
-        SuperConstructorInvocation;
-import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
-import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
 import 'package:analyzer/dart/element/element2.dart'
     show
         ClassElement2,
         ConstructorElement2,
-        Element2,
         LibraryElement2,
         LibraryImport,
-        PrefixElement2;
+        PrefixElement2,
+        Element2;
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart'
     show DartType, ParameterizedType;
 import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
 import 'package:copy_with_extension_gen/src/field_info.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
+import 'package:copy_with_extension_gen/src/constructor_field_resolver.dart';
 import 'package:source_gen/source_gen.dart'
     show ConstantReader, InvalidGenerationSourceError;
 
@@ -60,11 +51,12 @@ List<ConstructorParameterInfo> constructorFields(
       element: element,
     );
   }
+  final resolver = ConstructorFieldResolver(element, targetConstructor);
   final fields = <ConstructorParameterInfo>[];
 
   for (final parameter in parameters) {
     final paramName = readElementNameOrThrow(parameter);
-    final fieldName = _resolveFieldName(element, targetConstructor, paramName);
+    final fieldName = resolver.resolve(paramName);
 
     final field = ConstructorParameterInfo(
       parameter,
@@ -80,123 +72,6 @@ List<ConstructorParameterInfo> constructorFields(
   }
 
   return fields;
-}
-
-/// Builds a map of constructor parameter names to their corresponding field
-/// names when parameters are forwarded to a superclass with different names.
-Map<String, String> _superInitializerFieldMap(ConstructorElement2 constructor) {
-  final library = constructor.library2;
-  final session = library.session;
-
-  final parsed = session.getParsedLibraryByElement2(library);
-  if (parsed is! ParsedLibraryResult) return const {};
-  final declaration = parsed.getFragmentDeclaration(constructor.firstFragment);
-  final node = declaration?.node;
-  if (node is! ConstructorDeclaration) return const {};
-
-  final parameterNames = constructor.formalParameters
-      .map((p) => readElementNameOrThrow(p))
-      .toSet();
-
-  final result = <String, String>{};
-
-  for (final initializer in node.initializers) {
-    if (initializer is ConstructorFieldInitializer) {
-      final fieldName = initializer.fieldName.name;
-      final paramName =
-          _extractForwardedParameter(initializer.expression, parameterNames);
-      if (paramName != null) {
-        result[paramName] = fieldName;
-      }
-    } else if (initializer is SuperConstructorInvocation) {
-      var positionalIndex = 0;
-      final superParams =
-          constructor.superConstructor2?.formalParameters ?? const [];
-      for (final arg in initializer.argumentList.arguments) {
-        if (arg is NamedExpression) {
-          final paramName =
-              _extractForwardedParameter(arg.expression, parameterNames);
-          if (paramName != null) {
-            result[paramName] = arg.name.label.name;
-          }
-        } else {
-          final paramName = _extractForwardedParameter(arg, parameterNames);
-          if (paramName != null && positionalIndex < superParams.length) {
-            final superParam = superParams[positionalIndex];
-            result[paramName] = readElementNameOrThrow(superParam);
-          }
-          positionalIndex++;
-        }
-      }
-    }
-  }
-
-  return result;
-}
-
-/// Attempts to extract the simple identifier name of a parameter that is
-/// forwarded to another field or super constructor through [expression].
-///
-/// This walks the expression tree to find the underlying [SimpleIdentifier]
-/// serving as the root target of any property access or method invocation.
-String? _extractForwardedParameter(
-  Expression expression,
-  Set<String> parameterNames,
-) {
-  final visitor = _ForwardedParameterVisitor(parameterNames);
-  expression.accept(visitor);
-  if (visitor.names.length == 1) {
-    return visitor.names.first;
-  }
-  return null;
-}
-
-class _ForwardedParameterVisitor extends RecursiveAstVisitor<void> {
-  _ForwardedParameterVisitor(this.candidates);
-
-  final Set<String> candidates;
-  final Set<String> names = {};
-
-  @override
-  void visitSimpleIdentifier(SimpleIdentifier node) {
-    final name = node.name;
-    if (candidates.contains(name)) {
-      names.add(name);
-    }
-    super.visitSimpleIdentifier(node);
-  }
-}
-
-String? _resolveFieldName(
-  ClassElement2 element,
-  ConstructorElement2 constructor,
-  String paramName,
-) {
-  final map = _superInitializerFieldMap(constructor);
-  final forwarded = map[paramName];
-  final candidate = forwarded ?? paramName;
-  if (_hasField(element, candidate)) {
-    return candidate;
-  }
-  if (forwarded == null) {
-    return null;
-  }
-  final superConstructor = constructor.superConstructor2;
-  final superClass = element.supertype?.element3 as ClassElement2?;
-  if (superConstructor == null || superClass == null) {
-    return null;
-  }
-  return _resolveFieldName(superClass, superConstructor, forwarded);
-}
-
-bool _hasField(ClassElement2 element, String fieldName) {
-  if (element.getField2(fieldName) != null) return true;
-  for (final type in element.allSupertypes) {
-    if (type.element3.getField2(fieldName) != null) {
-      return true;
-    }
-  }
-  return false;
 }
 
 /// Restores the `CopyWith` annotation provided by the user.
@@ -237,12 +112,11 @@ String readElementNameOrThrow(Element2 element) {
   final name = element.name3;
   if (name is String) {
     return name;
-  } else {
-    throw InvalidGenerationSourceError(
-      'Name for $element is missing.',
-      element: element,
-    );
   }
+  throw InvalidGenerationSourceError(
+    'Name for $element is missing.',
+    element: element,
+  );
 }
 
 /// Returns constructor for the given type and optional named constructor name. E.g. "TestConstructor" or "TestConstructor._private" when "_private" constructor name is provided.
