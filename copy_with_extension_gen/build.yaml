@@ -9,6 +9,7 @@ targets:
             - example
           include:
             - test/gen_*
+            - test/**/gen_*
 
 builders:
   copy_with_extension_gen:

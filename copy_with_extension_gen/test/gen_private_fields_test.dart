@@ -1,9 +1,9 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';
 
-import 'test_utils.dart';
+import 'helpers/test_utils.dart';
 
-import 'gen_private_fields_parent.dart' as pp;
+import 'helpers/gen_private_fields_parent.dart' as pp;
 
 part 'gen_private_fields_test.g.dart';
 

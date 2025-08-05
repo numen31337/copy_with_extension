@@ -1,7 +1,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';
 
-import 'test_utils.dart';
+import 'helpers/test_utils.dart';
 
 part 'gen_skip_fields_inheritance_test.g.dart';
 
