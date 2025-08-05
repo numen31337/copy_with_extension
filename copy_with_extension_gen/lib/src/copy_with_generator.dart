@@ -3,7 +3,9 @@ import 'package:analyzer/dart/element/element2.dart'
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/annotation_utils.dart';
+import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/constructor_utils.dart';
+import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
@@ -28,80 +30,32 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    if (element is! ClassElement2) {
-      throw InvalidGenerationSourceError(
-        'Only classes can be annotated with "CopyWith". "$element" is not a ClassElement.',
-        element: element,
-      );
-    }
-
-    final classAnnotation = AnnotationUtils.readClassAnnotation(
-      settings,
-      annotation,
-    );
-    final className = ElementUtils.readElementNameOrThrow(element);
-
-    // Locate the nearest annotated superclass before gathering fields so
-    // inherited parameters can be tracked relative to that superclass only.
-    var superInfo = findAnnotatedSuper(element);
-
-    // When `skipFields` is enabled and the closest annotated superclass is not
-    // the direct parent, avoid proxy inheritance to ensure field-specific
-    // methods from ancestors are not exposed.
-    if (classAnnotation.skipFields &&
-        superInfo != null &&
-        element.supertype?.element3 != superInfo.element) {
-      superInfo = null;
-    }
-
+    final classElement = _expectClassElement(element);
+    final classAnnotation =
+        AnnotationUtils.readClassAnnotation(settings, annotation);
+    final className = ElementUtils.readElementNameOrThrow(classElement);
+    var superInfo = _findSuperInfo(classElement, classAnnotation);
     final fields = ConstructorUtils.constructorFields(
-      element,
+      classElement,
       classAnnotation.constructor,
       annotatedSuper: superInfo?.element,
     );
+    superInfo = _validateSuperFields(superInfo, fields);
+    _validateFieldNullability(fields, classElement);
 
-    if (superInfo != null) {
-      final superFields = ConstructorUtils.constructorFields(
-        superInfo.element,
-        superInfo.constructor,
-      ).where((f) => !f.fieldAnnotation.immutable).map((f) => f.name).toSet();
-      final fieldNames = fields.map((e) => e.name).toSet();
-      if (!fieldNames.containsAll(superFields)) {
-        superInfo = null;
-      }
-    }
-    final typeParametersAnnotation = ElementUtils.typeParametersString(
-      element,
-      false,
+    final typeParametersAnnotation =
+        ElementUtils.typeParametersString(classElement, false);
+    final typeParametersNames =
+        ElementUtils.typeParametersString(classElement, true);
+
+    final generateCopyWithNull = _shouldGenerateCopyWithNull(
+      classAnnotation.copyWithNull,
+      superInfo,
+      fields,
     );
-    final typeParametersNames = ElementUtils.typeParametersString(
-      element,
-      true,
-    );
-
-    // Verify that constructor and class field nullability match. The generator
-    // does not support a non-nullable constructor parameter pointing to a
-    // nullable class field.
-    for (final field in fields) {
-      if (field.classField != null &&
-          field.nullable == false &&
-          field.classFieldNullable) {
-        throw InvalidGenerationSourceError(
-          'The constructor parameter "${field.name}" is not nullable, whereas the corresponding class field is nullable. This use case is not supported.',
-          element: element,
-        );
-      }
-    }
-
-    var generateCopyWithNull = classAnnotation.copyWithNull;
-    if (!generateCopyWithNull &&
-        superInfo?.copyWithNull == true &&
-        fields.any((f) => f.nullable && !f.fieldAnnotation.immutable)) {
-      generateCopyWithNull = true;
-    }
 
     return extensionTemplate(
-      isPrivate: element.isPrivate,
+      isPrivate: classElement.isPrivate,
       className: className,
       typeParametersAnnotation: typeParametersAnnotation,
       typeParametersNames: typeParametersNames,
@@ -111,5 +65,71 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       constructor: classAnnotation.constructor,
       superInfo: superInfo,
     );
+  }
+
+  ClassElement2 _expectClassElement(Element2 element) {
+    if (element is ClassElement2) {
+      return element;
+    }
+    throw InvalidGenerationSourceError(
+      'Only classes can be annotated with "CopyWith". "$element" is not a ClassElement.',
+      element: element,
+    );
+  }
+
+  AnnotatedCopyWithSuper? _findSuperInfo(
+    ClassElement2 element,
+    CopyWithAnnotation annotation,
+  ) {
+    var superInfo = findAnnotatedSuper(element);
+    if (annotation.skipFields &&
+        superInfo != null &&
+        element.supertype?.element3 != superInfo.element) {
+      superInfo = null;
+    }
+    return superInfo;
+  }
+
+  AnnotatedCopyWithSuper? _validateSuperFields(
+    AnnotatedCopyWithSuper? superInfo,
+    List<ConstructorParameterInfo> fields,
+  ) {
+    if (superInfo != null) {
+      final superFields = ConstructorUtils.constructorFields(
+        superInfo.element,
+        superInfo.constructor,
+      ).where((f) => !f.fieldAnnotation.immutable).map((f) => f.name).toSet();
+      final fieldNames = fields.map((e) => e.name).toSet();
+      if (!fieldNames.containsAll(superFields)) {
+        return null;
+      }
+    }
+    return superInfo;
+  }
+
+  void _validateFieldNullability(
+    List<ConstructorParameterInfo> fields,
+    ClassElement2 classElement,
+  ) {
+    for (final field in fields) {
+      if (field.classField != null &&
+          field.nullable == false &&
+          field.classFieldNullable) {
+        throw InvalidGenerationSourceError(
+          'The constructor parameter "${field.name}" is not nullable, whereas the corresponding class field is nullable. This use case is not supported.',
+          element: classElement,
+        );
+      }
+    }
+  }
+
+  bool _shouldGenerateCopyWithNull(
+    bool copyWithNull,
+    AnnotatedCopyWithSuper? superInfo,
+    List<ConstructorParameterInfo> fields,
+  ) {
+    if (copyWithNull) return true;
+    return superInfo?.copyWithNull == true &&
+        fields.any((f) => f.nullable && !f.fieldAnnotation.immutable);
   }
 }
