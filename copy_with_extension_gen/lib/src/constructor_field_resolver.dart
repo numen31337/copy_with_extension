@@ -62,9 +62,9 @@ class ConstructorFieldResolver {
     for (final initializer in node.initializers) {
       if (initializer is ConstructorFieldInitializer) {
         final fieldName = initializer.fieldName.name;
-        final paramName =
-            _extractForwardedParameter(initializer.expression, parameterNames);
-        if (paramName != null) {
+        final paramNames =
+            _extractForwardedParameters(initializer.expression, parameterNames);
+        for (final paramName in paramNames) {
           result[paramName] = fieldName;
         }
       } else if (initializer is SuperConstructorInvocation) {
@@ -73,17 +73,19 @@ class ConstructorFieldResolver {
             constructor.superConstructor2?.formalParameters ?? const [];
         for (final arg in initializer.argumentList.arguments) {
           if (arg is NamedExpression) {
-            final paramName =
-                _extractForwardedParameter(arg.expression, parameterNames);
-            if (paramName != null) {
+            final paramNames =
+                _extractForwardedParameters(arg.expression, parameterNames);
+            for (final paramName in paramNames) {
               result[paramName] = arg.name.label.name;
             }
           } else {
-            final paramName = _extractForwardedParameter(arg, parameterNames);
-            if (paramName != null && positionalIndex < superParams.length) {
+            final paramNames = _extractForwardedParameters(arg, parameterNames);
+            if (positionalIndex < superParams.length) {
               final superParam = superParams[positionalIndex];
-              result[paramName] =
-                  ElementUtils.readElementNameOrThrow(superParam);
+              for (final paramName in paramNames) {
+                result[paramName] =
+                    ElementUtils.readElementNameOrThrow(superParam);
+              }
             }
             positionalIndex++;
           }
@@ -94,18 +96,15 @@ class ConstructorFieldResolver {
     return result;
   }
 
-  /// Attempts to extract the simple identifier name of a parameter that is
-  /// forwarded to another field or super constructor through [expression].
-  static String? _extractForwardedParameter(
+  /// Returns the names of all parameters from [parameterNames] referenced
+  /// within [expression].
+  static Iterable<String> _extractForwardedParameters(
     Expression expression,
     Set<String> parameterNames,
   ) {
     final visitor = _ForwardedParameterVisitor(parameterNames);
     expression.accept(visitor);
-    if (visitor.names.length == 1) {
-      return visitor.names.first;
-    }
-    return null;
+    return visitor.names;
   }
 
   static bool _hasField(ClassElement2 element, String fieldName) {

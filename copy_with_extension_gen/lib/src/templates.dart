@@ -2,6 +2,15 @@ import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
 
+List<ConstructorParameterInfo> _uniqueFields(
+    Iterable<ConstructorParameterInfo> fields) {
+  final map = <String, ConstructorParameterInfo>{};
+  for (final field in fields) {
+    map.putIfAbsent(field.name, () => field);
+  }
+  return map.values.toList();
+}
+
 /// Builds the entire extension code snippet.
 /// This method assembles the proxy class and the extension declaration that is added to the generated file.
 String extensionTemplate({
@@ -51,13 +60,14 @@ String copyWithNullTemplate(
   String? constructor,
   bool skipFields,
 ) {
+  final uniqueFields = _uniqueFields(fields);
   // Return an empty string when the class has no nullable fields.
-  if (fields.where((element) => element.nullable == true).isEmpty) {
+  if (uniqueFields.where((element) => element.nullable == true).isEmpty) {
     return '';
   }
 
   // Build the constructor parameter list. Only nullable and mutable fields need a boolean flag to specify nullification.
-  final nullConstructorInput = fields.fold<String>('', (r, v) {
+  final nullConstructorInput = uniqueFields.fold<String>('', (r, v) {
     if (v.fieldAnnotation.immutable || !v.nullable) {
       return r;
     } else {
@@ -104,7 +114,9 @@ String copyWithProxyTemplate(
   AnnotatedCopyWithSuper? superInfo,
 }) {
   final typeAnnotation = type + typeParameterNames;
-  final filteredFields = fields.where((e) => !e.fieldAnnotation.immutable);
+  final filteredFields =
+      fields.where((e) => !e.fieldAnnotation.immutable).toList();
+  final uniqueFilteredFields = _uniqueFields(filteredFields);
 
   // When a superclass is also annotated with `@CopyWith`, the generated
   // proxy inherits from the parent's proxy interface. This keeps the
@@ -118,7 +130,7 @@ String copyWithProxyTemplate(
 
   // Determine which fields require proxy methods. When [skipFields] is true,
   // only inherited fields need to be overridden to adjust the return type.
-  final fieldsForProxyMethods = filteredFields.where(
+  final fieldsForProxyMethods = uniqueFilteredFields.where(
     (e) =>
         !skipFields ||
         (superInfo != null && !superInfo.skipFields && e.isInherited),
@@ -153,7 +165,7 @@ String copyWithProxyTemplate(
       abstract class _\$${type}CWProxy$typeParameters$extendsProxy {
         $nonNullableFunctionsInterface
 
-        ${copyWithValuesTemplate(typeAnnotation, fields, constructor, skipFields, true, addOverride: superInfo != null)};
+        ${copyWithValuesTemplate(typeAnnotation, fields, uniqueFilteredFields, constructor, skipFields, true, addOverride: superInfo != null)};
       }
 
       /// Callable proxy for `copyWith` functionality.
@@ -166,7 +178,7 @@ String copyWithProxyTemplate(
         $nonNullableFunctions
 
         @override
-        ${copyWithValuesTemplate(typeAnnotation, fields, constructor, skipFields, false)}
+        ${copyWithValuesTemplate(typeAnnotation, fields, uniqueFilteredFields, constructor, skipFields, false)}
       }
     ''';
 }
@@ -175,14 +187,15 @@ String copyWithProxyTemplate(
 /// The returned snippet can be used either as an abstract interface (when [isAbstract] is `true`) or as a concrete implementation that instantiates the target class.
 String copyWithValuesTemplate(
   String typeAnnotation,
-  List<ConstructorParameterInfo> fields,
+  List<ConstructorParameterInfo> allFields,
+  List<ConstructorParameterInfo> uniqueFields,
   String? constructor,
   bool skipFields,
   bool isAbstract, {
   bool addOverride = false,
 }) {
   // Build the parameter list for the generated function or abstract interface. Immutable fields are excluded entirely.
-  final constructorInput = fields.fold<String>('', (r, v) {
+  final constructorInput = uniqueFields.fold<String>('', (r, v) {
     if (v.fieldAnnotation.immutable) return r;
 
     if (isAbstract) {
@@ -195,7 +208,7 @@ String copyWithValuesTemplate(
   });
 
   // Generate the parameters passed to the constructor when creating the new instance. Immutable fields are copied from the existing value.
-  final paramsInput = fields.fold<String>('', (r, v) {
+  final paramsInput = allFields.fold<String>('', (r, v) {
     if (v.fieldAnnotation.immutable) {
       return v.isPositioned
           ? '$r _value.${v.name},'

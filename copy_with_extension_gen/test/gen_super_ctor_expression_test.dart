@@ -42,6 +42,11 @@ class RenamedFunctionChild extends Base {
   RenamedFunctionChild({required int b}) : super(a: identity(b));
 }
 
+@CopyWith()
+class MultiParamChild extends Base {
+  MultiParamChild({required int b, required int c}) : super(a: (b + c) ~/ 2);
+}
+
 void main() {
   test('copyWith handles super initializer property access', () {
     final instance = Derived(b: 1);
@@ -76,5 +81,12 @@ void main() {
     final result = instance.copyWith(a: 2);
     expect(result, isA<RenamedFunctionChild>());
     expect(result.a, 2);
+  });
+
+  test('copyWith handles multiple parameters in super initializer', () {
+    final instance = MultiParamChild(b: 1, c: 3);
+    final result = instance.copyWith(a: 5);
+    expect(result, isA<MultiParamChild>());
+    expect(result.a, 5);
   });
 }
