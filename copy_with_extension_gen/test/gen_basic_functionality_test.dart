@@ -34,6 +34,27 @@ class CopyWithProxyChaining {
   final String? field;
 }
 
+@CopyWith()
+interface class CopyWithInterface {
+  const CopyWithInterface({this.id});
+
+  final int? id;
+}
+
+@CopyWith()
+abstract mixin class CopyWithMixin {
+  factory CopyWithMixin({required int id}) = _CopyWithMixinImpl;
+
+  int get id;
+}
+
+class _CopyWithMixinImpl with CopyWithMixin {
+  _CopyWithMixinImpl({required this.id});
+
+  @override
+  final int id;
+}
+
 void main() {
   group('CopyWithValues', () {
     test('updates field', () {
@@ -99,6 +120,18 @@ void main() {
 
       expect(result.id, 'test');
       expect(result.field, 'testField');
+    });
+  });
+
+  group('CopyWithInterface', () {
+    test('updates field', () {
+      expect(const CopyWithInterface().copyWith(id: 1).id, 1);
+    });
+  });
+
+  group('CopyWithMixin', () {
+    test('updates field', () {
+      expect(CopyWithMixin(id: 1).copyWith(id: 2).id, 2);
     });
   });
 }
