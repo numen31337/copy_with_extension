@@ -6,11 +6,7 @@ import 'package:meta/meta_meta.dart';
 /// Annotation used to indicate that the `copyWith` extension should be generated for the given class.
 @Target({TargetKind.classType})
 class CopyWith {
-  const CopyWith({
-    this.copyWithNull,
-    this.skipFields,
-    this.constructor,
-  });
+  const CopyWith({this.copyWithNull, this.skipFields, this.constructor});
 
   /// Set `copyWithNull` to `true` if you want to use `copyWithNull` function that allows you to nullify the fields. E.g. `myInstance.copyWithNull(id: true, name: true)`. Default is `false`.
   final bool? copyWithNull;
@@ -27,15 +23,17 @@ class CopyWith {
 class CopyWithField {
   const CopyWithField({this.immutable});
 
-  /// Indicates that the field should be hidden in the generated `copyWith` method. By setting this flag to `true` the field will always be copied as it is and excluded from `copyWith` interface. Default is `false`.
+  /// Indicates that the field should be hidden in the generated `copyWith` and
+  /// `copyWithNull` methods. By setting this flag to `true` the field will
+  /// always be copied as it is and excluded from the generated interfaces.
+  /// Default is `false`.
   final bool? immutable;
 }
 
-/// This placeholder object is a default value for nullable fields to handle cases when the user wants to nullify the value.
-/// Used internally as the default value for parameters in generated methods.
-///
-/// It allows the generator to differentiate between an explicitly passed `null`
-/// and an omitted parameter when building new instances of the annotated class.
+/// Placeholder used as the default value for parameters in generated methods.
+/// It lets the generator distinguish between an explicitly passed `null` and
+/// an omitted parameter, ensuring both nullable and non-nullable fields keep
+/// their existing values when not updated.
 class $CopyWithPlaceholder {
   const $CopyWithPlaceholder();
 }

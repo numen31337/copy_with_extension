@@ -79,7 +79,7 @@ myInstance.copyWith(fieldName: "test", anotherField: "test");
 
 #### Nullifying instance fields
 
-Generate a `copyWithNull` function to nullify class fields. Enable this by setting `copyWithNull` to `true`:
+Generate a `copyWithNull` function to nullify class fields. Enable this per class by setting `copyWithNull` to `true`, or configure it globally in `build.yaml`:
 ```dart
 @CopyWith(copyWithNull: true)
 class MyClass {
@@ -96,7 +96,7 @@ Prevent modification of specific fields by using:
 final int myImmutableField;
 ```
 
-This enforces that the `copyWith` method copies this field without allowing modifications.
+This enforces that the generated `copyWith` and `copyWithNull` methods copy this field without allowing modifications.
 
 #### Custom Constructor Name
 
@@ -115,8 +115,7 @@ class SimpleObjectPrivateConstructor {
 
 #### Skipping generation of `copyWith` functionality for individual fields
 
-Set `skipFields` to prevent the library from generating `copyWith` functions for individual fields e.g. `instance.copyWith.id("123")`. If you want to use only `copyWith(...)` function.
-
+Set `skipFields` to prevent the library from generating `copyWith` functions for individual fields (e.g. `instance.copyWith.id("123")`). Use this per class with `@CopyWith(skipFields: true)` or configure it globally via `build.yaml` if you only want the `copyWith(...)` method.
 ```dart
 @CopyWith(skipFields: true)
 class SimpleObject {
