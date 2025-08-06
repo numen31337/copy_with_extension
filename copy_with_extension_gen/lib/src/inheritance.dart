@@ -29,6 +29,7 @@ class AnnotatedCopyWithSuper {
     required this.skipFields,
     required this.copyWithNull,
     required this.constructor,
+    required this.immutableFields,
     required this.originLibrary,
   });
 
@@ -53,6 +54,9 @@ class AnnotatedCopyWithSuper {
 
   /// Named constructor used by the superclass, if any.
   final String? constructor;
+
+  /// Whether fields are immutable by default in the superclass.
+  final bool immutableFields;
 
   /// Library in which the subclass is defined. Needed to resolve import
   /// prefixes when rendering [typeArguments].
@@ -97,6 +101,8 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
       final copyWithNull =
           annotationReader?.peek('copyWithNull')?.boolValue ?? false;
       final constructor = annotationReader?.peek('constructor')?.stringValue;
+      final immutableFields =
+          annotationReader?.peek('immutableFields')?.boolValue ?? false;
       return AnnotatedCopyWithSuper(
         name: name,
         prefix: prefix,
@@ -105,6 +111,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
         skipFields: skipFields,
         copyWithNull: copyWithNull,
         constructor: constructor,
+        immutableFields: immutableFields,
         originLibrary: library,
       );
     }

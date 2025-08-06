@@ -16,9 +16,11 @@ class ConstructorParameterInfo {
     ClassElement2? annotatedSuper,
     String? fieldName,
     required Set<String> annotations,
+    bool immutableDefault = false,
   })  : name = fieldName ?? element.displayName,
         constructorParamName = element.displayName,
-        fieldAnnotation = _readFieldAnnotation(element, classElement),
+        fieldAnnotation =
+            _readFieldAnnotation(element, classElement, immutableDefault),
         classField = _lookupField(
           classElement,
           fieldName ?? element.displayName,
@@ -122,8 +124,11 @@ class ConstructorParameterInfo {
   static CopyWithFieldAnnotation _readFieldAnnotation(
     FormalParameterElement element,
     ClassElement2 classElement,
+    bool immutableDefault,
   ) {
-    const defaults = CopyWithFieldAnnotation.defaults();
+    final defaults = CopyWithFieldAnnotation.defaults(
+      immutable: immutableDefault,
+    );
 
     final fieldName = element.displayName;
     final isPrivate = fieldName.startsWith('_');

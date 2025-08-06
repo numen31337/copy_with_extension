@@ -43,9 +43,11 @@ void main() {
 
       expect(randomGlobalSettings.copyWithNull, false);
       expect(randomGlobalSettings.skipFields, false);
+      expect(randomGlobalSettings.immutableFields, false);
       expect(randomGlobalSettings.annotations, {'deprecated'});
       expect(emptyGlobalSettings.copyWithNull, false);
       expect(emptyGlobalSettings.skipFields, false);
+      expect(emptyGlobalSettings.immutableFields, false);
       expect(emptyGlobalSettings.annotations, {'deprecated'});
       expect(defaultFieldAnnotation.immutable, false);
     });
@@ -54,11 +56,13 @@ void main() {
       final customSettings = Settings.fromConfig(<String, dynamic>{
         'copy_with_null': true,
         'skip_fields': true,
+        'immutable_fields': true,
         'annotations': ['Foo'],
       });
 
       expect(customSettings.copyWithNull, true);
       expect(customSettings.skipFields, true);
+      expect(customSettings.immutableFields, true);
       expect(customSettings.annotations, {'foo'});
     });
 
@@ -78,7 +82,11 @@ void main() {
       );
 
       final output = await generateForElement(
-        CopyWithGenerator(Settings(copyWithNull: false, skipFields: false)),
+        CopyWithGenerator(Settings(
+          copyWithNull: false,
+          skipFields: false,
+          immutableFields: false,
+        )),
         reader,
         'AnnotationFixture',
       );
@@ -99,6 +107,7 @@ void main() {
           Settings(
             copyWithNull: false,
             skipFields: false,
+            immutableFields: false,
             annotations: {'donotuse'},
           ),
         ),
@@ -119,7 +128,12 @@ void main() {
 
       final output = await generateForElement(
         CopyWithGenerator(
-          Settings(copyWithNull: false, skipFields: false, annotations: {}),
+          Settings(
+            copyWithNull: false,
+            skipFields: false,
+            immutableFields: false,
+            annotations: {},
+          ),
         ),
         reader,
         'AnnotationFixture',
