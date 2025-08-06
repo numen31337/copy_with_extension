@@ -30,6 +30,20 @@ class ElementUtils {
     final nullability =
         type.nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
 
+    final alias = type.alias;
+    if (alias != null) {
+      final aliasElement = alias.element2;
+      final aliasName =
+          '${libraryImportPrefix(library, aliasElement.library2)}${aliasElement.name3}';
+      if (alias.typeArguments.isNotEmpty) {
+        final args = alias.typeArguments
+            .map((t) => typeNameWithPrefix(library, t))
+            .join(', ');
+        return '$aliasName<$args>$nullability';
+      }
+      return '$aliasName$nullability';
+    }
+
     if (type is ParameterizedType) {
       final element = type.element3;
       final name = element != null

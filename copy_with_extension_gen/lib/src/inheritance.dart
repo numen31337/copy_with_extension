@@ -77,7 +77,14 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
   final library = classElement.library2;
   var supertype = classElement.supertype;
   while (supertype != null) {
-    final element = supertype.element3;
+    var element = supertype.element3;
+    final alias = supertype.alias;
+    if (alias != null) {
+      final aliased = alias.element2.aliasedType.element3;
+      if (aliased is ClassElement2) {
+        element = aliased;
+      }
+    }
     if (element is ClassElement2 && checker.hasAnnotationOf(element)) {
       final name = element.displayName;
       final prefix =
@@ -122,7 +129,16 @@ bool hasNonSkippedFieldProxy(FieldElement2? field) {
           ConstantReader(annotation).peek('skipFields')?.boolValue ?? false;
       return !skipFields;
     }
-    current = current.supertype?.element3 as ClassElement2?;
+    final nextType = current.supertype;
+    var next = nextType?.element3;
+    final alias = nextType?.alias;
+    if (alias != null) {
+      final aliased = alias.element2.aliasedType.element3;
+      if (aliased is ClassElement2) {
+        next = aliased;
+      }
+    }
+    current = next is ClassElement2 ? next : null;
   }
   return false;
 }
