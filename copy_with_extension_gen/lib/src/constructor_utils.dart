@@ -25,14 +25,15 @@ class ConstructorUtils {
         : element.unnamedConstructor2;
 
     if (targetConstructor is! ConstructorElement2) {
+      final className = ElementUtils.readElementNameOrThrow(element);
       if (constructor != null) {
         throw InvalidGenerationSourceError(
-          'Named Constructor "$constructor" constructor is missing.',
+          'Could not find a constructor named "$constructor" in class $className.',
           element: element,
         );
       } else {
         throw InvalidGenerationSourceError(
-          'Default constructor for $element is missing.',
+          'Class $className must define an unnamed constructor to enable copyWith generation.',
           element: element,
         );
       }
@@ -40,8 +41,9 @@ class ConstructorUtils {
 
     final parameters = targetConstructor.formalParameters;
     if (parameters.isEmpty) {
+      final className = ElementUtils.readElementNameOrThrow(element);
       throw InvalidGenerationSourceError(
-        'Unnamed constructor for $element has no parameters or missing.',
+        'The unnamed constructor of class $className must declare at least one parameter.',
         element: element,
       );
     }

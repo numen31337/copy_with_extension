@@ -38,7 +38,7 @@ class ElementUtils {
       return name;
     }
     throw InvalidGenerationSourceError(
-      'Name for $element is missing.',
+      'Unable to determine a name for $element. Ensure that this element has an identifier.',
       element: element,
     );
   }

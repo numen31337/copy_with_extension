@@ -79,7 +79,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       return element;
     }
     throw InvalidGenerationSourceError(
-      'Only classes can be annotated with "CopyWith". "$element" is not a ClassElement.',
+      'The @CopyWith annotation is only supported on classes. "$element" is not a class.',
       element: element,
     );
   }
@@ -124,7 +124,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
           field.nullable == false &&
           field.classFieldNullable) {
         throw InvalidGenerationSourceError(
-          'The constructor parameter "${field.name}" is not nullable, whereas the corresponding class field is nullable. This use case is not supported.',
+          'Constructor parameter "${field.name}" is non-nullable, but the corresponding class field is nullable. Make both nullable or both non-nullable.',
           element: classElement,
         );
       }

@@ -1,32 +1,34 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldThrow(
-  'Only classes can be annotated with "CopyWith". "Object wrongAnnotation" is not a ClassElement.',
+  'The @CopyWith annotation is only supported on classes. "Object wrongAnnotation" is not a class.',
 )
 // ignore: invalid_annotation_target
 @CopyWith()
 Object wrongAnnotation = Object();
 
 @ShouldThrow(
-  'Unnamed constructor for class NoConstructor has no parameters or missing.',
+  'The unnamed constructor of class NoConstructor must declare at least one parameter.',
 )
 @CopyWith()
 class NoConstructor {
   int? test;
 }
 
-@ShouldThrow('Named Constructor "test" constructor is missing.')
+@ShouldThrow(
+    'Could not find a constructor named "test" in class WrongConstructor.')
 @CopyWith(constructor: "test")
 class WrongConstructor {}
 
-@ShouldThrow('Default constructor for class NoDefaultConstructor is missing.')
+@ShouldThrow(
+    'Class NoDefaultConstructor must define an unnamed constructor to enable copyWith generation.')
 @CopyWith()
 class NoDefaultConstructor {
   NoDefaultConstructor.nonDefault();
 }
 
 @ShouldThrow(
-  'The constructor parameter "nullableWithNonNullableConstructor" is not nullable, whereas the corresponding class field is nullable. This use case is not supported.',
+  'Constructor parameter "nullableWithNonNullableConstructor" is non-nullable, but the corresponding class field is nullable. Make both nullable or both non-nullable.',
 )
 @CopyWith()
 class TestNullability {
