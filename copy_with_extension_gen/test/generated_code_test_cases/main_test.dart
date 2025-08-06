@@ -16,6 +16,6 @@ Future<void> main() async {
 
   testAnnotatedElements<CopyWith>(
     reader,
-    CopyWithGenerator(const Settings(copyWithNull: false, skipFields: false)),
+    CopyWithGenerator(Settings(copyWithNull: false, skipFields: false)),
   );
 }

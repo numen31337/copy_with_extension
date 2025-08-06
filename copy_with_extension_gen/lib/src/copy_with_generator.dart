@@ -31,22 +31,29 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     BuildStep buildStep,
   ) {
     final classElement = _expectClassElement(element);
-    final classAnnotation =
-        AnnotationUtils.readClassAnnotation(settings, annotation);
+    final classAnnotation = AnnotationUtils.readClassAnnotation(
+      settings,
+      annotation,
+    );
     final className = ElementUtils.readElementNameOrThrow(classElement);
     var superInfo = _findSuperInfo(classElement, classAnnotation);
     final fields = ConstructorUtils.constructorFields(
       classElement,
       classAnnotation.constructor,
       annotatedSuper: superInfo?.element,
+      annotations: settings.annotations,
     );
     superInfo = _validateSuperFields(superInfo, fields);
     _validateFieldNullability(fields, classElement);
 
-    final typeParametersAnnotation =
-        ElementUtils.typeParametersString(classElement, false);
-    final typeParametersNames =
-        ElementUtils.typeParametersString(classElement, true);
+    final typeParametersAnnotation = ElementUtils.typeParametersString(
+      classElement,
+      false,
+    );
+    final typeParametersNames = ElementUtils.typeParametersString(
+      classElement,
+      true,
+    );
 
     final generateCopyWithNull = _shouldGenerateCopyWithNull(
       classAnnotation.copyWithNull,
@@ -98,6 +105,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       final superFields = ConstructorUtils.constructorFields(
         superInfo.element,
         superInfo.constructor,
+        annotations: settings.annotations,
       ).where((f) => !f.fieldAnnotation.immutable).map((f) => f.name).toSet();
       final fieldNames = fields.map((e) => e.name).toSet();
       if (!fieldNames.containsAll(superFields)) {

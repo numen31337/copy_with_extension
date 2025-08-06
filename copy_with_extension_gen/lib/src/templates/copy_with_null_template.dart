@@ -21,7 +21,8 @@ String copyWithNullTemplate(
     if (v.fieldAnnotation.immutable || !v.nullable) {
       return r;
     } else {
-      return '$r bool ${v.name} = false,';
+      final annotations = v.metadata.isEmpty ? '' : '${v.metadata.join(' ')} ';
+      return '$r ${annotations}bool ${v.name} = false,';
     }
   });
 

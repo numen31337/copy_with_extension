@@ -17,12 +17,13 @@ String copyWithValuesTemplate(
   final constructorInput = uniqueFields.fold<String>('', (r, v) {
     if (v.fieldAnnotation.immutable) return r;
 
+    final annotations = v.metadata.isEmpty ? '' : '${v.metadata.join(' ')} ';
     if (isAbstract) {
       // When generating the interface, parameters are typed directly.
-      return '$r ${v.type} ${v.name},';
+      return '$r\n    $annotations${v.type} ${v.name},';
     } else {
       // The implementation uses [\$CopyWithPlaceholder] to detect whether a parameter was passed.
-      return '$r Object? ${v.name} = const \$CopyWithPlaceholder(),';
+      return '$r\n    ${annotations}Object? ${v.name} = const \$CopyWithPlaceholder(),';
     }
   });
 

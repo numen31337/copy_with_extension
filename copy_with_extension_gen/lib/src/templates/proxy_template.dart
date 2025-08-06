@@ -51,20 +51,22 @@ String copyWithProxyTemplate(
     final body = shouldDelegate
         ? 'super.${e.name}(${e.name}) as $type$typeParameterNames'
         : 'call(${e.name}: ${e.name})';
+    final annotations = e.metadata.isEmpty ? '' : '${e.metadata.join(' ')} ';
     return '''
     @override
-    $type$typeParameterNames ${e.name}(${e.type} ${e.name}) => $body;
+    $type$typeParameterNames ${e.name}($annotations${e.type} ${e.name}) => $body;
     ''';
   }).join('\n');
 
   // Interface used by the proxy class. It mirrors the proxy methods above.
-  final nonNullableFunctionsInterface = fieldsForProxyMethods
-      .map(
-        (e) => '''
-    ${superInfo != null && e.isInherited && hasNonSkippedFieldProxy(e.classField) ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}(${e.type} ${e.name});
-    ''',
-      )
-      .join('\n');
+  final nonNullableFunctionsInterface = fieldsForProxyMethods.map(
+    (e) {
+      final annotations = e.metadata.isEmpty ? '' : '${e.metadata.join(' ')} ';
+      return '''
+    ${superInfo != null && e.isInherited && hasNonSkippedFieldProxy(e.classField) ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}($annotations${e.type} ${e.name});
+    ''';
+    },
+  ).join('\n');
 
   return '''
       abstract class _\$${type}CWProxy$typeParameters$extendsProxy {
