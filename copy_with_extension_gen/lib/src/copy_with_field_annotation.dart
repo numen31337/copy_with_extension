@@ -6,7 +6,8 @@ class CopyWithFieldAnnotation implements CopyWithField {
     required this.immutable,
   });
 
-  const CopyWithFieldAnnotation.defaults() : this(immutable: false);
+  const CopyWithFieldAnnotation.defaults({bool immutable = false})
+      : this(immutable: immutable);
 
   @override
   final bool immutable;

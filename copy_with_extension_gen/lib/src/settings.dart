@@ -3,6 +3,7 @@ class Settings {
   Settings({
     required this.copyWithNull,
     required this.skipFields,
+    required this.immutableFields,
     Set<String>? annotations,
   }) : annotations = (annotations ?? defaultAnnotations)
             .map((e) => e.toLowerCase())
@@ -21,12 +22,14 @@ class Settings {
     return Settings(
       copyWithNull: json['copy_with_null'] as bool? ?? false,
       skipFields: json['skip_fields'] as bool? ?? false,
+      immutableFields: json['immutable_fields'] as bool? ?? false,
       annotations: rawAnnotations,
     );
   }
 
   final bool copyWithNull;
   final bool skipFields;
+  final bool immutableFields;
   final Set<String> annotations;
 
   /// Default annotation names forwarded to generated parameters.

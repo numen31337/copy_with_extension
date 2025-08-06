@@ -14,11 +14,13 @@ class AnnotationUtils {
     final generateCopyWithNull = reader.peek('copyWithNull')?.boolValue;
     final skipFields = reader.peek('skipFields')?.boolValue;
     final constructor = reader.peek('constructor')?.stringValue;
+    final immutableFields = reader.peek('immutableFields')?.boolValue;
 
     return CopyWithAnnotation(
       copyWithNull: generateCopyWithNull ?? settings.copyWithNull,
       skipFields: skipFields ?? settings.skipFields,
       constructor: constructor,
+      immutableFields: immutableFields ?? settings.immutableFields,
     );
   }
 }

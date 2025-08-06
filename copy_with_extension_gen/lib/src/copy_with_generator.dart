@@ -42,6 +42,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       classAnnotation.constructor,
       annotatedSuper: superInfo?.element,
       annotations: settings.annotations,
+      immutableFields: classAnnotation.immutableFields,
     );
     superInfo = _validateSuperFields(superInfo, fields);
     _validateFieldNullability(fields, classElement);
@@ -117,6 +118,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
         superInfo.element,
         superInfo.constructor,
         annotations: settings.annotations,
+        immutableFields: superInfo.immutableFields,
       ).where((f) => !f.fieldAnnotation.immutable).map((f) => f.name).toSet();
       final fieldNames = fields.map((e) => e.name).toSet();
       if (!fieldNames.containsAll(superFields)) {

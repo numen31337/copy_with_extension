@@ -18,6 +18,7 @@ class ConstructorUtils {
     String? constructor, {
     ClassElement2? annotatedSuper,
     required Set<String> annotations,
+    required bool immutableFields,
   }) {
     final targetConstructor = constructor != null
         ? element.getNamedConstructor2(constructor)
@@ -61,6 +62,7 @@ class ConstructorUtils {
         annotatedSuper: annotatedSuper,
         fieldName: fieldName,
         annotations: annotations,
+        immutableDefault: immutableFields,
       );
 
       final classField = field.classField;
