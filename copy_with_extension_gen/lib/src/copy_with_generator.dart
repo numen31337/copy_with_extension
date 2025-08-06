@@ -35,7 +35,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       settings,
       annotation,
     );
-    final className = ElementUtils.readElementNameOrThrow(classElement);
+    final className = classElement.displayName;
     var superInfo = _findSuperInfo(classElement, classAnnotation);
     final fields = ConstructorUtils.constructorFields(
       classElement,

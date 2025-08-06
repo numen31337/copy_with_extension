@@ -16,22 +16,22 @@ class ConstructorParameterInfo {
     ClassElement2? annotatedSuper,
     String? fieldName,
     required Set<String> annotations,
-  })  : name = fieldName ?? ElementUtils.readElementNameOrThrow(element),
-        constructorParamName = ElementUtils.readElementNameOrThrow(element),
+  })  : name = fieldName ?? element.displayName,
+        constructorParamName = element.displayName,
         fieldAnnotation = _readFieldAnnotation(element, classElement),
         classField = _lookupField(
           classElement,
-          fieldName ?? ElementUtils.readElementNameOrThrow(element),
+          fieldName ?? element.displayName,
         ),
         metadata = _readFieldMetadata(
           _lookupField(
             classElement,
-            fieldName ?? ElementUtils.readElementNameOrThrow(element),
+            fieldName ?? element.displayName,
           ),
           annotations,
         ),
         isInherited = _isInherited(
-          fieldName ?? ElementUtils.readElementNameOrThrow(element),
+          fieldName ?? element.displayName,
           classElement,
           annotatedSuper,
         ),
@@ -125,7 +125,7 @@ class ConstructorParameterInfo {
   ) {
     const defaults = CopyWithFieldAnnotation.defaults();
 
-    final fieldName = ElementUtils.readElementNameOrThrow(element);
+    final fieldName = element.displayName;
     final isPrivate = fieldName.startsWith('_');
     if (isPrivate) {
       // Treat private parameters as immutable to avoid generating `copyWith`

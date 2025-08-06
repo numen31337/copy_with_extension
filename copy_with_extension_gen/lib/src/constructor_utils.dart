@@ -1,7 +1,6 @@
 import 'package:analyzer/dart/element/element2.dart'
     show ClassElement2, ConstructorElement2;
 import 'package:copy_with_extension_gen/src/constructor_field_resolver.dart';
-import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
 
@@ -25,7 +24,7 @@ class ConstructorUtils {
         : element.unnamedConstructor2;
 
     if (targetConstructor is! ConstructorElement2) {
-      final className = ElementUtils.readElementNameOrThrow(element);
+      final className = element.displayName;
       if (constructor != null) {
         throw InvalidGenerationSourceError(
           'Could not find a constructor named "$constructor" in class $className.',
@@ -42,7 +41,7 @@ class ConstructorUtils {
     final resolvedConstructor = resolveRedirects(element, targetConstructor);
     final parameters = resolvedConstructor.formalParameters;
     if (parameters.isEmpty) {
-      final className = ElementUtils.readElementNameOrThrow(element);
+      final className = element.displayName;
       throw InvalidGenerationSourceError(
         'The unnamed constructor of class $className must declare at least one parameter.',
         element: element,
@@ -52,7 +51,7 @@ class ConstructorUtils {
     final fields = <ConstructorParameterInfo>[];
 
     for (final parameter in parameters) {
-      final paramName = ElementUtils.readElementNameOrThrow(parameter);
+      final paramName = parameter.displayName;
       final fieldName = resolver.resolve(paramName);
 
       final field = ConstructorParameterInfo(

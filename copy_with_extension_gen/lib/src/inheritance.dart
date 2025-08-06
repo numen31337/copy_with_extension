@@ -1,5 +1,5 @@
 import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, Element2, FieldElement2, LibraryElement2;
+    show ClassElement2, FieldElement2, LibraryElement2;
 import 'package:analyzer/dart/element/type.dart' show DartType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
@@ -79,7 +79,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
   while (supertype != null) {
     final element = supertype.element3;
     if (element is ClassElement2 && checker.hasAnnotationOf(element)) {
-      final name = ElementUtils.readElementNameOrThrow(element as Element2);
+      final name = element.displayName;
       final prefix =
           ElementUtils.libraryImportPrefix(library, element.library2);
       final annotation = checker.firstAnnotationOf(element);

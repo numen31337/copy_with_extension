@@ -1,14 +1,8 @@
 import 'package:analyzer/dart/element/element2.dart'
-    show
-        ClassElement2,
-        Element2,
-        LibraryElement2,
-        LibraryImport,
-        PrefixElement2;
+    show ClassElement2, LibraryElement2, LibraryImport, PrefixElement2;
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart'
     show DartType, ParameterizedType;
-import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
 
 /// Utilities for working with analyzer elements and types.
 class ElementUtils {
@@ -25,22 +19,9 @@ class ElementUtils {
   static String typeParametersString(
       ClassElement2 classElement, bool nameOnly) {
     final names = classElement.typeParameters2
-        .map((e) => nameOnly ? readElementNameOrThrow(e) : e.displayString2())
+        .map((e) => nameOnly ? e.displayName : e.displayString2())
         .join(',');
     return names.isNotEmpty ? '<$names>' : '';
-  }
-
-  /// Returns the name of [element] or throws an
-  /// [InvalidGenerationSourceError] if the element has no name.
-  static String readElementNameOrThrow(Element2 element) {
-    final name = element.name3;
-    if (name is String) {
-      return name;
-    }
-    throw InvalidGenerationSourceError(
-      'Unable to determine a name for $element. Ensure that this element has an identifier.',
-      element: element,
-    );
   }
 
   /// Recursively builds the display name for [type] including any import
