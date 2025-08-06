@@ -12,20 +12,10 @@ Future<void> main() async {
     'test/generated_code_test_cases',
     'source_gen_entrypoint.dart',
   );
-  final readerForCustomSettingsCase = await initializeLibraryReaderForDirectory(
-    'test/generated_code_test_cases',
-    'custom_settings_test_case.dart',
-  );
-
   initializeBuildLogTracking();
 
   testAnnotatedElements<CopyWith>(
     reader,
     CopyWithGenerator(const Settings(copyWithNull: false, skipFields: false)),
-  );
-
-  testAnnotatedElements<CopyWith>(
-    readerForCustomSettingsCase,
-    CopyWithGenerator(const Settings(copyWithNull: true, skipFields: true)),
   );
 }

@@ -25,10 +25,10 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
   final BasicClass<T> _value;
 
   @override
-  BasicClass<T> id(String id) => this(id: id);
+  BasicClass<T> id(String id) => call(id: id);
 
   @override
-  BasicClass<T> optional(T? optional) => this(optional: optional);
+  BasicClass<T> optional(T? optional) => call(optional: optional);
 
   @override
   /// Creates a new instance with the provided field values.
@@ -43,7 +43,7 @@ class _$BasicClassCWProxyImpl<T extends Iterable<int>>
     Object? optional = const $CopyWithPlaceholder(),
   }) {
     return BasicClass<T>(
-      id: id == const $CopyWithPlaceholder()
+      id: id == const $CopyWithPlaceholder() || id == null
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as String,

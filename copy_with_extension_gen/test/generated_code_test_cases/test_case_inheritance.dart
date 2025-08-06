@@ -24,10 +24,10 @@ class _$BasicChildCWProxyImpl implements _$BasicChildCWProxy {
   final BasicChild _value;
 
   @override
-  BasicChild childField(String childField) => this(childField: childField);
+  BasicChild childField(String childField) => call(childField: childField);
 
   @override
-  BasicChild id(String id) => this(id: id);
+  BasicChild id(String id) => call(id: id);
 
   @override
   /// Creates a new instance with the provided field values.
@@ -42,11 +42,11 @@ class _$BasicChildCWProxyImpl implements _$BasicChildCWProxy {
     Object? id = const $CopyWithPlaceholder(),
   }) {
     return BasicChild(
-      childField == const $CopyWithPlaceholder()
+      childField == const $CopyWithPlaceholder() || childField == null
           ? _value.childField
           // ignore: cast_nullable_to_non_nullable
           : childField as String,
-      id: id == const $CopyWithPlaceholder()
+      id: id == const $CopyWithPlaceholder() || id == null
           ? _value.id
           // ignore: cast_nullable_to_non_nullable
           : id as String,
@@ -65,10 +65,12 @@ extension $BasicChildCopyWith on BasicChild {
 ''')
 @CopyWith()
 class BasicChild extends BasicClass<Iterable<int>> {
-  BasicChild(this.childField,
-      {required super.id,
-      required super.immutable,
-      required super.nullableImmutable});
+  BasicChild(
+    this.childField, {
+    required super.id,
+    required super.immutable,
+    required super.nullableImmutable,
+  });
 
   final String childField;
 }

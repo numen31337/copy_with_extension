@@ -1,3 +1,7 @@
+## 9.0.0
+* **BREAKING** Dynamic fields are treated as nullable, affecting generated `copyWith` signatures.
+* Added robust inheritance support enabling `copyWith` across parent and child classes
+
 ## 8.0.0
 * **BREAKING** Private constructor parameters are now treated as immutable to avoid [invalid](https://github.com/numen31337/copy_with_extension/issues/85) `copyWith` parameter names.
 * **BREAKING** Field annotations are [inherited](https://github.com/numen31337/copy_with_extension/issues/70) from parent classes.

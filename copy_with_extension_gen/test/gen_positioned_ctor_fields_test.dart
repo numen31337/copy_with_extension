@@ -1,16 +1,12 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:equatable/equatable.dart';
-import 'package:test/test.dart' show expect, group, setUp, test;
+import 'package:test/test.dart';
 
 part 'gen_positioned_ctor_fields_test.g.dart';
 
 @CopyWith()
 class PositionedFields extends Equatable {
-  const PositionedFields(
-    this.one,
-    this.oneAndAHalf, {
-    this.two,
-  });
+  const PositionedFields(this.one, this.oneAndAHalf, {this.two});
 
   final String one;
   final String oneAndAHalf;
@@ -25,50 +21,25 @@ void main() {
     late PositionedFields instance;
 
     setUp(() {
-      instance = const PositionedFields(
-        'one',
-        'oneAndAHalf',
-        two: 'two',
-      );
+      instance = const PositionedFields('one', 'oneAndAHalf', two: 'two');
     });
 
     test('one is replaced value', () {
-      const expected = PositionedFields(
-        'test',
-        'oneAndAHalf',
-        two: 'two',
-      );
+      const expected = PositionedFields('test', 'oneAndAHalf', two: 'two');
 
-      expect(
-        instance.copyWith.one('test'),
-        expected,
-      );
+      expect(instance.copyWith.one('test'), expected);
     });
 
     test('oneAndAHalf is replaced value', () {
-      const expected = PositionedFields(
-        'one',
-        'test',
-        two: 'two',
-      );
+      const expected = PositionedFields('one', 'test', two: 'two');
 
-      expect(
-        instance.copyWith.oneAndAHalf('test'),
-        expected,
-      );
+      expect(instance.copyWith.oneAndAHalf('test'), expected);
     });
 
     test('two is replaced value', () {
-      const expected = PositionedFields(
-        'one',
-        'oneAndAHalf',
-        two: 'test',
-      );
+      const expected = PositionedFields('one', 'oneAndAHalf', two: 'test');
 
-      expect(
-        instance.copyWith.two('test'),
-        expected,
-      );
+      expect(instance.copyWith.two('test'), expected);
     });
   });
 }
