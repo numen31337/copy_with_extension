@@ -53,6 +53,34 @@ class SubNamedOther extends SuperNamed {
   final String b;
 }
 
+@CopyWith()
+class RedirectingNoParams {
+  RedirectingNoParams() : this._(0);
+  RedirectingNoParams._(this.value);
+
+  final int value;
+}
+
+@CopyWith()
+class RedirectingMultiLevel {
+  RedirectingMultiLevel() : this._first();
+  RedirectingMultiLevel._first() : this._second(0);
+  RedirectingMultiLevel._second(this.value);
+
+  final int value;
+}
+
+@CopyWith()
+class FactoryRedirectMultiLevel {
+  factory FactoryRedirectMultiLevel(int value) =
+      FactoryRedirectMultiLevel._first;
+  factory FactoryRedirectMultiLevel._first(int value) =
+      FactoryRedirectMultiLevel._second;
+  FactoryRedirectMultiLevel._second(this.value);
+
+  final int value;
+}
+
 void main() {
   test('CopyWithNamedConstructor', () {
     expect(const CopyWithNamedConstructor._().copyWith.id("test").id, "test");
@@ -108,5 +136,23 @@ void main() {
     expect(baseUpdated, isA<SubNamedOther>());
     expect(baseUpdated.a, 3);
     expect(baseUpdated.b, 'b');
+  });
+
+  test('copyWith works with redirecting constructor without parameters', () {
+    final original = RedirectingNoParams();
+    final updated = original.copyWith(value: 42);
+    expect(updated.value, 42);
+  });
+
+  test('copyWith follows multi-level redirecting constructors', () {
+    final original = RedirectingMultiLevel();
+    final updated = original.copyWith(value: 24);
+    expect(updated.value, 24);
+  });
+
+  test('copyWith follows multi-level factory redirects', () {
+    final original = FactoryRedirectMultiLevel(0);
+    final updated = original.copyWith(value: 10);
+    expect(updated.value, 10);
   });
 }

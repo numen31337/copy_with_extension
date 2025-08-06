@@ -39,7 +39,8 @@ class ConstructorUtils {
       }
     }
 
-    final parameters = targetConstructor.formalParameters;
+    final resolvedConstructor = resolveRedirects(element, targetConstructor);
+    final parameters = resolvedConstructor.formalParameters;
     if (parameters.isEmpty) {
       final className = ElementUtils.readElementNameOrThrow(element);
       throw InvalidGenerationSourceError(
@@ -47,7 +48,7 @@ class ConstructorUtils {
         element: element,
       );
     }
-    final resolver = ConstructorFieldResolver(element, targetConstructor);
+    final resolver = ConstructorFieldResolver(element, resolvedConstructor);
     final fields = <ConstructorParameterInfo>[];
 
     for (final parameter in parameters) {
@@ -72,6 +73,27 @@ class ConstructorUtils {
     }
 
     return fields;
+  }
+
+  /// Follows redirecting or factory constructors until the final generative
+  /// constructor is reached.
+  ///
+  /// Ensures that only constructors belonging to [element] are considered in
+  /// order to avoid traversing into other classes.
+  static ConstructorElement2 resolveRedirects(
+    ClassElement2 element,
+    ConstructorElement2 constructor,
+  ) {
+    var current = constructor;
+    final seen = <ConstructorElement2>{};
+    while (seen.add(current)) {
+      final redirected = current.redirectedConstructor2;
+      if (redirected == null || redirected.enclosingElement2 != element) {
+        return current;
+      }
+      current = redirected;
+    }
+    return current;
   }
 
   /// Returns constructor for the given type and optional named constructor

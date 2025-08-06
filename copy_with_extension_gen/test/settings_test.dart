@@ -7,8 +7,8 @@ import 'package:source_gen_test/source_gen_test.dart'
 import 'package:test/test.dart';
 
 class Obsolete {
-  final String message;
   const Obsolete(this.message);
+  final String message;
 }
 
 class DoNotUse {

@@ -1,5 +1,5 @@
 import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, Element2;
+    show ClassElement2, ConstructorElement2, Element2;
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/annotation_utils.dart';
@@ -61,6 +61,17 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       fields,
     );
 
+    var resolvedConstructorName = classAnnotation.constructor;
+    final targetConstructor = classAnnotation.constructor != null
+        ? classElement.getNamedConstructor2(classAnnotation.constructor!)
+        : classElement.unnamedConstructor2;
+    if (targetConstructor is ConstructorElement2) {
+      final resolved =
+          ConstructorUtils.resolveRedirects(classElement, targetConstructor);
+      final name = resolved.name3;
+      resolvedConstructorName = name == 'new' ? null : name;
+    }
+
     return extensionTemplate(
       isPrivate: classElement.isPrivate,
       className: className,
@@ -69,7 +80,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       fields: fields,
       skipFields: classAnnotation.skipFields,
       copyWithNull: generateCopyWithNull,
-      constructor: classAnnotation.constructor,
+      constructor: resolvedConstructorName,
       superInfo: superInfo,
     );
   }
