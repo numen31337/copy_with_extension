@@ -129,7 +129,7 @@ class SimpleObject {
 
 #### `build.yaml` configuration
 
-You can globally configure the library's behavior in your project by adding a `build.yaml` file. This allows you to customize features such as `copyWithNull` and `skipFields` globally across your project.
+You can globally configure the library's behavior in your project by adding a `build.yaml` file. This allows you to customize features such as `copyWithNull`, `skipFields`, and which annotations should be forwarded to generated parameters.
 
 ```yaml
 targets:
@@ -140,7 +140,11 @@ targets:
         options:
           copy_with_null: true # Default is false. Generate `copyWithNull` functions.
           skip_fields: true    # Default is false. Prevent generation of individual field methods, e.g. `instance.copyWith.id("123")`.
+          annotations:        # Names to forward (case-insensitive). Overrides defaults when provided.
+            - Deprecated      # Default is Deprecated; include it when overriding. Use [] to disable
 ```
+
+By default the generator forwards only the `Deprecated` annotation. Supplying the `annotations` list replaces this set, so include `Deprecated` if you still want it. Specifying an empty list turns off annotation propagation entirely.
 
 ## How is this library better than `freezed`?
 

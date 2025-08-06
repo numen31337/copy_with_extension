@@ -15,12 +15,20 @@ class ConstructorParameterInfo {
     required this.isPositioned,
     ClassElement2? annotatedSuper,
     String? fieldName,
+    required Set<String> annotations,
   })  : name = fieldName ?? ElementUtils.readElementNameOrThrow(element),
         constructorParamName = ElementUtils.readElementNameOrThrow(element),
         fieldAnnotation = _readFieldAnnotation(element, classElement),
         classField = _lookupField(
           classElement,
           fieldName ?? ElementUtils.readElementNameOrThrow(element),
+        ),
+        metadata = _readFieldMetadata(
+          _lookupField(
+            classElement,
+            fieldName ?? ElementUtils.readElementNameOrThrow(element),
+          ),
+          annotations,
         ),
         isInherited = _isInherited(
           fieldName ?? ElementUtils.readElementNameOrThrow(element),
@@ -53,6 +61,10 @@ class ConstructorParameterInfo {
   /// Field element taken from the class itself. If `null`, the field with the
   /// given name wasn't found on the class or its superclasses.
   final FieldElement2? classField;
+
+  /// Metadata annotations copied from the corresponding class field that should
+  /// be reflected in generated `copyWith` methods.
+  final List<String> metadata;
 
   /// `true` if this field is declared in a superclass rather than the current
   /// class. Used to annotate overridden members in generated proxies.
@@ -156,5 +168,32 @@ class ConstructorParameterInfo {
     }
 
     return null;
+  }
+
+  /// Restores metadata annotations for [field] that need to be transferred to
+  /// generated parameters. Names in [annotations] are matched case-insensitively
+  /// so callers don't need to specify multiple variants.
+  static List<String> _readFieldMetadata(
+    FieldElement2? field,
+    Set<String> annotations,
+  ) {
+    if (field == null || annotations.isEmpty) return const [];
+
+    final transferable = annotations.map((name) => name.toLowerCase()).toSet();
+
+    return field.metadata2.annotations
+        .where((annotation) {
+          final name = annotation.element2?.name3;
+          final enclosing = annotation.element2?.enclosingElement2?.name3;
+          if (name == 'CopyWithField' || enclosing == 'CopyWithField') {
+            return false;
+          }
+          final nameLower = name?.toLowerCase();
+          final enclosingLower = enclosing?.toLowerCase();
+          return (nameLower != null && transferable.contains(nameLower)) ||
+              (enclosingLower != null && transferable.contains(enclosingLower));
+        })
+        .map((annotation) => annotation.toSource())
+        .toList();
   }
 }

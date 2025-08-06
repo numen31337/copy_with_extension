@@ -18,6 +18,7 @@ class ConstructorUtils {
     ClassElement2 element,
     String? constructor, {
     ClassElement2? annotatedSuper,
+    required Set<String> annotations,
   }) {
     final targetConstructor = constructor != null
         ? element.getNamedConstructor2(constructor)
@@ -57,6 +58,7 @@ class ConstructorUtils {
         isPositioned: parameter.isPositional,
         annotatedSuper: annotatedSuper,
         fieldName: fieldName,
+        annotations: annotations,
       );
 
       final classField = field.classField;
