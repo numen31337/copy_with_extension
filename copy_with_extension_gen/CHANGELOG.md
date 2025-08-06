@@ -1,3 +1,9 @@
+## 9.1.0
+* Added `immutableFields` option to treat class fields as immutable by default.
+* Forward annotations (e.g., `@Deprecated`) to generated `copyWith` parameters.
+* Preserve type aliases.
+* Added support for redirection constructors.
+
 ## 9.0.0
 * **BREAKING** Dynamic fields are treated as nullable, affecting generated `copyWith` signatures.
 * Added robust inheritance support enabling `copyWith` across parent and child classes
