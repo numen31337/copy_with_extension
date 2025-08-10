@@ -10,7 +10,10 @@ on:
 
 jobs:
   run_tests:
-    name: Run Tests - Dart ${{ matrix.sdk }} - ${{ matrix.os }}
+    name: >-
+      ${{ matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest' &&
+          format('Full Test Suite - Dart {0} - {1}', matrix.sdk, matrix.os) ||
+          format('Run Tests - Dart {0} - {1}', matrix.sdk, matrix.os) }}
     timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     defaults:
@@ -29,7 +32,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Install Dart
         uses: dart-lang/setup-dart@v1
@@ -59,6 +64,41 @@ jobs:
 
       - name: Check formatting
         run: dart format --set-exit-if-changed ../
+
+      - name: Install coverage tools
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lcov
+
+      - name: Run tests with coverage
+        if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
+        run: |
+          dart run coverage:test_with_coverage --function-coverage --branch-coverage -- --reporter=github
+          summary=$(lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --summary coverage/lcov.info)
+          detail=$(lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --list coverage/lcov.info | tail -n +2)
+          uncovered=$(awk '
+            /^SF:/{f=substr($0,4); next}
+            /^FN:/{fn[$2]=$1; next}
+            /^FNDA:0,/{split($0,a,","); printf "%s\t%s\tfunction %s not covered\n", f, fn[a[2]], a[2]; next}
+            /^DA:[0-9]+,0$/{split($0,a,":|,"); printf "%s\t%s\tline not covered\n", f, a[2]}
+          ' coverage/lcov.info)
+
+          {
+            echo '### Coverage Summary'
+            echo
+            echo '```'
+            echo "$summary"
+            echo '```'
+            echo
+            echo '```'
+            echo "$detail"
+            echo '```'
+            echo
+            echo '```'
+            echo "$uncovered" | sed $'s/\t/: /g'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Check Outdated Packages - copy_with_extension_gen
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
@@ -96,10 +136,20 @@ jobs:
         package: [copy_with_extension_gen, copy_with_extension]
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
         
       - name: Package score
+        id: package_score
         uses: axel-op/dart-package-analyzer@v3
         with:
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           relativePath: ${{ matrix.package }}
+
+      - name: Annotate package score
+        if: ${{ steps.package_score.outputs.total < steps.package_score.outputs.total_max }}
+        run: |
+          msg="Package score for ${{ matrix.package }} is ${{ steps.package_score.outputs.total }}/${{ steps.package_score.outputs.total_max }}"
+          echo "${msg}"
+          echo "::warning ::${msg}"

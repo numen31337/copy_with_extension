@@ -1,4 +1,9 @@
+import 'package:analyzer/dart/element/element2.dart' show FieldElement2;
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
+import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
+import 'package:copy_with_extension_gen/src/templates/copy_with_null_template.dart';
+import 'package:copy_with_extension_gen/src/templates/copy_with_values_template.dart';
 import 'package:test/test.dart';
 
 part 'gen_nullability_test.g.dart';
@@ -69,6 +74,55 @@ class ParentNoNullable {
 @CopyWith()
 class ChildNoNullable extends ParentNoNullable {
   ChildNoNullable(super.a);
+}
+
+@CopyWith(copyWithNull: true)
+class ParentWithCopyNull {
+  const ParentWithCopyNull({this.a});
+
+  final int? a;
+}
+
+@CopyWith()
+class ChildInheritsCopyNull extends ParentWithCopyNull {
+  const ChildInheritsCopyNull({super.a, this.b});
+
+  final String? b;
+}
+
+class _FakeConstructorParameterInfo implements ConstructorParameterInfo {
+  _FakeConstructorParameterInfo({
+    required this.name,
+    required this.constructorParamName,
+    required this.nullable,
+    required bool immutable,
+    this.isPositioned = false,
+  })  : fieldAnnotation = CopyWithFieldAnnotation(immutable: immutable),
+        type = 'int',
+        classField = null,
+        metadata = const [],
+        isInherited = false;
+
+  @override
+  final String constructorParamName;
+  @override
+  final String name;
+  @override
+  final bool nullable;
+  @override
+  final String type;
+  @override
+  final CopyWithFieldAnnotation fieldAnnotation;
+  @override
+  final bool isPositioned;
+  @override
+  final FieldElement2? classField;
+  @override
+  final List<String> metadata;
+  @override
+  final bool isInherited;
+  @override
+  bool get classFieldNullable => true;
 }
 
 void main() {
@@ -189,5 +243,59 @@ void main() {
     final child = ChildNoNullable(1);
     final result = (child as dynamic);
     expect(() => result.copyWithNull(), throwsNoSuchMethodError);
+  });
+
+  test(
+      'copyWithNull is inherited when superclass enables it and child has nullable field',
+      () {
+    final original = ChildInheritsCopyNull(a: 1, b: 'b');
+
+    final updated = original.copyWithNull(b: true);
+    expect(updated, isA<ChildInheritsCopyNull>());
+    expect(updated.a, 1);
+    expect(updated.b, isNull);
+
+    final unchanged = original.copyWithNull();
+    expect(unchanged.a, 1);
+    expect(unchanged.b, 'b');
+  });
+
+  test('copyWithNullTemplate keeps current value for non-nullable fields', () {
+    final fields = [
+      _FakeConstructorParameterInfo(
+        name: 'a',
+        constructorParamName: 'a',
+        nullable: false,
+        immutable: false,
+      ),
+      _FakeConstructorParameterInfo(
+        name: 'b',
+        constructorParamName: 'b',
+        nullable: true,
+        immutable: false,
+      ),
+    ];
+    final result = copyWithNullTemplate('Test', fields, null, false);
+    expect(result, contains('a,'));
+    expect(result, contains('b == true ? null : this.b'));
+  });
+
+  test('copyWithValuesTemplate handles immutable positioned fields', () {
+    final field = _FakeConstructorParameterInfo(
+      name: 'a',
+      constructorParamName: 'a',
+      nullable: false,
+      immutable: true,
+      isPositioned: true,
+    );
+    final result = copyWithValuesTemplate(
+      'Test',
+      [field],
+      [field],
+      null,
+      false,
+      false,
+    );
+    expect(result, contains('_value.a,'));
   });
 }
