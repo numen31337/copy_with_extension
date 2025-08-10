@@ -69,7 +69,7 @@ jobs:
       - name: Run tests with coverage
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
-          dart run coverage:test_with_coverage -- --reporter=github
+          dart run coverage:test_with_coverage --function-coverage -- --reporter=github
           lcov --summary coverage/lcov.info
 
       - name: Check Outdated Packages - copy_with_extension_gen
