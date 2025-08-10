@@ -75,13 +75,6 @@ jobs:
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
           dart run coverage:test_with_coverage --function-coverage --branch-coverage -- --reporter=github
-          awk '
-            /^SF:/ {print; brf=0; brh=0; next}
-            /^BRDA:/ {brf++; split($0,a,","); if (a[4] != "-" && a[4] != "0") brh++; print; next}
-            /^end_of_record/ {printf "BRF:%d\nBRH:%d\nend_of_record\n", brf, brh; next}
-            {print}
-          ' coverage/lcov.info > coverage/lcov.tmp
-          mv coverage/lcov.tmp coverage/lcov.info
           summary=$(lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --summary coverage/lcov.info)
           detail=$(lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --list coverage/lcov.info | tail -n +2)
           uncovered=$(awk '
