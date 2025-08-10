@@ -29,6 +29,28 @@ class AnnotationFixture {
   final String? custom;
 }
 
+@CopyWith()
+class FieldInitializerFixture {
+  FieldInitializerFixture({required int b}) : a = b;
+  final int a;
+}
+
+@CopyWith()
+class ChainRoot {
+  const ChainRoot({required this.a});
+  final int a;
+}
+
+@CopyWith()
+class ChainMiddle extends ChainRoot {
+  ChainMiddle({required int b}) : super(a: b);
+}
+
+@CopyWith()
+class ChainLeaf extends ChainMiddle {
+  ChainLeaf({required int c}) : super(b: c);
+}
+
 void main() {
   group('Settings', () {
     test('Default values', () {
@@ -142,6 +164,53 @@ void main() {
       expect(output, isNot(contains('@Deprecated')));
       expect(output, isNot(contains('@Obsolete')));
       expect(output, isNot(contains('@DoNotUse')));
+    });
+  });
+
+  group('Constructor field resolver', () {
+    test('maps field initializers with renamed parameters', () async {
+      final reader = await initializeLibraryReaderForDirectory(
+        'test',
+        'settings_test.dart',
+      );
+
+      final output = await generateForElement(
+        CopyWithGenerator(
+          Settings(
+            copyWithNull: false,
+            skipFields: false,
+            immutableFields: false,
+          ),
+        ),
+        reader,
+        'FieldInitializerFixture',
+      );
+
+      expect(output, contains('a('));
+      expect(output, isNot(contains('b(')));
+    });
+
+    test('follows parameter forwarding through super constructors', () async {
+      final reader = await initializeLibraryReaderForDirectory(
+        'test',
+        'settings_test.dart',
+      );
+
+      final output = await generateForElement(
+        CopyWithGenerator(
+          Settings(
+            copyWithNull: false,
+            skipFields: false,
+            immutableFields: false,
+          ),
+        ),
+        reader,
+        'ChainLeaf',
+      );
+
+      expect(output, contains('a('));
+      expect(output, isNot(contains('b(')));
+      expect(output, isNot(contains('c(')));
     });
   });
 }
