@@ -101,6 +101,20 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
+          uncovered=$(awk '
+            /^SF:/{f=substr($0,4); next}
+            /^FN:/{fn[$2]=$1; next}
+            /^FNDA:0,/{split($0,a,","); printf "%s\t%s\tfunction %s not covered\n", f, fn[a[2]], a[2]; next}
+            /^DA:[0-9]+,0$/{split($0,a,":|,"); printf "%s\t%s\tline not covered\n", f, a[2]}
+          ' coverage/lcov.info)
+          if [[ -n "$uncovered" ]]; then
+            {
+              echo '### Uncovered Lines'
+              echo
+              echo "$uncovered" | sed $'s/\t/: /g'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Check Outdated Packages - copy_with_extension_gen
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
