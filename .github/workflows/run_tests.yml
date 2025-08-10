@@ -76,18 +76,13 @@ jobs:
         run: |
           dart run coverage:test_with_coverage --function-coverage --branch-coverage -- --reporter=github
           summary=$(lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --summary coverage/lcov.info)
-          echo "$summary"
-          summary_escaped=${summary//'%'/'%25'}
-          summary_escaped=${summary_escaped//$'\n'/'%0A'}
-          summary_escaped=${summary_escaped//$'\r'/'%0D'}
-          echo "::notice ::${summary_escaped}"
-
           detail=$(lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --list coverage/lcov.info | tail -n +2)
-          echo "$detail"
-          detail_escaped=${detail//'%'/'%25'}
-          detail_escaped=${detail_escaped//$'\n'/'%0A'}
-          detail_escaped=${detail_escaped//$'\r'/'%0D'}
-          echo "::notice ::${detail_escaped}"
+          uncovered=$(awk '
+            /^SF:/{f=substr($0,4); next}
+            /^FN:/{fn[$2]=$1; next}
+            /^FNDA:0,/{split($0,a,","); printf "%s\t%s\tfunction %s not covered\n", f, fn[a[2]], a[2]; next}
+            /^DA:[0-9]+,0$/{split($0,a,":|,"); printf "%s\t%s\tline not covered\n", f, a[2]}
+          ' coverage/lcov.info)
 
           {
             echo '### Coverage Summary'
@@ -99,21 +94,11 @@ jobs:
             echo '```'
             echo "$detail"
             echo '```'
+            echo
+            echo '```'
+            echo "$uncovered" | sed $'s/\t/: /g'
+            echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
-          uncovered=$(awk '
-            /^SF:/{f=substr($0,4); next}
-            /^FN:/{fn[$2]=$1; next}
-            /^FNDA:0,/{split($0,a,","); printf "%s\t%s\tfunction %s not covered\n", f, fn[a[2]], a[2]; next}
-            /^DA:[0-9]+,0$/{split($0,a,":|,"); printf "%s\t%s\tline not covered\n", f, a[2]}
-          ' coverage/lcov.info)
-          if [[ -n "$uncovered" ]]; then
-            {
-              echo '### Uncovered Lines'
-              echo
-              echo "$uncovered" | sed $'s/\t/: /g'
-            } >> "$GITHUB_STEP_SUMMARY"
-          fi
 
       - name: Check Outdated Packages - copy_with_extension_gen
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
