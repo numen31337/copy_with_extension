@@ -10,7 +10,10 @@ on:
 
 jobs:
   run_tests:
-    name: Run Tests - Dart ${{ matrix.sdk }} - ${{ matrix.os }}
+    name: >-
+      ${{ matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest' &&
+          format('Full Test Suite - Dart {0} - {1}', matrix.sdk, matrix.os) ||
+          format('Run Tests - Dart {0} - {1}', matrix.sdk, matrix.os) }}
     timeout-minutes: 10
     runs-on: ${{ matrix.os }}
     defaults:
@@ -78,7 +81,7 @@ jobs:
             /^FNDA:0,/{split($0,a,","); print f ":" fn[a[2]] ": function " a[2] " not covered"; next}
             /^DA:[0-9]+,0$/{split($0,a,":|,"); print f ":" a[2] ": line not covered"}
           ' coverage/lcov.info
-          
+
       - name: Check Outdated Packages - copy_with_extension_gen
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
