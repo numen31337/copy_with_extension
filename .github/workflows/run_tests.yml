@@ -72,7 +72,13 @@ jobs:
           dart run coverage:test_with_coverage --function-coverage --branch-coverage -- --reporter=github
           lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --summary coverage/lcov.info
           lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --list coverage/lcov.info
-
+          awk '
+            /^SF:/{f=substr($0,4); next}
+            /^FN:/{fn[$2]=$1; next}
+            /^FNDA:0,/{split($0,a,","); print f ":" fn[a[2]] ": function " a[2] " not covered"; next}
+            /^DA:[0-9]+,0$/{split($0,a,":|,"); print f ":" a[2] ": line not covered"}
+          ' coverage/lcov.info
+          
       - name: Check Outdated Packages - copy_with_extension_gen
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
