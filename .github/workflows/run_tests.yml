@@ -82,9 +82,6 @@ jobs:
             /^DA:[0-9]+,0$/{split($0,a,":|,"); printf "%s\t%s\tline not covered\n", f, a[2]}
           ' coverage/lcov.info)
           if [[ -n "$uncovered" ]]; then
-            while IFS=$'\t' read -r file line msg; do
-              echo "::warning file=$file,line=$line::$msg"
-            done <<< "$uncovered"
             {
               echo '### Uncovered Lines'
               echo
