@@ -76,6 +76,20 @@ class ChildNoNullable extends ParentNoNullable {
   ChildNoNullable(super.a);
 }
 
+@CopyWith(copyWithNull: true)
+class ParentWithCopyNull {
+  const ParentWithCopyNull({this.a});
+
+  final int? a;
+}
+
+@CopyWith()
+class ChildInheritsCopyNull extends ParentWithCopyNull {
+  const ChildInheritsCopyNull({super.a, this.b});
+
+  final String? b;
+}
+
 class _FakeConstructorParameterInfo implements ConstructorParameterInfo {
   _FakeConstructorParameterInfo({
     required this.name,
@@ -229,6 +243,21 @@ void main() {
     final child = ChildNoNullable(1);
     final result = (child as dynamic);
     expect(() => result.copyWithNull(), throwsNoSuchMethodError);
+  });
+
+  test(
+      'copyWithNull is inherited when superclass enables it and child has nullable field',
+      () {
+    final original = ChildInheritsCopyNull(a: 1, b: 'b');
+
+    final updated = original.copyWithNull(b: true);
+    expect(updated, isA<ChildInheritsCopyNull>());
+    expect(updated.a, 1);
+    expect(updated.b, isNull);
+
+    final unchanged = original.copyWithNull();
+    expect(unchanged.a, 1);
+    expect(unchanged.b, 'b');
   });
 
   test('copyWithNullTemplate keeps current value for non-nullable fields', () {
