@@ -75,8 +75,11 @@ jobs:
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
           dart run coverage:test_with_coverage --function-coverage --branch-coverage -- --reporter=github
-          genhtml coverage/lcov.info --branch-coverage --output-directory coverage/html > coverage/genhtml.log
-          summary=$(grep -A3 '^Overall coverage rate:' coverage/genhtml.log | tail -n 4)
+          brf=$(grep -c '^BRDA:' coverage/lcov.info)
+          brh=$(grep '^BRDA:' coverage/lcov.info | awk -F',' '$4 != "-" && $4 != "0" {c++} END{print c+0}')
+          echo "BRF:$brf" >> coverage/lcov.info
+          echo "BRH:$brh" >> coverage/lcov.info
+          summary=$(lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --summary coverage/lcov.info)
           detail=$(lcov --ignore-errors corrupt --rc branch_coverage=1 --rc check_data_consistency=0 --list coverage/lcov.info | tail -n +2)
           uncovered=$(awk '
             /^SF:/{f=substr($0,4); next}
