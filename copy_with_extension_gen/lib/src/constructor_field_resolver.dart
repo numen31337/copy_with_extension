@@ -26,12 +26,16 @@ class ConstructorFieldResolver {
   /// Returns the field name for [paramName] or `null` if the field
   /// cannot be resolved on this class or any annotated superclasses.
   String? resolve(String paramName) {
-    final forwarded = _forwardMap[paramName];
-    final candidate = forwarded ?? paramName;
-    if (_hasField(_classElement, candidate)) {
-      return candidate;
+    if (_hasField(_classElement, paramName)) {
+      return paramName;
     }
-    if (forwarded == null) return null;
+    final forwarded = _forwardMap[paramName];
+    if (forwarded == null) {
+      return null;
+    }
+    if (_hasField(_classElement, forwarded)) {
+      return forwarded;
+    }
     final superConstructor = _constructor.superConstructor2;
     final superClass = _classElement.supertype?.element3 as ClassElement2?;
     if (superConstructor == null || superClass == null) {

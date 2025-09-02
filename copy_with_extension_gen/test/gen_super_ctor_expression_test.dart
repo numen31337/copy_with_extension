@@ -47,6 +47,21 @@ class MultiParamChild extends Base {
   MultiParamChild({required int b, required int c}) : super(a: (b + c) ~/ 2);
 }
 
+@CopyWith()
+class BaseItem {
+  const BaseItem({this.focusNodeCount = 0});
+
+  final int focusNodeCount;
+}
+
+@CopyWith()
+class FormItem extends BaseItem {
+  FormItem({required this.quantities})
+      : super(focusNodeCount: quantities.length);
+
+  final List<String> quantities;
+}
+
 void main() {
   test('copyWith handles super initializer property access', () {
     final instance = Derived(b: 1);
@@ -88,5 +103,12 @@ void main() {
     final result = instance.copyWith(a: 5);
     expect(result, isA<MultiParamChild>());
     expect(result.a, 5);
+  });
+
+  test('copyWith handles local fields used in super initializer', () {
+    final item = FormItem(quantities: ['a', 'b']);
+    final copy = item.copyWith(quantities: ['x']);
+    expect(copy.quantities, ['x']);
+    expect(copy.focusNodeCount, 1);
   });
 }
