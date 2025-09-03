@@ -1,3 +1,6 @@
+## 9.1.1
+* Fix constructor parameter resolution when initializers reference parameters or super constructors.
+
 ## 9.1.0
 * Added `immutableFields` option to treat class fields as immutable by default.
 * Forward annotations (e.g., `@Deprecated`) to generated `copyWith` parameters.
