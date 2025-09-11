@@ -1,3 +1,6 @@
+# 9.2.0
+* Updating `meta` to support `^1.17.0`
+
 ## 9.1.1
 * Fix constructor parameter resolution when initializers reference parameters or super constructors.
 
