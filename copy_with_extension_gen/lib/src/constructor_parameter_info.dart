@@ -1,5 +1,5 @@
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
-import 'package:analyzer/dart/element/element2.dart';
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart' show DynamicType;
 import 'package:copy_with_extension/copy_with_extension.dart';
@@ -11,9 +11,9 @@ import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 class ConstructorParameterInfo {
   ConstructorParameterInfo(
     FormalParameterElement element,
-    ClassElement2 classElement, {
+    ClassElement classElement, {
     required this.isPositioned,
-    ClassElement2? annotatedSuper,
+    ClassElement? annotatedSuper,
     String? fieldName,
     required Set<String> annotations,
     bool immutableDefault = false,
@@ -62,7 +62,7 @@ class ConstructorParameterInfo {
 
   /// Field element taken from the class itself. If `null`, the field with the
   /// given name wasn't found on the class or its superclasses.
-  final FieldElement2? classField;
+  final FieldElement? classField;
 
   /// Metadata annotations copied from the corresponding class field that should
   /// be reflected in generated `copyWith` methods.
@@ -87,15 +87,15 @@ class ConstructorParameterInfo {
   /// [classElement].
   static bool _isInherited(
     String fieldName,
-    ClassElement2 classElement,
-    ClassElement2? annotatedSuper,
+    ClassElement classElement,
+    ClassElement? annotatedSuper,
   ) {
-    if (classElement.getField2(fieldName) != null) return false;
+    if (classElement.getField(fieldName) != null) return false;
 
     if (annotatedSuper != null) {
-      if (annotatedSuper.getField2(fieldName) != null) return true;
+      if (annotatedSuper.getField(fieldName) != null) return true;
       for (final type in annotatedSuper.allSupertypes) {
-        if (type.element3.getField2(fieldName) != null) {
+        if (type.element.getField(fieldName) != null) {
           return true;
         }
       }
@@ -103,7 +103,7 @@ class ConstructorParameterInfo {
     }
 
     for (final type in classElement.allSupertypes) {
-      if (type.element3.getField2(fieldName) != null) {
+      if (type.element.getField(fieldName) != null) {
         return true;
       }
     }
@@ -112,8 +112,8 @@ class ConstructorParameterInfo {
 
   /// Returns full type name including namespace for all nested type arguments.
   static String _fullTypeName(FormalParameterElement element) {
-    final library = element.library2;
-    if (library is! LibraryElement2) {
+    final library = element.library;
+    if (library is! LibraryElement) {
       return element.type.getDisplayString();
     }
 
@@ -123,7 +123,7 @@ class ConstructorParameterInfo {
   /// Restores the `CopyWithField` annotation provided by the user.
   static CopyWithFieldAnnotation _readFieldAnnotation(
     FormalParameterElement element,
-    ClassElement2 classElement,
+    ClassElement classElement,
     bool immutableDefault,
   ) {
     final defaults = CopyWithFieldAnnotation.defaults(
@@ -140,11 +140,11 @@ class ConstructorParameterInfo {
     }
 
     final fieldElement = _lookupField(classElement, fieldName);
-    if (fieldElement is! FieldElement2) {
+    if (fieldElement is! FieldElement) {
       return defaults;
     }
 
-    const checker = TypeChecker.fromRuntime(CopyWithField);
+    const checker = TypeChecker.typeNamed(CopyWithField);
     final annotation = checker.firstAnnotationOf(fieldElement);
     if (annotation is! DartObject) {
       return defaults;
@@ -156,18 +156,18 @@ class ConstructorParameterInfo {
     return CopyWithFieldAnnotation(immutable: immutable ?? defaults.immutable);
   }
 
-  /// Returns [FieldElement2] for [fieldName] searching the entire inheritance
+  /// Returns [FieldElement] for [fieldName] searching the entire inheritance
   /// hierarchy starting from [classElement].
-  static FieldElement2? _lookupField(
-    ClassElement2 classElement,
+  static FieldElement? _lookupField(
+    ClassElement classElement,
     String fieldName,
   ) {
-    final ownField = classElement.getField2(fieldName);
-    if (ownField is FieldElement2) return ownField;
+    final ownField = classElement.getField(fieldName);
+    if (ownField is FieldElement) return ownField;
 
     for (final supertype in classElement.allSupertypes) {
-      final candidate = supertype.element3.getField2(fieldName);
-      if (candidate is FieldElement2) {
+      final candidate = supertype.element.getField(fieldName);
+      if (candidate is FieldElement) {
         return candidate;
       }
     }
@@ -179,17 +179,17 @@ class ConstructorParameterInfo {
   /// generated parameters. Names in [annotations] are matched case-insensitively
   /// so callers don't need to specify multiple variants.
   static List<String> _readFieldMetadata(
-    FieldElement2? field,
+    FieldElement? field,
     Set<String> annotations,
   ) {
     if (field == null || annotations.isEmpty) return const [];
 
     final transferable = annotations.map((name) => name.toLowerCase()).toSet();
 
-    return field.metadata2.annotations
+    return field.metadata.annotations
         .where((annotation) {
-          final name = annotation.element2?.name3;
-          final enclosing = annotation.element2?.enclosingElement2?.name3;
+          final name = annotation.element?.name;
+          final enclosing = annotation.element?.enclosingElement?.name;
           if (name == 'CopyWithField' || enclosing == 'CopyWithField') {
             return false;
           }

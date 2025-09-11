@@ -30,3 +30,6 @@ copy_with_extension_gen/coverage/
 # Flutter tool directories
 .flutter-plugins
 .flutter-plugins-dependencies
+
+# FVM Version Cache
+.fvm/

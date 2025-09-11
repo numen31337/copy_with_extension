@@ -1,5 +1,5 @@
-import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, FieldElement2, LibraryElement2;
+import 'package:analyzer/dart/element/element.dart'
+    show ClassElement, FieldElement, LibraryElement;
 import 'package:analyzer/dart/element/type.dart' show DartType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
@@ -43,7 +43,7 @@ class AnnotatedCopyWithSuper {
   final List<DartType> typeArguments;
 
   /// The element for the superclass, used for field lookups.
-  final ClassElement2 element;
+  final ClassElement element;
 
   /// Whether the superclass suppressed field-specific methods using
   /// `skipFields: true`.
@@ -60,7 +60,7 @@ class AnnotatedCopyWithSuper {
 
   /// Library in which the subclass is defined. Needed to resolve import
   /// prefixes when rendering [typeArguments].
-  final LibraryElement2 originLibrary;
+  final LibraryElement originLibrary;
 
   /// Returns the type arguments as they appear in source, e.g. `<T, U>`.
   String typeArgumentsAnnotation() {
@@ -76,23 +76,23 @@ class AnnotatedCopyWithSuper {
 /// about the first superclass annotated with `@CopyWith`.
 ///
 /// Returns `null` when no annotated superclass is found.
-AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
-  const checker = TypeChecker.fromRuntime(CopyWith);
-  final library = classElement.library2;
+AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement classElement) {
+  const checker = TypeChecker.typeNamed(CopyWith);
+  final library = classElement.library;
   var supertype = classElement.supertype;
   while (supertype != null) {
-    var element = supertype.element3;
+    var element = supertype.element;
     final alias = supertype.alias;
     if (alias != null) {
-      final aliased = alias.element2.aliasedType.element3;
-      if (aliased is ClassElement2) {
+      final aliased = alias.element.aliasedType.element;
+      if (aliased is ClassElement) {
         element = aliased;
       }
     }
-    if (element is ClassElement2 && checker.hasAnnotationOf(element)) {
+    if (element is ClassElement && checker.hasAnnotationOf(element)) {
       final name = element.displayName;
       final prefix =
-          ElementUtils.libraryImportPrefix(library, element.library2);
+          ElementUtils.libraryImportPrefix(library, element.library);
       final annotation = checker.firstAnnotationOf(element);
       final annotationReader =
           annotation == null ? null : ConstantReader(annotation);
@@ -125,10 +125,10 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement2 classElement) {
 ///
 /// The check walks up the inheritance chain starting from the field's
 /// declaring class and returns `false` if no such ancestor is found.
-bool hasNonSkippedFieldProxy(FieldElement2? field) {
+bool hasNonSkippedFieldProxy(FieldElement? field) {
   if (field == null) return false;
-  const checker = TypeChecker.fromRuntime(CopyWith);
-  var current = field.enclosingElement2 as ClassElement2?;
+  const checker = TypeChecker.typeNamed(CopyWith);
+  var current = field.enclosingElement as ClassElement?;
   while (current != null) {
     if (checker.hasAnnotationOf(current)) {
       final annotation = checker.firstAnnotationOf(current);
@@ -137,15 +137,15 @@ bool hasNonSkippedFieldProxy(FieldElement2? field) {
       return !skipFields;
     }
     final nextType = current.supertype;
-    var next = nextType?.element3;
+    var next = nextType?.element;
     final alias = nextType?.alias;
     if (alias != null) {
-      final aliased = alias.element2.aliasedType.element3;
-      if (aliased is ClassElement2) {
+      final aliased = alias.element.aliasedType.element;
+      if (aliased is ClassElement) {
         next = aliased;
       }
     }
-    current = next is ClassElement2 ? next : null;
+    current = next is ClassElement ? next : null;
   }
   return false;
 }

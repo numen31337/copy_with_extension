@@ -1,5 +1,5 @@
-import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, ConstructorElement2;
+import 'package:analyzer/dart/element/element.dart'
+    show ClassElement, ConstructorElement;
 import 'package:copy_with_extension_gen/src/constructor_field_resolver.dart';
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
@@ -14,17 +14,17 @@ class ConstructorUtils {
   /// Will throw an [InvalidGenerationSourceError] if the constructor cannot be
   /// resolved or has no parameters.
   static List<ConstructorParameterInfo> constructorFields(
-    ClassElement2 element,
+    ClassElement element,
     String? constructor, {
-    ClassElement2? annotatedSuper,
+    ClassElement? annotatedSuper,
     required Set<String> annotations,
     required bool immutableFields,
   }) {
     final targetConstructor = constructor != null
-        ? element.getNamedConstructor2(constructor)
-        : element.unnamedConstructor2;
+        ? element.getNamedConstructor(constructor)
+        : element.unnamedConstructor;
 
-    if (targetConstructor is! ConstructorElement2) {
+    if (targetConstructor is! ConstructorElement) {
       final className = element.displayName;
       if (constructor != null) {
         throw InvalidGenerationSourceError(
@@ -67,7 +67,7 @@ class ConstructorUtils {
 
       final classField = field.classField;
       final isAccessible = classField != null &&
-          (!classField.isPrivate || classField.library2 == element.library2);
+          (!classField.isPrivate || classField.library == element.library);
       if (isAccessible) {
         fields.add(field);
       }
@@ -81,15 +81,15 @@ class ConstructorUtils {
   ///
   /// Ensures that only constructors belonging to [element] are considered in
   /// order to avoid traversing into other classes.
-  static ConstructorElement2 resolveRedirects(
-    ClassElement2 element,
-    ConstructorElement2 constructor,
+  static ConstructorElement resolveRedirects(
+    ClassElement element,
+    ConstructorElement constructor,
   ) {
     var current = constructor;
-    final seen = <ConstructorElement2>{};
+    final seen = <ConstructorElement>{};
     while (seen.add(current)) {
-      final redirected = current.redirectedConstructor2;
-      if (redirected == null || redirected.enclosingElement2 != element) {
+      final redirected = current.redirectedConstructor;
+      if (redirected == null || redirected.enclosingElement != element) {
         return current;
       }
       current = redirected;
