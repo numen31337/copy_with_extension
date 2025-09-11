@@ -1,3 +1,9 @@
+## 9.2.0
+* Updating `analyzer` to support `^8.0.0`
+* Updating `source_gen` to support `^4.0.0`
+* Updating `build` to support `^4.0.0`
+* Updating `meta` to support `^1.17.0`
+
 ## 9.1.1
 * Fix constructor parameter resolution when initializers reference parameters or super constructors.
 

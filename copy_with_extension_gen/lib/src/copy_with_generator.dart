@@ -1,5 +1,5 @@
-import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, ConstructorElement2, Element2;
+import 'package:analyzer/dart/element/element.dart'
+    show ClassElement, ConstructorElement, Element;
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/annotation_utils.dart';
@@ -26,7 +26,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   /// the extension as a string.
   @override
   String generateForAnnotatedElement(
-    Element2 element,
+    Element element,
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
@@ -64,12 +64,12 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
     var resolvedConstructorName = classAnnotation.constructor;
     final targetConstructor = classAnnotation.constructor != null
-        ? classElement.getNamedConstructor2(classAnnotation.constructor!)
-        : classElement.unnamedConstructor2;
-    if (targetConstructor is ConstructorElement2) {
+        ? classElement.getNamedConstructor(classAnnotation.constructor!)
+        : classElement.unnamedConstructor;
+    if (targetConstructor is ConstructorElement) {
       final resolved =
           ConstructorUtils.resolveRedirects(classElement, targetConstructor);
-      final name = resolved.name3;
+      final name = resolved.name;
       resolvedConstructorName = name == 'new' ? null : name;
     }
 
@@ -86,8 +86,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     );
   }
 
-  ClassElement2 _expectClassElement(Element2 element) {
-    if (element is ClassElement2) {
+  ClassElement _expectClassElement(Element element) {
+    if (element is ClassElement) {
       return element;
     }
     throw InvalidGenerationSourceError(
@@ -97,13 +97,13 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   }
 
   AnnotatedCopyWithSuper? _findSuperInfo(
-    ClassElement2 element,
+    ClassElement element,
     CopyWithAnnotation annotation,
   ) {
     var superInfo = findAnnotatedSuper(element);
     if (annotation.skipFields &&
         superInfo != null &&
-        element.supertype?.element3 != superInfo.element) {
+        element.supertype?.element != superInfo.element) {
       superInfo = null;
     }
     return superInfo;
@@ -130,7 +130,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
 
   void _validateFieldNullability(
     List<ConstructorParameterInfo> fields,
-    ClassElement2 classElement,
+    ClassElement classElement,
   ) {
     for (final field in fields) {
       if (field.classField != null &&

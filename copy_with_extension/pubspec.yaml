@@ -1,15 +1,15 @@
 name: copy_with_extension
-version: 9.1.1
+version: 9.2.0
 description: Annotation for generating `copyWith` extensions code using `copy_with_extension_gen`.
 homepage: https://github.com/numen31337/copy_with_extension/tree/master/copy_with_extension
 repository: https://github.com/numen31337/copy_with_extension
 issue_tracker: https://github.com/numen31337/copy_with_extension/issues
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ^3.0.0
 
 dependencies:
-  meta: ^1.8.0
+  meta: ^1.16.0
 
 dev_dependencies:
   flutter_lints: ^6.0.0

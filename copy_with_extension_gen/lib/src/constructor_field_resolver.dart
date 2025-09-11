@@ -8,8 +8,8 @@ import 'package:analyzer/dart/ast/ast.dart'
         SuperConstructorInvocation;
 import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
 import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
-import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, ConstructorElement2;
+import 'package:analyzer/dart/element/element.dart'
+    show ClassElement, ConstructorElement;
 
 /// Resolves constructor parameters to the corresponding class fields.
 ///
@@ -19,8 +19,8 @@ class ConstructorFieldResolver {
   ConstructorFieldResolver(this._classElement, this._constructor)
       : _forwardMap = _buildForwardMap(_constructor);
 
-  final ClassElement2 _classElement;
-  final ConstructorElement2 _constructor;
+  final ClassElement _classElement;
+  final ConstructorElement _constructor;
   final Map<String, String> _forwardMap;
 
   /// Returns the field name for [paramName] or `null` if the field
@@ -36,8 +36,8 @@ class ConstructorFieldResolver {
     if (_hasField(_classElement, forwarded)) {
       return forwarded;
     }
-    final superConstructor = _constructor.superConstructor2;
-    final superClass = _classElement.supertype?.element3 as ClassElement2?;
+    final superConstructor = _constructor.superConstructor;
+    final superClass = _classElement.supertype?.element as ClassElement?;
     if (superConstructor == null || superClass == null) {
       return null;
     }
@@ -45,11 +45,11 @@ class ConstructorFieldResolver {
         .resolve(forwarded);
   }
 
-  static Map<String, String> _buildForwardMap(ConstructorElement2 constructor) {
-    final library = constructor.library2;
+  static Map<String, String> _buildForwardMap(ConstructorElement constructor) {
+    final library = constructor.library;
     final session = library.session;
 
-    final parsed = session.getParsedLibraryByElement2(library);
+    final parsed = session.getParsedLibraryByElement(library);
     if (parsed is! ParsedLibraryResult) return const {};
     final declaration =
         parsed.getFragmentDeclaration(constructor.firstFragment);
@@ -72,7 +72,7 @@ class ConstructorFieldResolver {
       } else if (initializer is SuperConstructorInvocation) {
         var positionalIndex = 0;
         final superParams =
-            constructor.superConstructor2?.formalParameters ?? const [];
+            constructor.superConstructor?.formalParameters ?? const [];
         for (final arg in initializer.argumentList.arguments) {
           if (arg is NamedExpression) {
             final paramNames =
@@ -108,10 +108,10 @@ class ConstructorFieldResolver {
     return visitor.names;
   }
 
-  static bool _hasField(ClassElement2 element, String fieldName) {
-    if (element.getField2(fieldName) != null) return true;
+  static bool _hasField(ClassElement element, String fieldName) {
+    if (element.getField(fieldName) != null) return true;
     for (final type in element.allSupertypes) {
-      if (type.element3.getField2(fieldName) != null) {
+      if (type.element.getField(fieldName) != null) {
         return true;
       }
     }
