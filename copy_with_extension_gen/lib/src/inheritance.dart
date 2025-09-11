@@ -91,8 +91,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement classElement) {
     }
     if (element is ClassElement && checker.hasAnnotationOf(element)) {
       final name = element.displayName;
-      final prefix =
-          ElementUtils.libraryImportPrefix(library, element.library);
+      final prefix = ElementUtils.libraryImportPrefix(library, element.library);
       final annotation = checker.firstAnnotationOf(element);
       final annotationReader =
           annotation == null ? null : ConstantReader(annotation);
