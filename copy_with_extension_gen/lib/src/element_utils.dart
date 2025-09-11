@@ -1,5 +1,4 @@
-import 'package:analyzer/dart/element/element2.dart'
-    show ClassElement2, LibraryElement2, LibraryImport, PrefixElement2;
+import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart'
     show DartType, ParameterizedType;
@@ -16,25 +15,24 @@ class ElementUtils {
   ///
   /// If [nameOnly] is `false`: `class MyClass<T extends String, Y>` returns
   /// `<T extends String, Y>`.
-  static String typeParametersString(
-      ClassElement2 classElement, bool nameOnly) {
-    final names = classElement.typeParameters2
-        .map((e) => nameOnly ? e.displayName : e.displayString2())
+  static String typeParametersString(ClassElement classElement, bool nameOnly) {
+    final names = classElement.typeParameters
+        .map((e) => nameOnly ? e.displayName : e.displayString())
         .join(',');
     return names.isNotEmpty ? '<$names>' : '';
   }
 
   /// Recursively builds the display name for [type] including any import
   /// prefixes required to reference symbols from other libraries.
-  static String typeNameWithPrefix(LibraryElement2 library, DartType type) {
+  static String typeNameWithPrefix(LibraryElement library, DartType type) {
     final nullability =
         type.nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
 
     final alias = type.alias;
     if (alias != null) {
-      final aliasElement = alias.element2;
+      final aliasElement = alias.element;
       final aliasName =
-          '${libraryImportPrefix(library, aliasElement.library2)}${aliasElement.name3}';
+          '${libraryImportPrefix(library, aliasElement.library)}${aliasElement.name}';
       if (alias.typeArguments.isNotEmpty) {
         final args = alias.typeArguments
             .map((t) => typeNameWithPrefix(library, t))
@@ -45,9 +43,9 @@ class ElementUtils {
     }
 
     if (type is ParameterizedType) {
-      final element = type.element3;
+      final element = type.element;
       final name = element != null
-          ? '${libraryImportPrefix(library, element.library2)}${element.name3}'
+          ? '${libraryImportPrefix(library, element.library)}${element.name}'
           : displayStringWithoutNullability(type);
 
       if (type.typeArguments.isNotEmpty) {
@@ -60,18 +58,18 @@ class ElementUtils {
     }
 
     final displayName = displayStringWithoutNullability(type);
-    return '${libraryImportPrefix(library, type.element3?.library2)}$displayName$nullability';
+    return '${libraryImportPrefix(library, type.element?.library)}$displayName$nullability';
   }
 
   /// Returns the import prefix for [targetLibrary] if one exists in [library].
   static String libraryImportPrefix(
-      LibraryElement2 library, LibraryElement2? targetLibrary) {
+      LibraryElement library, LibraryElement? targetLibrary) {
     if (targetLibrary == null) return '';
     final unit = library.fragments.first;
-    for (final PrefixElement2 prefix in unit.prefixes) {
+    for (final PrefixElement prefix in unit.prefixes) {
       for (final LibraryImport import in prefix.imports) {
-        if (import.importedLibrary2 == targetLibrary) {
-          final prefixName = prefix.name3;
+        if (import.importedLibrary == targetLibrary) {
+          final prefixName = prefix.name;
           if (prefixName is String && prefixName.isNotEmpty) {
             return '$prefixName.';
           }

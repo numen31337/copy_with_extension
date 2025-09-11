@@ -1,4 +1,4 @@
-import 'package:analyzer/dart/element/element2.dart' show FieldElement2;
+import 'package:analyzer/dart/element/element.dart' show FieldElement;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
@@ -116,7 +116,7 @@ class _FakeConstructorParameterInfo implements ConstructorParameterInfo {
   @override
   final bool isPositioned;
   @override
-  final FieldElement2? classField;
+  final FieldElement? classField;
   @override
   final List<String> metadata;
   @override
