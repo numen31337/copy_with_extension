@@ -15,6 +15,7 @@ String extensionTemplate({
   required bool skipFields,
   required bool copyWithNull,
   required String? constructor,
+  required bool allowNullForNonNullableFields,
   AnnotatedCopyWithSuper? superInfo,
 }) {
   final typeAnnotation = className + typeParametersNames;
@@ -27,6 +28,7 @@ String extensionTemplate({
     fields,
     skipFields,
     superInfo: superInfo,
+    allowNullForNonNullableFields: allowNullForNonNullableFields,
   );
   final copyWithNullBlock = copyWithNull
       ? copyWithNullTemplate(typeAnnotation, fields, constructor, skipFields)

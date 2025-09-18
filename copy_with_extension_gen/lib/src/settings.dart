@@ -5,6 +5,7 @@ class Settings {
     required this.skipFields,
     required this.immutableFields,
     Set<String>? annotations,
+    this.allowNullForNonNullableFields = false,
   }) : annotations = (annotations ?? defaultAnnotations)
             .map((e) => e.toLowerCase())
             .toSet();
@@ -23,6 +24,8 @@ class Settings {
       copyWithNull: json['copy_with_null'] as bool? ?? false,
       skipFields: json['skip_fields'] as bool? ?? false,
       immutableFields: json['immutable_fields'] as bool? ?? false,
+      allowNullForNonNullableFields:
+          json['allow_null_for_non_nullable_fields'] as bool? ?? false,
       annotations: rawAnnotations,
     );
   }
@@ -31,6 +34,7 @@ class Settings {
   final bool skipFields;
   final bool immutableFields;
   final Set<String> annotations;
+  final bool allowNullForNonNullableFields;
 
   /// Default annotation names forwarded to generated parameters.
   static const defaultAnnotations = {'Deprecated'};

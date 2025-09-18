@@ -83,6 +83,8 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       copyWithNull: generateCopyWithNull,
       constructor: resolvedConstructorName,
       superInfo: superInfo,
+      allowNullForNonNullableFields:
+          classAnnotation.allowNullForNonNullableFields,
     );
   }
 

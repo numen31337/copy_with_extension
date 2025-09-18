@@ -7,6 +7,7 @@ class CopyWithAnnotation implements CopyWith {
     required this.copyWithNull,
     required this.skipFields,
     required this.immutableFields,
+    required this.allowNullForNonNullableFields,
   });
 
   @override
@@ -20,4 +21,7 @@ class CopyWithAnnotation implements CopyWith {
 
   @override
   final bool immutableFields;
+
+  @override
+  final bool allowNullForNonNullableFields;
 }

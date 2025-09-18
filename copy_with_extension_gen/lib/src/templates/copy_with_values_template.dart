@@ -4,6 +4,8 @@ import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 /// Generates the body of the `call` method used by the proxy.
 /// The returned snippet can be used either as an abstract interface (when [isAbstract] is `true`)
 /// or as a concrete implementation that instantiates the target class.
+///
+/// param [allowNullForNonNullableFields] - if true, make non-nullable fields nullable, will be respected only when [isAbstract] is `true`
 String copyWithValuesTemplate(
   String typeAnnotation,
   List<ConstructorParameterInfo> allFields,
@@ -11,6 +13,7 @@ String copyWithValuesTemplate(
   String? constructor,
   bool skipFields,
   bool isAbstract, {
+  bool allowNullForNonNullableFields = false,
   bool addOverride = false,
 }) {
   // Build the parameter list for the generated function or abstract interface. Immutable fields are excluded entirely.
@@ -19,8 +22,12 @@ String copyWithValuesTemplate(
 
     final annotations = v.metadata.isEmpty ? '' : '${v.metadata.join(' ')} ';
     if (isAbstract) {
+      // If [allowNullForNonNullableFields] is true and field is non-nullable, make it nullable
+      final typeToUse = (allowNullForNonNullableFields && !v.nullable)
+          ? '${v.type}?'
+          : v.type;
       // When generating the interface, parameters are typed directly.
-      return '$r\n    $annotations${v.type} ${v.name},';
+      return '$r\n    $annotations$typeToUse ${v.name},';
     } else {
       // The implementation uses [\$CopyWithPlaceholder] to detect whether a parameter was passed.
       return '$r\n    ${annotations}Object? ${v.name} = const \$CopyWithPlaceholder(),';

@@ -14,6 +14,7 @@ String copyWithProxyTemplate(
   List<ConstructorParameterInfo> fields,
   bool skipFields, {
   AnnotatedCopyWithSuper? superInfo,
+  required bool allowNullForNonNullableFields,
 }) {
   final typeAnnotation = type + typeParameterNames;
   final filteredFields =
@@ -72,7 +73,7 @@ String copyWithProxyTemplate(
       abstract class _\$${type}CWProxy$typeParameters$extendsProxy {
         $nonNullableFunctionsInterface
 
-        ${copyWithValuesTemplate(typeAnnotation, fields, uniqueFilteredFields, constructor, skipFields, true, addOverride: superInfo != null)};
+        ${copyWithValuesTemplate(typeAnnotation, fields, uniqueFilteredFields, constructor, skipFields, true, addOverride: superInfo != null, allowNullForNonNullableFields: allowNullForNonNullableFields)};
       }
 
       /// Callable proxy for `copyWith` functionality.
@@ -85,7 +86,7 @@ String copyWithProxyTemplate(
         $nonNullableFunctions
 
         @override
-        ${copyWithValuesTemplate(typeAnnotation, fields, uniqueFilteredFields, constructor, skipFields, false)}
+        ${copyWithValuesTemplate(typeAnnotation, fields, uniqueFilteredFields, constructor, skipFields, false, allowNullForNonNullableFields: allowNullForNonNullableFields)}
       }
     ''';
 }
