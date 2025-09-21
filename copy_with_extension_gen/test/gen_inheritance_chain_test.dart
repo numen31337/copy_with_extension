@@ -3,6 +3,8 @@ import 'dart:typed_data' as ns;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';
 
+import 'helpers/gen_cross_library_parent.dart' as cross_lib;
+
 part 'gen_inheritance_chain_test.g.dart';
 
 @CopyWith()
@@ -96,15 +98,22 @@ class BoundedChild<S extends int> extends BaseBound<List<S>> {
 }
 
 @CopyWith()
-class ReorderParent<A, B> {
+class ReorderParent<TFirst, TSecond> {
   ReorderParent(this.a, this.b);
-  final A a;
-  final B b;
+  final TFirst a;
+  final TSecond b;
 }
 
 @CopyWith()
 class ReorderChild<X, Y> extends ReorderParent<Y, X> {
   ReorderChild(super.a, super.b);
+}
+
+@CopyWith()
+class CrossLibraryChild extends cross_lib.CrossLibraryParent {
+  const CrossLibraryChild({required super.value, required this.child});
+
+  final int child;
 }
 
 @CopyWith()
@@ -257,6 +266,20 @@ void main() {
     final baseCopy = base.copyWith(value: const [4]);
     expect(baseCopy, isA<BaseBound<List<int>>>());
     expect(baseCopy.value, [4]);
+  });
+
+  test('copyWith inlines cross-library super proxies', () {
+    final child = CrossLibraryChild(value: 1, child: 2);
+
+    final delegated = child.copyWith.value(3);
+    expect(delegated, isA<CrossLibraryChild>());
+    expect(delegated.value, 3);
+    expect(delegated.child, 2);
+
+    final updated = child.copyWith(value: 4, child: 5);
+    expect(updated, isA<CrossLibraryChild>());
+    expect(updated.value, 4);
+    expect(updated.child, 5);
   });
 
   test('copyWith preserves subclass type with reordered generics', () {
