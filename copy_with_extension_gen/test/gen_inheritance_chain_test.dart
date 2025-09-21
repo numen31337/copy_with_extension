@@ -98,10 +98,10 @@ class BoundedChild<S extends int> extends BaseBound<List<S>> {
 }
 
 @CopyWith()
-class ReorderParent<A, B> {
+class ReorderParent<TFirst, TSecond> {
   ReorderParent(this.a, this.b);
-  final A a;
-  final B b;
+  final TFirst a;
+  final TSecond b;
 }
 
 @CopyWith()
