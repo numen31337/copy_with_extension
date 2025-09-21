@@ -1,3 +1,6 @@
+## 10.0.1
+* Proxy generator now inherits only within the same library, inlines otherwise. Fixes [#114](https://github.com/numen31337/copy_with_extension/issues/114).
+
 ## 10.0.0
 * Updating `analyzer` to `^8.0.0`
 * Updating `source_gen` to `^4.0.0`
