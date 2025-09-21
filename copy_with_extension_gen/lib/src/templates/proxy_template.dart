@@ -21,21 +21,25 @@ String copyWithProxyTemplate(
   final uniqueFilteredFields = uniqueConstructorFields(filteredFields);
 
   // When a superclass is also annotated with `@CopyWith`, the generated
-  // proxy inherits from the parent's proxy interface. This keeps the
-  // subclass' proxy compatible with the superclass and allows chaining.
-  final extendsProxy = superInfo == null
-      ? ''
-      : ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxy${superInfo.typeArgumentsAnnotation()}';
-  final extendsImpl = superInfo == null
-      ? ''
-      : ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxyImpl${superInfo.typeArgumentsAnnotation()}';
+  // proxy inherits from the parent's proxy interface as long as both classes
+  // live in the same library. Proxies generated in a different library are
+  // private and can't be referenced, so we skip inheritance in that case and
+  // inline the required functionality instead.
+  final shouldExtendSuper =
+      superInfo != null && superInfo.element.library == superInfo.originLibrary;
+  final extendsProxy = shouldExtendSuper
+      ? ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxy${superInfo.typeArgumentsAnnotation()}'
+      : '';
+  final extendsImpl = shouldExtendSuper
+      ? ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxyImpl${superInfo.typeArgumentsAnnotation()}'
+      : '';
 
   // Determine which fields require proxy methods. When [skipFields] is true,
   // only inherited fields need to be overridden to adjust the return type.
   final fieldsForProxyMethods = uniqueFilteredFields.where(
     (e) =>
         !skipFields ||
-        (superInfo != null &&
+        (shouldExtendSuper &&
             e.isInherited &&
             hasNonSkippedFieldProxy(e.classField)),
   );
@@ -45,7 +49,7 @@ String copyWithProxyTemplate(
   // Inherited fields delegate to the superclass implementation to avoid
   // duplicating logic.
   final nonNullableFunctions = fieldsForProxyMethods.map((e) {
-    final shouldDelegate = superInfo != null &&
+    final shouldDelegate = shouldExtendSuper &&
         e.isInherited &&
         hasNonSkippedFieldProxy(e.classField);
     final body = shouldDelegate
@@ -63,7 +67,7 @@ String copyWithProxyTemplate(
     (e) {
       final annotations = e.metadata.isEmpty ? '' : '${e.metadata.join(' ')} ';
       return '''
-    ${superInfo != null && e.isInherited && hasNonSkippedFieldProxy(e.classField) ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}($annotations${e.type} ${e.name});
+    ${shouldExtendSuper && e.isInherited && hasNonSkippedFieldProxy(e.classField) ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}($annotations${e.type} ${e.name});
     ''';
     },
   ).join('\n');
@@ -72,15 +76,15 @@ String copyWithProxyTemplate(
       abstract class _\$${type}CWProxy$typeParameters$extendsProxy {
         $nonNullableFunctionsInterface
 
-        ${copyWithValuesTemplate(typeAnnotation, fields, uniqueFilteredFields, constructor, skipFields, true, addOverride: superInfo != null)};
+        ${copyWithValuesTemplate(typeAnnotation, fields, uniqueFilteredFields, constructor, skipFields, true, addOverride: shouldExtendSuper)};
       }
 
       /// Callable proxy for `copyWith` functionality.
       /// Use as `instanceOf$type.copyWith(...)`${skipFields ? '' : ' or call `instanceOf$type.copyWith.fieldName(value)` for a single field'}.
       class _\$${type}CWProxyImpl$typeParameters$extendsImpl implements _\$${type}CWProxy$typeParameterNames {
-        const _\$${type}CWProxyImpl(${superInfo != null ? '$type$typeParameterNames super._value' : 'this._value'});
+        const _\$${type}CWProxyImpl(${shouldExtendSuper ? '$type$typeParameterNames super._value' : 'this._value'});
 
-        ${superInfo != null ? '@override\n        $type$typeParameterNames get _value => super._value as $type$typeParameterNames;' : 'final $type$typeParameterNames _value;'}
+        ${shouldExtendSuper ? '@override\n        $type$typeParameterNames get _value => super._value as $type$typeParameterNames;' : 'final $type$typeParameterNames _value;'}
 
         $nonNullableFunctions
 

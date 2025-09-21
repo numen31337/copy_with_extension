@@ -1,8 +1,7 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldGenerate(r'''
-abstract class _$PrefixedSubclassCWProxy extends a._$PrefixedSuperCWProxy<int> {
-  @override
+abstract class _$PrefixedSubclassCWProxy {
   PrefixedSubclass superField(int superField);
 
   /// Creates a new instance with the provided field values.
@@ -12,22 +11,18 @@ abstract class _$PrefixedSubclassCWProxy extends a._$PrefixedSuperCWProxy<int> {
   /// ```dart
   /// PrefixedSubclass(...).copyWith(id: 12, name: "My name")
   /// ```
-  @override
   PrefixedSubclass call({int superField});
 }
 
 /// Callable proxy for `copyWith` functionality.
 /// Use as `instanceOfPrefixedSubclass.copyWith(...)` or call `instanceOfPrefixedSubclass.copyWith.fieldName(value)` for a single field.
-class _$PrefixedSubclassCWProxyImpl extends a._$PrefixedSuperCWProxyImpl<int>
-    implements _$PrefixedSubclassCWProxy {
-  const _$PrefixedSubclassCWProxyImpl(PrefixedSubclass super._value);
+class _$PrefixedSubclassCWProxyImpl implements _$PrefixedSubclassCWProxy {
+  const _$PrefixedSubclassCWProxyImpl(this._value);
+
+  final PrefixedSubclass _value;
 
   @override
-  PrefixedSubclass get _value => super._value as PrefixedSubclass;
-
-  @override
-  PrefixedSubclass superField(int superField) =>
-      super.superField(superField) as PrefixedSubclass;
+  PrefixedSubclass superField(int superField) => call(superField: superField);
 
   @override
   /// Creates a new instance with the provided field values.
