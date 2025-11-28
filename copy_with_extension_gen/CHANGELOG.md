@@ -1,3 +1,6 @@
+## 11.0.0
+* Updating `analyzer` to `^9.0.0`
+
 ## 10.0.1
 * Proxy generator now inherits only within the same library, inlines otherwise. Fixes [#114](https://github.com/numen31337/copy_with_extension/issues/114).
 
