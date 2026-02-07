@@ -10,6 +10,7 @@ import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
 import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, ConstructorElement;
+import 'package:build/build.dart' show log;
 
 /// Resolves constructor parameters to the corresponding class fields.
 ///
@@ -50,11 +51,25 @@ class ConstructorFieldResolver {
     final session = library.session;
 
     final parsed = session.getParsedLibraryByElement(library);
-    if (parsed is! ParsedLibraryResult) return const {};
+    if (parsed is! ParsedLibraryResult) {
+      log.warning(
+        'copy_with_extension_gen: Unable to parse library for '
+        '${constructor.enclosingElement.displayName}; constructor field '
+        'forwarding will be limited.',
+      );
+      return const {};
+    }
     final declaration =
         parsed.getFragmentDeclaration(constructor.firstFragment);
     final node = declaration?.node;
-    if (node is! ConstructorDeclaration) return const {};
+    if (node is! ConstructorDeclaration) {
+      log.warning(
+        'copy_with_extension_gen: Unable to resolve constructor node for '
+        '${constructor.enclosingElement.displayName}.${constructor.displayName}; '
+        'constructor field forwarding will be limited.',
+      );
+      return const {};
+    }
 
     final parameterNames =
         constructor.formalParameters.map((p) => p.displayName).toSet();

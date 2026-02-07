@@ -182,9 +182,9 @@ class ConstructorParameterInfo {
     FieldElement? field,
     Set<String> annotations,
   ) {
-    if (field == null || annotations.isEmpty) return const [];
-
-    final transferable = annotations.map((name) => name.toLowerCase()).toSet();
+    if (field == null || annotations.isEmpty) {
+      return const [];
+    }
 
     return field.metadata.annotations
         .where((annotation) {
@@ -195,8 +195,8 @@ class ConstructorParameterInfo {
           }
           final nameLower = name?.toLowerCase();
           final enclosingLower = enclosing?.toLowerCase();
-          return (nameLower != null && transferable.contains(nameLower)) ||
-              (enclosingLower != null && transferable.contains(enclosingLower));
+          return (nameLower != null && annotations.contains(nameLower)) ||
+              (enclosingLower != null && annotations.contains(enclosingLower));
         })
         .map((annotation) => annotation.toSource())
         .toList();

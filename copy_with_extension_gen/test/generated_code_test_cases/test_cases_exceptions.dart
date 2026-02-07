@@ -16,6 +16,14 @@ class NoConstructor {
 }
 
 @ShouldThrow(
+  'The constructor "empty" of class NoParamNamedConstructor must declare at least one parameter.',
+)
+@CopyWith(constructor: 'empty')
+class NoParamNamedConstructor {
+  NoParamNamedConstructor.empty();
+}
+
+@ShouldThrow(
     'Could not find a constructor named "test" in class WrongConstructor.')
 @CopyWith(constructor: "test")
 class WrongConstructor {}

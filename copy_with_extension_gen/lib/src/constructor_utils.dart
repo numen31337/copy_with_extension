@@ -43,10 +43,17 @@ class ConstructorUtils {
     final parameters = resolvedConstructor.formalParameters;
     if (parameters.isEmpty) {
       final className = element.displayName;
-      throw InvalidGenerationSourceError(
-        'The unnamed constructor of class $className must declare at least one parameter.',
-        element: element,
-      );
+      if (constructor != null) {
+        throw InvalidGenerationSourceError(
+          'The constructor "$constructor" of class $className must declare at least one parameter.',
+          element: element,
+        );
+      } else {
+        throw InvalidGenerationSourceError(
+          'The unnamed constructor of class $className must declare at least one parameter.',
+          element: element,
+        );
+      }
     }
     final resolver = ConstructorFieldResolver(element, resolvedConstructor);
     final fields = <ConstructorParameterInfo>[];
