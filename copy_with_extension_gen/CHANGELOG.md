@@ -1,3 +1,6 @@
+## 12.0.0
+* Updating `analyzer` to `^10.0.0`
+
 ## 11.0.0
 * Updating `analyzer` to `^9.0.0`
 
