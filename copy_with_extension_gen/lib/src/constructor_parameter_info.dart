@@ -20,8 +20,11 @@ class ConstructorParameterInfo {
     bool immutableDefault = false,
   })  : name = fieldName ?? element.displayName,
         constructorParamName = element.displayName,
-        fieldAnnotation =
-            _readFieldAnnotation(element, classElement, immutableDefault),
+        fieldAnnotation = _readFieldAnnotation(
+          classElement,
+          fieldName ?? element.displayName,
+          immutableDefault,
+        ),
         classField = ClassFieldLookup.find(
           classElement,
           fieldName ?? element.displayName,
@@ -123,18 +126,17 @@ class ConstructorParameterInfo {
 
   /// Restores the `CopyWithField` annotation provided by the user.
   static CopyWithFieldAnnotation _readFieldAnnotation(
-    FormalParameterElement element,
     ClassElement classElement,
+    String fieldName,
     bool immutableDefault,
   ) {
     final defaults = CopyWithFieldAnnotation.defaults(
       immutable: immutableDefault,
     );
 
-    final fieldName = element.displayName;
     final isPrivate = fieldName.startsWith('_');
     if (isPrivate) {
-      // Treat private parameters as immutable to avoid generating `copyWith`
+      // Treat private fields as immutable to avoid generating `copyWith`
       // parameters starting with an underscore. Using such parameters in a
       // public method results in analyzer errors.
       return const CopyWithFieldAnnotation(immutable: true);
