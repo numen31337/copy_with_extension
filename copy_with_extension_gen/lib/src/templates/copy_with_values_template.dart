@@ -49,6 +49,8 @@ String copyWithValuesTemplate(
   final constructorBody = isAbstract
       ? ''
       : '{ return ${ConstructorUtils.constructorFor(typeAnnotation, constructor)}($paramsInput); }';
+  final callParameters =
+      constructorInput.trim().isEmpty ? '' : '{$constructorInput}';
 
   return '''
         /// Creates a new instance with the provided field values.
@@ -58,6 +60,6 @@ String copyWithValuesTemplate(
         /// ```dart
         /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
         /// ```
-${addOverride ? '        @override\n' : ''}        $typeAnnotation call({$constructorInput}) $constructorBody
+${addOverride ? '        @override\n' : ''}        $typeAnnotation call($callParameters) $constructorBody
     ''';
 }
