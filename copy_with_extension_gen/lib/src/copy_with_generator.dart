@@ -82,6 +82,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       skipFields: classAnnotation.skipFields,
       copyWithNull: generateCopyWithNull,
       constructor: resolvedConstructorName,
+      settings: settings,
       superInfo: superInfo,
     );
   }
@@ -100,7 +101,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ClassElement element,
     CopyWithAnnotation annotation,
   ) {
-    var superInfo = findAnnotatedSuper(element);
+    var superInfo = findAnnotatedSuper(element, settings);
     if (annotation.skipFields &&
         superInfo != null &&
         element.supertype?.element != superInfo.element) {

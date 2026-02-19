@@ -2,7 +2,9 @@ import 'package:analyzer/dart/element/element.dart'
     show ClassElement, FieldElement, LibraryElement;
 import 'package:analyzer/dart/element/type.dart' show DartType;
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:copy_with_extension_gen/src/annotation_utils.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
+import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /*
@@ -76,7 +78,10 @@ class AnnotatedCopyWithSuper {
 /// about the first superclass annotated with `@CopyWith`.
 ///
 /// Returns `null` when no annotated superclass is found.
-AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement classElement) {
+AnnotatedCopyWithSuper? findAnnotatedSuper(
+  ClassElement classElement,
+  Settings settings,
+) {
   const checker = TypeChecker.typeNamed(CopyWith);
   final library = classElement.library;
   var supertype = classElement.supertype;
@@ -93,24 +98,23 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement classElement) {
       final name = element.displayName;
       final prefix = ElementUtils.libraryImportPrefix(library, element.library);
       final annotation = checker.firstAnnotationOf(element);
-      final annotationReader =
-          annotation == null ? null : ConstantReader(annotation);
-      final skipFields =
-          annotationReader?.peek('skipFields')?.boolValue ?? false;
-      final copyWithNull =
-          annotationReader?.peek('copyWithNull')?.boolValue ?? false;
-      final constructor = annotationReader?.peek('constructor')?.stringValue;
-      final immutableFields =
-          annotationReader?.peek('immutableFields')?.boolValue ?? false;
+      if (annotation == null) {
+        supertype = supertype.superclass;
+        continue;
+      }
+      final classAnnotation = AnnotationUtils.readClassAnnotation(
+        settings,
+        ConstantReader(annotation),
+      );
       return AnnotatedCopyWithSuper(
         name: name,
         prefix: prefix,
         typeArguments: supertype.typeArguments,
         element: element,
-        skipFields: skipFields,
-        copyWithNull: copyWithNull,
-        constructor: constructor,
-        immutableFields: immutableFields,
+        skipFields: classAnnotation.skipFields,
+        copyWithNull: classAnnotation.copyWithNull,
+        constructor: classAnnotation.constructor,
+        immutableFields: classAnnotation.immutableFields,
         originLibrary: library,
       );
     }
@@ -124,16 +128,19 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(ClassElement classElement) {
 ///
 /// The check walks up the inheritance chain starting from the field's
 /// declaring class and returns `false` if no such ancestor is found.
-bool hasNonSkippedFieldProxy(FieldElement? field) {
+bool hasNonSkippedFieldProxy(FieldElement? field, Settings settings) {
   if (field == null) return false;
   const checker = TypeChecker.typeNamed(CopyWith);
   var current = field.enclosingElement as ClassElement?;
   while (current != null) {
     if (checker.hasAnnotationOf(current)) {
       final annotation = checker.firstAnnotationOf(current);
-      final skipFields =
-          ConstantReader(annotation).peek('skipFields')?.boolValue ?? false;
-      return !skipFields;
+      if (annotation == null) return !settings.skipFields;
+      final classAnnotation = AnnotationUtils.readClassAnnotation(
+        settings,
+        ConstantReader(annotation),
+      );
+      return !classAnnotation.skipFields;
     }
     final nextType = current.supertype;
     var next = nextType?.element;

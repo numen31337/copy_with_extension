@@ -213,4 +213,34 @@ void main() {
       expect(output, isNot(contains('c(')));
     });
   });
+
+  group('Global skipFields', () {
+    test('does not delegate inherited proxy methods to a skipped superclass',
+        () async {
+      final reader = await initializeLibraryReaderForDirectory(
+        'test',
+        'settings_test.dart',
+      );
+      final settings = Settings(
+        copyWithNull: false,
+        skipFields: true,
+        immutableFields: false,
+      );
+
+      final rootOutput = await generateForElement(
+        CopyWithGenerator(settings),
+        reader,
+        'ChainRoot',
+      );
+      final middleOutput = await generateForElement(
+        CopyWithGenerator(settings),
+        reader,
+        'ChainMiddle',
+      );
+
+      expect(rootOutput, isNot(contains('ChainRoot a(')));
+      expect(middleOutput, isNot(contains('ChainMiddle a(')));
+      expect(middleOutput, isNot(contains('super.a(a) as ChainMiddle')));
+    });
+  });
 }
