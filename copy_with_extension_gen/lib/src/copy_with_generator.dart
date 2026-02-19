@@ -17,7 +17,7 @@ import 'package:source_gen/source_gen.dart'
 class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   CopyWithGenerator(this.settings) : super();
 
-  Settings settings;
+  final Settings settings;
 
   /// Generates the `copyWith` extension code for the annotated [element].
   ///

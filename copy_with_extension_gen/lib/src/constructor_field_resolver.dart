@@ -11,6 +11,7 @@ import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, ConstructorElement;
 import 'package:build/build.dart' show log;
+import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 
 /// Resolves constructor parameters to the corresponding class fields.
 ///
@@ -27,14 +28,14 @@ class ConstructorFieldResolver {
   /// Returns the field name for [paramName] or `null` if the field
   /// cannot be resolved on this class or any annotated superclasses.
   String? resolve(String paramName) {
-    if (_hasField(_classElement, paramName)) {
+    if (ClassFieldLookup.exists(_classElement, paramName)) {
       return paramName;
     }
     final forwarded = _forwardMap[paramName];
     if (forwarded == null) {
       return null;
     }
-    if (_hasField(_classElement, forwarded)) {
+    if (ClassFieldLookup.exists(_classElement, forwarded)) {
       return forwarded;
     }
     final superConstructor = _constructor.superConstructor;
@@ -121,16 +122,6 @@ class ConstructorFieldResolver {
     final visitor = _ForwardedParameterVisitor(parameterNames);
     expression.accept(visitor);
     return visitor.names;
-  }
-
-  static bool _hasField(ClassElement element, String fieldName) {
-    if (element.getField(fieldName) != null) return true;
-    for (final type in element.allSupertypes) {
-      if (type.element.getField(fieldName) != null) {
-        return true;
-      }
-    }
-    return false;
   }
 }
 
