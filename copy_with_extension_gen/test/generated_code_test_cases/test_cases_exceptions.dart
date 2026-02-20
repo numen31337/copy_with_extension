@@ -8,7 +8,7 @@ part of 'source_gen_entrypoint.dart';
 Object wrongAnnotation = Object();
 
 @ShouldThrow(
-  'The unnamed constructor of class NoConstructor must declare at least one parameter.',
+  'The unnamed constructor of class NoConstructor has no parameters. copyWith generation requires at least one constructor parameter.',
 )
 @CopyWith()
 class NoConstructor {
@@ -16,7 +16,7 @@ class NoConstructor {
 }
 
 @ShouldThrow(
-  'The constructor "empty" of class NoParamNamedConstructor must declare at least one parameter.',
+  'The constructor "empty" of class NoParamNamedConstructor has no parameters. copyWith generation requires at least one constructor parameter.',
 )
 @CopyWith(constructor: 'empty')
 class NoParamNamedConstructor {

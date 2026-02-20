@@ -18,7 +18,7 @@ class ElementUtils {
   static String typeParametersString(ClassElement classElement, bool nameOnly) {
     final names = classElement.typeParameters
         .map((e) => nameOnly ? e.displayName : e.displayString())
-        .join(',');
+        .join(', ');
     return names.isNotEmpty ? '<$names>' : '';
   }
 

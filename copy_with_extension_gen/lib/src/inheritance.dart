@@ -74,7 +74,7 @@ class AnnotatedCopyWithSuper {
         : typeArguments.take(expectedArity).toList(growable: false);
     final names = normalizedTypeArguments
         .map((e) => ElementUtils.typeNameWithPrefix(originLibrary, e))
-        .join(',');
+        .join(', ');
     return '<$names>';
   }
 }
