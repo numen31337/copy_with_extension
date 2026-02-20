@@ -1,0 +1,61 @@
+abstract class _$ChildCWProxy extends _$ParentCWProxy {
+  Child a(int a);
+
+  Child b(int b);
+
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Child(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// Child(...).copyWith(id: 12, name: "My name")
+  /// ```
+  @override
+  Child call({int a, int b});
+}
+
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfChild.copyWith(...)` or call `instanceOfChild.copyWith.fieldName(value)` for a single field.
+class _$ChildCWProxyImpl extends _$ParentCWProxyImpl implements _$ChildCWProxy {
+  const _$ChildCWProxyImpl(Child super._value);
+
+  @override
+  Child get _value => super._value as Child;
+
+  @override
+  Child a(int a) => call(a: a);
+
+  @override
+  Child b(int b) => call(b: b);
+
+  @override
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Child(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// Child(...).copyWith(id: 12, name: "My name")
+  /// ```
+  Child call({
+    Object? a = const $CopyWithPlaceholder(),
+    Object? b = const $CopyWithPlaceholder(),
+  }) {
+    return Child(
+      a: a == const $CopyWithPlaceholder() || a == null
+          ? _value.a
+          // ignore: cast_nullable_to_non_nullable
+          : a as int,
+      b: b == const $CopyWithPlaceholder() || b == null
+          ? _value.b
+          // ignore: cast_nullable_to_non_nullable
+          : b as int,
+    );
+  }
+}
+
+extension $ChildCopyWith on Child {
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfChild.copyWith(...)` or `instanceOfChild.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$ChildCWProxy get copyWith => _$ChildCWProxyImpl(this);
+}

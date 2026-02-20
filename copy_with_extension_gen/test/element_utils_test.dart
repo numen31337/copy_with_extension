@@ -14,11 +14,13 @@ class ElementUtilsAliasFixture {
     required this.aliasWithArgs,
     required this.aliasWithoutArgs,
     required this.parameterized,
+    required this.callback,
   });
 
   final LocalAlias<String> aliasWithArgs;
   final LocalScalar aliasWithoutArgs;
   final List<ns.Uint8List> parameterized;
+  final void Function(ns.Uint8List) callback;
 }
 
 void main() {
@@ -60,6 +62,15 @@ void main() {
       final result =
           ElementUtils.typeNameWithPrefix(fixture.library, field!.type);
       expect(result, 'List<ns.Uint8List>');
+    });
+
+    test('renders function type parameters with import prefixes', () {
+      final field = fixture.getField('callback');
+      expect(field, isNotNull);
+
+      final result =
+          ElementUtils.typeNameWithPrefix(fixture.library, field!.type);
+      expect(result, 'void Function(ns.Uint8List)');
     });
   });
 }

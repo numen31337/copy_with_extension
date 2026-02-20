@@ -1,6 +1,6 @@
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, FieldElement, LibraryElement;
-import 'package:analyzer/dart/element/type.dart' show DartType;
+import 'package:analyzer/dart/element/type.dart' show DartType, InterfaceType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/annotation_utils.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
@@ -66,10 +66,15 @@ class AnnotatedCopyWithSuper {
 
   /// Returns the type arguments as they appear in source, e.g. `<T, U>`.
   String typeArgumentsAnnotation() {
-    if (typeArguments.isEmpty) return '';
-    final names = typeArguments
+    final expectedArity = element.typeParameters.length;
+    if (expectedArity == 0 || typeArguments.isEmpty) return '';
+    if (typeArguments.length < expectedArity) return '';
+    final normalizedTypeArguments = typeArguments.length == expectedArity
+        ? typeArguments
+        : typeArguments.take(expectedArity).toList(growable: false);
+    final names = normalizedTypeArguments
         .map((e) => ElementUtils.typeNameWithPrefix(originLibrary, e))
-        .join(',');
+        .join(', ');
     return '<$names>';
   }
 }
@@ -109,7 +114,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(
       return AnnotatedCopyWithSuper(
         name: name,
         prefix: prefix,
-        typeArguments: supertype.typeArguments,
+        typeArguments: _resolveSuperTypeArguments(supertype, element),
         element: element,
         skipFields: classAnnotation.skipFields,
         copyWithNull: classAnnotation.copyWithNull,
@@ -121,6 +126,43 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(
     supertype = supertype.superclass;
   }
   return null;
+}
+
+List<DartType> _resolveSuperTypeArguments(
+  InterfaceType supertype,
+  ClassElement superElement,
+) {
+  final expectedArity = superElement.typeParameters.length;
+  if (expectedArity == 0) return const <DartType>[];
+
+  final asInstance = supertype.asInstanceOf(superElement)?.typeArguments;
+  if (asInstance != null && asInstance.length == expectedArity) {
+    return asInstance;
+  }
+
+  final direct = supertype.typeArguments;
+  if (direct.length == expectedArity) {
+    return direct;
+  }
+
+  final alias = supertype.alias?.typeArguments;
+  if (alias != null && alias.length == expectedArity) {
+    return alias;
+  }
+
+  // Defensive fallback: some analyzer paths can expose alias-shape type
+  // arguments here. Truncate extras to keep generated proxy inheritance valid.
+  if (direct.length > expectedArity) {
+    return direct.take(expectedArity).toList(growable: false);
+  }
+  if (asInstance != null && asInstance.length > expectedArity) {
+    return asInstance.take(expectedArity).toList(growable: false);
+  }
+  if (alias != null && alias.length > expectedArity) {
+    return alias.take(expectedArity).toList(growable: false);
+  }
+
+  return const <DartType>[];
 }
 
 /// Returns `true` when [field] originates from a class annotated with

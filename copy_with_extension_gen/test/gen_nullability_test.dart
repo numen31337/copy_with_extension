@@ -83,6 +83,14 @@ class ParentWithCopyNull {
   final int? a;
 }
 
+@CopyWith(skipFields: true, copyWithNull: true)
+class SkipFieldsWithCopyNull<T extends Iterable<int>> {
+  const SkipFieldsWithCopyNull({this.nullable, required this.id});
+
+  final T? nullable;
+  final int id;
+}
+
 @CopyWith()
 class ChildInheritsCopyNull extends ParentWithCopyNull {
   const ChildInheritsCopyNull({super.a, this.b});
@@ -258,6 +266,29 @@ void main() {
     final unchanged = original.copyWithNull();
     expect(unchanged.a, 1);
     expect(unchanged.b, 'b');
+  });
+
+  group('skipFields + copyWithNull on the same class', () {
+    test('call updates values while keeping nullable field', () {
+      final original = SkipFieldsWithCopyNull<List<int>>(nullable: [1], id: 1);
+      final updated = original.copyWith(id: 2);
+      expect(updated, isA<SkipFieldsWithCopyNull<List<int>>>());
+      expect(updated.id, 2);
+      expect(updated.nullable, [1]);
+    });
+
+    test('field methods are not generated when skipFields is true', () {
+      final dynamic proxy =
+          SkipFieldsWithCopyNull<List<int>>(nullable: [1], id: 1).copyWith;
+      expect(() => proxy.nullable([2]), throwsNoSuchMethodError);
+    });
+
+    test('copyWithNull nullifies nullable fields and keeps non-nullables', () {
+      final original = SkipFieldsWithCopyNull<List<int>>(nullable: [1], id: 1);
+      final updated = original.copyWithNull(nullable: true);
+      expect(updated.nullable, isNull);
+      expect(updated.id, 1);
+    });
   });
 
   test('copyWithNullTemplate keeps current value for non-nullable fields', () {

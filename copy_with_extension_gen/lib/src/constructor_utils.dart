@@ -45,12 +45,12 @@ class ConstructorUtils {
       final className = element.displayName;
       if (constructor != null) {
         throw InvalidGenerationSourceError(
-          'The constructor "$constructor" of class $className must declare at least one parameter.',
+          'The constructor "$constructor" of class $className has no parameters. copyWith generation requires at least one constructor parameter.',
           element: element,
         );
       } else {
         throw InvalidGenerationSourceError(
-          'The unnamed constructor of class $className must declare at least one parameter.',
+          'The unnamed constructor of class $className has no parameters. copyWith generation requires at least one constructor parameter.',
           element: element,
         );
       }
