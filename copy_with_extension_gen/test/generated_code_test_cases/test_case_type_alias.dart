@@ -3,55 +3,6 @@ part of 'source_gen_entrypoint.dart';
 typedef GoldenInt = int;
 typedef GoldenList<T> = List<T>;
 
-@ShouldGenerate(r'''
-abstract class _$GoldenAliasNamesCWProxy {
-  GoldenAliasNames value(GoldenList<GoldenInt> value);
-
-  /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GoldenAliasNames(...).copyWith.fieldName(value)`.
-  ///
-  /// Example:
-  /// ```dart
-  /// GoldenAliasNames(...).copyWith(id: 12, name: "My name")
-  /// ```
-  GoldenAliasNames call({GoldenList<GoldenInt> value});
-}
-
-/// Callable proxy for `copyWith` functionality.
-/// Use as `instanceOfGoldenAliasNames.copyWith(...)` or call `instanceOfGoldenAliasNames.copyWith.fieldName(value)` for a single field.
-class _$GoldenAliasNamesCWProxyImpl implements _$GoldenAliasNamesCWProxy {
-  const _$GoldenAliasNamesCWProxyImpl(this._value);
-
-  final GoldenAliasNames _value;
-
-  @override
-  GoldenAliasNames value(GoldenList<GoldenInt> value) => call(value: value);
-
-  @override
-  /// Creates a new instance with the provided field values.
-  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GoldenAliasNames(...).copyWith.fieldName(value)`.
-  ///
-  /// Example:
-  /// ```dart
-  /// GoldenAliasNames(...).copyWith(id: 12, name: "My name")
-  /// ```
-  GoldenAliasNames call({Object? value = const $CopyWithPlaceholder()}) {
-    return GoldenAliasNames(
-      value: value == const $CopyWithPlaceholder() || value == null
-          ? _value.value
-          // ignore: cast_nullable_to_non_nullable
-          : value as GoldenList<GoldenInt>,
-    );
-  }
-}
-
-extension $GoldenAliasNamesCopyWith on GoldenAliasNames {
-  /// Returns a callable class used to build a new instance with modified fields.
-  /// Example: `instanceOfGoldenAliasNames.copyWith(...)` or `instanceOfGoldenAliasNames.copyWith.fieldName(...)`.
-  // ignore: library_private_types_in_public_api
-  _$GoldenAliasNamesCWProxy get copyWith => _$GoldenAliasNamesCWProxyImpl(this);
-}
-''')
 @CopyWith()
 class GoldenAliasNames {
   const GoldenAliasNames({required this.value});

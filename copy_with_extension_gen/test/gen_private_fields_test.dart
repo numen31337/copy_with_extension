@@ -1,7 +1,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';
 
-import 'helpers/test_utils.dart';
+import 'helpers/golden_test_utils.dart';
 
 import 'helpers/gen_private_fields_parent.dart' as pp;
 
@@ -34,8 +34,13 @@ void main() {
     });
 
     test('subclass skips private super fields from other libraries', () async {
-      final content = await readGeneratedFile('gen_private_fields_test.g.dart');
-      expect(content, isNot(contains('_secret')));
+      await expectGeneratedCodeMatchesGolden(
+        sourceDirectory: 'test',
+        sourceFile: 'gen_private_fields_test.dart',
+        elementName: 'ChildWithPrivateSuper',
+        goldenFilePath:
+            'test/goldens/gen_private_fields__child_with_private_super.golden',
+      );
 
       const child = ChildWithPrivateSuper(1, 5);
       final copy = child.copyWith(childField: 2);

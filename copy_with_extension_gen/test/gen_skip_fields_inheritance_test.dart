@@ -1,7 +1,7 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';
 
-import 'helpers/test_utils.dart';
+import 'helpers/golden_test_utils.dart';
 
 part 'gen_skip_fields_inheritance_test.g.dart';
 
@@ -65,11 +65,13 @@ void main() {
     test(
       'inherited field methods omit @override when superclass skips fields',
       () async {
-        final content = await readGeneratedFile(
-          'gen_skip_fields_inheritance_test.g.dart',
+        await expectGeneratedCodeMatchesGolden(
+          sourceDirectory: 'test',
+          sourceFile: 'gen_skip_fields_inheritance_test.dart',
+          elementName: 'Child',
+          goldenFilePath:
+              'test/goldens/gen_skip_fields_inheritance__child_proxy_when_parent_skips_fields.golden',
         );
-        expect(content, contains('Child a(int a)'));
-        expect(content, isNot(contains('@override\n  Child a(int a);')));
       },
     );
 
