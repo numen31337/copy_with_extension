@@ -140,11 +140,11 @@ targets:
           copy_with_null: true   # Default is false. Generate `copyWithNull` functions.
           skip_fields: true      # Default is false. Prevent generation of individual field methods, e.g. `instance.copyWith.id("123")`.
           immutable_fields: true # Default is false. Treat all fields as immutable unless `@CopyWithField(immutable: false)`.
-          annotations:           # Names to forward (case-insensitive). Overrides defaults when provided.
+          annotations:           # Names to forward (case-insensitive). A non-null list overrides defaults.
             - Deprecated         # Default is Deprecated; include it when overriding. Use [] to disable
 ```
 
-By default the generator forwards only the `Deprecated` annotation. Supplying the `annotations` list replaces this set, so include `Deprecated` if you still want it. Specifying an empty list turns off annotation propagation entirely.
+By default the generator forwards only the `Deprecated` annotation. Supplying a non-null `annotations` list replaces this set, so include `Deprecated` if you still want it. Omitting `annotations` (or setting it to `null`) keeps defaults. Specifying an empty list turns off annotation propagation entirely.
 
 ## How is this library better than `freezed`?
 
