@@ -1,0 +1,9 @@
+name: _
+publish_to: none
+
+environment:
+  sdk: ^3.6.0
+
+workspace:
+  - copy_with_extension
+  - copy_with_extension_gen
