@@ -1,7 +1,7 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart'
-    show DartType, ParameterizedType;
+    show DartType, FunctionType, ParameterizedType, RecordType;
 
 /// Utilities for working with analyzer elements and types.
 class ElementUtils {
@@ -42,6 +42,14 @@ class ElementUtils {
       return '$aliasName$nullability';
     }
 
+    if (type is FunctionType) {
+      return '${_functionTypeNameWithPrefix(library, type)}$nullability';
+    }
+
+    if (type is RecordType) {
+      return '${_recordTypeNameWithPrefix(library, type)}$nullability';
+    }
+
     if (type is ParameterizedType) {
       final element = type.element;
       final name = element != null
@@ -59,6 +67,96 @@ class ElementUtils {
 
     final displayName = displayStringWithoutNullability(type);
     return '${libraryImportPrefix(library, type.element?.library)}$displayName$nullability';
+  }
+
+  static String _functionTypeNameWithPrefix(
+    LibraryElement library,
+    FunctionType type,
+  ) {
+    final returnType = typeNameWithPrefix(library, type.returnType);
+    final typeParameters = type.typeParameters
+        .map((parameter) => _typeParameterWithPrefix(library, parameter))
+        .join(', ');
+    final typeParametersSuffix =
+        typeParameters.isNotEmpty ? '<$typeParameters>' : '';
+    final parameters = _functionParametersWithPrefix(
+      library,
+      type.formalParameters,
+    );
+
+    return '$returnType Function$typeParametersSuffix($parameters)';
+  }
+
+  static String _typeParameterWithPrefix(
+    LibraryElement library,
+    TypeParameterElement parameter,
+  ) {
+    final bound = parameter.bound;
+    if (bound == null) {
+      return parameter.displayName;
+    }
+    return '${parameter.displayName} extends ${typeNameWithPrefix(library, bound)}';
+  }
+
+  static String _functionParametersWithPrefix(
+    LibraryElement library,
+    List<FormalParameterElement> parameters,
+  ) {
+    final requiredPositional = <String>[];
+    final optionalPositional = <String>[];
+    final named = <String>[];
+
+    for (final parameter in parameters) {
+      final parameterType = typeNameWithPrefix(library, parameter.type);
+      if (parameter.isNamed) {
+        final required = parameter.isRequiredNamed ? 'required ' : '';
+        named.add('$required$parameterType ${parameter.displayName}');
+      } else if (parameter.isOptionalPositional) {
+        optionalPositional.add(parameterType);
+      } else {
+        requiredPositional.add(parameterType);
+      }
+    }
+
+    final parameterSegments = <String>[];
+    if (requiredPositional.isNotEmpty) {
+      parameterSegments.add(requiredPositional.join(', '));
+    }
+    if (optionalPositional.isNotEmpty) {
+      parameterSegments.add('[${optionalPositional.join(', ')}]');
+    }
+    if (named.isNotEmpty) {
+      parameterSegments.add('{${named.join(', ')}}');
+    }
+
+    return parameterSegments.join(', ');
+  }
+
+  static String _recordTypeNameWithPrefix(
+    LibraryElement library,
+    RecordType type,
+  ) {
+    final positional = type.positionalFields
+        .map((field) => typeNameWithPrefix(library, field.type))
+        .toList();
+    final named = type.namedFields
+        .map((field) =>
+            '${typeNameWithPrefix(library, field.type)} ${field.name}')
+        .toList();
+
+    final segments = <String>[];
+    if (positional.isNotEmpty) {
+      var positionalSignature = positional.join(', ');
+      if (positional.length == 1 && named.isEmpty) {
+        positionalSignature = '$positionalSignature,';
+      }
+      segments.add(positionalSignature);
+    }
+    if (named.isNotEmpty) {
+      segments.add('{${named.join(', ')}}');
+    }
+
+    return '(${segments.join(', ')})';
   }
 
   /// Returns the import prefix for [targetLibrary] if one exists in [library].
