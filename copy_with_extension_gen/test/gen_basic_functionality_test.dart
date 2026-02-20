@@ -27,6 +27,16 @@ class CopyWithProxy {
 }
 
 @CopyWith()
+class CopyWithRenamedImmutable {
+  const CopyWithRenamedImmutable({required int seed, required this.label})
+      : immutable = seed;
+
+  @CopyWithField(immutable: true)
+  final int immutable;
+  final String label;
+}
+
+@CopyWith()
 class CopyWithProxyChaining {
   const CopyWithProxyChaining({this.id, this.field});
 
@@ -107,6 +117,30 @@ void main() {
       final result = original.copyWith.id('new');
 
       expect(result.immutable, 'init');
+    });
+  });
+
+  group('CopyWithRenamedImmutable', () {
+    test('updating other fields preserves immutable resolved field', () {
+      const original = CopyWithRenamedImmutable(seed: 1, label: 'old');
+      final result = original.copyWith(label: 'new');
+
+      expect(result.immutable, 1);
+      expect(result.label, 'new');
+    });
+
+    test('immutable resolved field cannot be passed to call()', () {
+      const original = CopyWithRenamedImmutable(seed: 1, label: 'old');
+      final dynamic call = original.copyWith.call;
+
+      expect(
+        () => Function.apply(
+          call as Function,
+          const [],
+          const {#immutable: 2},
+        ),
+        throwsA(isA<NoSuchMethodError>()),
+      );
     });
   });
 

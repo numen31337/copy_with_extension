@@ -11,19 +11,19 @@ String copyWithNullTemplate(
   bool skipFields,
 ) {
   final uniqueFields = uniqueConstructorFields(fields);
-  // Return an empty string when the class has no nullable fields.
-  if (uniqueFields.where((element) => element.nullable == true).isEmpty) {
+  final nullableMutableFields = uniqueFields
+      .where(
+          (element) => element.nullable && !element.fieldAnnotation.immutable)
+      .toList();
+  // Return an empty string when the class has no nullable mutable fields.
+  if (nullableMutableFields.isEmpty) {
     return '';
   }
 
   // Build the constructor parameter list. Only nullable and mutable fields need a boolean flag to specify nullification.
-  final nullConstructorInput = uniqueFields.fold<String>('', (r, v) {
-    if (v.fieldAnnotation.immutable || !v.nullable) {
-      return r;
-    } else {
-      final annotations = v.metadata.isEmpty ? '' : '${v.metadata.join(' ')} ';
-      return '$r ${annotations}bool ${v.name} = false,';
-    }
+  final nullConstructorInput = nullableMutableFields.fold<String>('', (r, v) {
+    final annotations = v.metadata.isEmpty ? '' : '${v.metadata.join(' ')} ';
+    return '$r ${annotations}bool ${v.name} = false,';
   });
 
   // Build the actual invocation parameters for the constructor call.

@@ -2,6 +2,7 @@ import 'package:analyzer/dart/constant/value.dart' show DartObject;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart' show DynamicType;
+import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
@@ -19,14 +20,17 @@ class ConstructorParameterInfo {
     bool immutableDefault = false,
   })  : name = fieldName ?? element.displayName,
         constructorParamName = element.displayName,
-        fieldAnnotation =
-            _readFieldAnnotation(element, classElement, immutableDefault),
-        classField = _lookupField(
+        fieldAnnotation = _readFieldAnnotation(
+          classElement,
+          fieldName ?? element.displayName,
+          immutableDefault,
+        ),
+        classField = ClassFieldLookup.find(
           classElement,
           fieldName ?? element.displayName,
         ),
         metadata = _readFieldMetadata(
-          _lookupField(
+          ClassFieldLookup.find(
             classElement,
             fieldName ?? element.displayName,
           ),
@@ -122,24 +126,23 @@ class ConstructorParameterInfo {
 
   /// Restores the `CopyWithField` annotation provided by the user.
   static CopyWithFieldAnnotation _readFieldAnnotation(
-    FormalParameterElement element,
     ClassElement classElement,
+    String fieldName,
     bool immutableDefault,
   ) {
     final defaults = CopyWithFieldAnnotation.defaults(
       immutable: immutableDefault,
     );
 
-    final fieldName = element.displayName;
     final isPrivate = fieldName.startsWith('_');
     if (isPrivate) {
-      // Treat private parameters as immutable to avoid generating `copyWith`
+      // Treat private fields as immutable to avoid generating `copyWith`
       // parameters starting with an underscore. Using such parameters in a
       // public method results in analyzer errors.
       return const CopyWithFieldAnnotation(immutable: true);
     }
 
-    final fieldElement = _lookupField(classElement, fieldName);
+    final fieldElement = ClassFieldLookup.find(classElement, fieldName);
     if (fieldElement is! FieldElement) {
       return defaults;
     }
@@ -154,25 +157,6 @@ class ConstructorParameterInfo {
     final immutable = reader.peek('immutable')?.boolValue;
 
     return CopyWithFieldAnnotation(immutable: immutable ?? defaults.immutable);
-  }
-
-  /// Returns [FieldElement] for [fieldName] searching the entire inheritance
-  /// hierarchy starting from [classElement].
-  static FieldElement? _lookupField(
-    ClassElement classElement,
-    String fieldName,
-  ) {
-    final ownField = classElement.getField(fieldName);
-    if (ownField is FieldElement) return ownField;
-
-    for (final supertype in classElement.allSupertypes) {
-      final candidate = supertype.element.getField(fieldName);
-      if (candidate is FieldElement) {
-        return candidate;
-      }
-    }
-
-    return null;
   }
 
   /// Restores metadata annotations for [field] that need to be transferred to

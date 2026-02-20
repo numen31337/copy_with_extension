@@ -1,3 +1,8 @@
+## 12.1.0
+* Honor `@CopyWithField` when constructor parameters are renamed.
+* Fix inheritance proxy generation when `skipFields` is enabled globally. Fixes [#120](https://github.com/numen31337/copy_with_extension/issues/120).
+* Avoid emitting `copyWithNull` and empty `call({})` signatures when no mutable nullable fields are available. Fixes [#125](https://github.com/numen31337/copy_with_extension/issues/125).
+
 ## 12.0.0
 * Updating `analyzer` to `^10.0.0`
 

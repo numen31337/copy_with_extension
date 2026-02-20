@@ -1,5 +1,6 @@
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
+import 'package:copy_with_extension_gen/src/settings.dart';
 
 import 'copy_with_null_template.dart';
 import 'proxy_template.dart';
@@ -15,6 +16,7 @@ String extensionTemplate({
   required bool skipFields,
   required bool copyWithNull,
   required String? constructor,
+  required Settings settings,
   AnnotatedCopyWithSuper? superInfo,
 }) {
   final typeAnnotation = className + typeParametersNames;
@@ -26,6 +28,7 @@ String extensionTemplate({
     typeParametersNames,
     fields,
     skipFields,
+    settings: settings,
     superInfo: superInfo,
   );
   final copyWithNullBlock = copyWithNull

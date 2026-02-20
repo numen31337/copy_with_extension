@@ -1,5 +1,6 @@
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
+import 'package:copy_with_extension_gen/src/settings.dart';
 
 import 'copy_with_values_template.dart';
 import 'field_utils.dart';
@@ -14,6 +15,7 @@ String copyWithProxyTemplate(
   List<ConstructorParameterInfo> fields,
   bool skipFields, {
   AnnotatedCopyWithSuper? superInfo,
+  required Settings settings,
 }) {
   final typeAnnotation = type + typeParameterNames;
   final filteredFields =
@@ -33,15 +35,15 @@ String copyWithProxyTemplate(
   final extendsImpl = shouldExtendSuper
       ? ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxyImpl${superInfo.typeArgumentsAnnotation()}'
       : '';
+  bool delegatesToSuper(ConstructorParameterInfo field) =>
+      shouldExtendSuper &&
+      field.isInherited &&
+      hasNonSkippedFieldProxy(field.classField, settings);
 
   // Determine which fields require proxy methods. When [skipFields] is true,
   // only inherited fields need to be overridden to adjust the return type.
   final fieldsForProxyMethods = uniqueFilteredFields.where(
-    (e) =>
-        !skipFields ||
-        (shouldExtendSuper &&
-            e.isInherited &&
-            hasNonSkippedFieldProxy(e.classField)),
+    (e) => !skipFields || delegatesToSuper(e),
   );
 
   // Generate proxy methods for each mutable field. These methods allow
@@ -49,9 +51,7 @@ String copyWithProxyTemplate(
   // Inherited fields delegate to the superclass implementation to avoid
   // duplicating logic.
   final nonNullableFunctions = fieldsForProxyMethods.map((e) {
-    final shouldDelegate = shouldExtendSuper &&
-        e.isInherited &&
-        hasNonSkippedFieldProxy(e.classField);
+    final shouldDelegate = delegatesToSuper(e);
     final body = shouldDelegate
         ? 'super.${e.name}(${e.name}) as $type$typeParameterNames'
         : 'call(${e.name}: ${e.name})';
@@ -67,7 +67,7 @@ String copyWithProxyTemplate(
     (e) {
       final annotations = e.metadata.isEmpty ? '' : '${e.metadata.join(' ')} ';
       return '''
-    ${shouldExtendSuper && e.isInherited && hasNonSkippedFieldProxy(e.classField) ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}($annotations${e.type} ${e.name});
+    ${delegatesToSuper(e) ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}($annotations${e.type} ${e.name});
     ''';
     },
   ).join('\n');
