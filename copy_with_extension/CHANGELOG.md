@@ -1,3 +1,8 @@
+## 13.0.0
+* **BREAKING** Remove `package:copy_with_extension_gen/builder.dart`. Import `package:copy_with_extension_gen/copy_with_extension_gen.dart` instead when wiring the builder factory directly.
+* Preserve import prefixes in generated function-typed field signatures.
+* Normalize proxy generics for typedef-inherited models and improve alias-based generation coverage.
+
 ## 12.1.0
 * Honor `@CopyWithField` when constructor parameters are renamed.
 * Fix inheritance proxy generation when `skipFields` is enabled globally. Fixes [#120](https://github.com/numen31337/copy_with_extension/issues/120).
