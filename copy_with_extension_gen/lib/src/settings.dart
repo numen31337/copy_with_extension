@@ -14,9 +14,12 @@ class Settings {
   factory Settings.fromConfig(Map<String, dynamic> json) {
     Set<String>? rawAnnotations;
     if (json.containsKey('annotations')) {
-      rawAnnotations = (json['annotations'] as List<dynamic>? ?? const [])
-          .map((e) => e.toString())
-          .toSet();
+      final configAnnotations = json['annotations'];
+      if (configAnnotations != null) {
+        rawAnnotations = (configAnnotations as List<dynamic>)
+            .map((e) => e.toString())
+            .toSet();
+      }
     }
 
     return Settings(

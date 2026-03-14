@@ -94,6 +94,13 @@ void main() {
       });
       expect(settings.annotations, <String>{});
     });
+
+    test('Null annotations fallback to defaults', () {
+      final settings = Settings.fromConfig(<String, dynamic>{
+        'annotations': null,
+      });
+      expect(settings.annotations, {'deprecated'});
+    });
   });
 
   group('Annotation forwarding', () {

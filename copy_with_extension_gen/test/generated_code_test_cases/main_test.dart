@@ -6,6 +6,9 @@ import 'package:source_gen_test/source_gen_test.dart'
         initializeLibraryReaderForDirectory,
         initializeBuildLogTracking,
         testAnnotatedElements;
+import 'package:test/test.dart';
+
+import '../helpers/golden_test_utils.dart';
 
 Future<void> main() async {
   final reader = await initializeLibraryReaderForDirectory(
@@ -24,4 +27,16 @@ Future<void> main() async {
       ),
     ),
   );
+
+  group('generated code goldens', () {
+    test('type aliases are preserved in generated code', () async {
+      await expectGeneratedCodeMatchesGolden(
+        sourceDirectory: 'test/generated_code_test_cases',
+        sourceFile: 'source_gen_entrypoint.dart',
+        elementName: 'GoldenAliasNames',
+        goldenFilePath:
+            'test/goldens/generated_code_test_cases__golden_alias_names.golden',
+      );
+    });
+  });
 }

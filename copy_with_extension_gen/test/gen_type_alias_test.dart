@@ -1,8 +1,6 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';
 
-import 'helpers/test_utils.dart';
-
 part 'gen_type_alias_test.g.dart';
 
 typedef MyInt = int;
@@ -40,15 +38,28 @@ class SubViaAlias extends BaseAlias {
   final String? b;
 }
 
-void main() {
-  test('generated code preserves type alias names', () async {
-    final output = await readGeneratedFile('gen_type_alias_test.g.dart');
-    expect(output, contains('MyInt'));
-    expect(output, contains('MyList<int>'));
-    expect(output, contains('DeepTypeDef'));
-    expect(output, contains('MyList<MyList<MyInt>>'));
+@CopyWith()
+class GenericAliasParent<T, U> {
+  const GenericAliasParent({required this.first, required this.second});
+
+  final T first;
+  final U second;
+}
+
+typedef GenericAlias<T, U, V> = GenericAliasParent<T, U>;
+
+@CopyWith()
+class SubViaGenericAlias extends GenericAlias<int, String, bool> {
+  const SubViaGenericAlias({
+    required super.first,
+    required super.second,
+    required this.extra,
   });
 
+  final double extra;
+}
+
+void main() {
   test('copyWith recognizes annotated superclass referenced via typedef', () {
     final result = SubViaAlias(a: 1, b: 'x').copyWith(a: 2);
     expect(result, isA<SubViaAlias>());
@@ -61,5 +72,21 @@ void main() {
     expect(result, isA<SubViaAlias>());
     expect(result.a, 3);
     expect(result.b, 'x');
+  });
+
+  test('field proxy works with alias that has extra type parameters', () {
+    final source = SubViaGenericAlias(first: 1, second: 'x', extra: 1.5);
+
+    final firstUpdated = source.copyWith.first(2);
+    expect(firstUpdated, isA<SubViaGenericAlias>());
+    expect(firstUpdated.first, 2);
+    expect(firstUpdated.second, 'x');
+    expect(firstUpdated.extra, 1.5);
+
+    final secondUpdated = source.copyWith(second: 'y');
+    expect(secondUpdated, isA<SubViaGenericAlias>());
+    expect(secondUpdated.first, 1);
+    expect(secondUpdated.second, 'y');
+    expect(secondUpdated.extra, 1.5);
   });
 }

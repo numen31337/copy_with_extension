@@ -16,8 +16,8 @@ myInstance.copyWithNull(fieldName: true, anotherField: true) // Nullify multiple
 ## Usage
 
 #### In your `pubspec.yaml` file
-- Add to `dependencies` section `copy_with_extension: ^12.0.0`
-- Add to `dev_dependencies` section `copy_with_extension_gen: ^12.0.0`
+- Add to `dependencies` section `copy_with_extension: ^13.0.0`
+- Add to `dev_dependencies` section `copy_with_extension_gen: ^13.0.0`
 - Add to `dev_dependencies` section `build_runner: ^2.8.0`
 - Set `environment` to at least Dart `3.0.0` version like so: `">=3.0.0 <4.0.0"`
 
@@ -29,12 +29,12 @@ environment:
 
 dependencies:
   ...
-  copy_with_extension: ^12.0.0
+  copy_with_extension: ^13.0.0
   
 dev_dependencies:
   ...
   build_runner: ^2.8.0
-  copy_with_extension_gen: ^12.0.0
+  copy_with_extension_gen: ^13.0.0
 ```
 
 #### Annotate your class with `CopyWith` annotation
@@ -58,8 +58,10 @@ Make sure that you set the part file as shown in the example above: `part 'your_
 #### Launch code generation
 
 ```bash
-flutter pub run build_runner build
+dart run build_runner build
 ```
+
+In Flutter projects, `flutter pub run build_runner build` also works.
 
 #### Use
 
@@ -140,11 +142,21 @@ targets:
           copy_with_null: true   # Default is false. Generate `copyWithNull` functions.
           skip_fields: true      # Default is false. Prevent generation of individual field methods, e.g. `instance.copyWith.id("123")`.
           immutable_fields: true # Default is false. Treat all fields as immutable unless `@CopyWithField(immutable: false)`.
-          annotations:           # Names to forward (case-insensitive). Overrides defaults when provided.
+          annotations:           # Names to forward (case-insensitive). A non-null list overrides defaults.
             - Deprecated         # Default is Deprecated; include it when overriding. Use [] to disable
 ```
 
-By default the generator forwards only the `Deprecated` annotation. Supplying the `annotations` list replaces this set, so include `Deprecated` if you still want it. Specifying an empty list turns off annotation propagation entirely.
+By default the generator forwards only the `Deprecated` annotation. Supplying a non-null `annotations` list replaces this set, so include `Deprecated` if you still want it. Omitting `annotations` (or setting it to `null`) keeps defaults. Specifying an empty list turns off annotation propagation entirely.
+
+## Direct builder usage
+
+If you are wiring the builder into a custom build pipeline, import the package entrypoint directly:
+
+```dart
+import 'package:copy_with_extension_gen/copy_with_extension_gen.dart';
+```
+
+The legacy `package:copy_with_extension_gen/builder.dart` entrypoint was removed in `13.0.0`.
 
 ## How is this library better than `freezed`?
 

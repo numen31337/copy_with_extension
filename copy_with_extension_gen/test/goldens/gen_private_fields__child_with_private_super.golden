@@ -1,0 +1,52 @@
+abstract class _$ChildWithPrivateSuperCWProxy {
+  ChildWithPrivateSuper childField(int childField);
+
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ChildWithPrivateSuper(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// ChildWithPrivateSuper(...).copyWith(id: 12, name: "My name")
+  /// ```
+  ChildWithPrivateSuper call({int childField});
+}
+
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfChildWithPrivateSuper.copyWith(...)` or call `instanceOfChildWithPrivateSuper.copyWith.fieldName(value)` for a single field.
+class _$ChildWithPrivateSuperCWProxyImpl
+    implements _$ChildWithPrivateSuperCWProxy {
+  const _$ChildWithPrivateSuperCWProxyImpl(this._value);
+
+  final ChildWithPrivateSuper _value;
+
+  @override
+  ChildWithPrivateSuper childField(int childField) =>
+      call(childField: childField);
+
+  @override
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ChildWithPrivateSuper(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// ChildWithPrivateSuper(...).copyWith(id: 12, name: "My name")
+  /// ```
+  ChildWithPrivateSuper call({
+    Object? childField = const $CopyWithPlaceholder(),
+  }) {
+    return ChildWithPrivateSuper(
+      childField == const $CopyWithPlaceholder() || childField == null
+          ? _value.childField
+          // ignore: cast_nullable_to_non_nullable
+          : childField as int,
+    );
+  }
+}
+
+extension $ChildWithPrivateSuperCopyWith on ChildWithPrivateSuper {
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfChildWithPrivateSuper.copyWith(...)` or `instanceOfChildWithPrivateSuper.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$ChildWithPrivateSuperCWProxy get copyWith =>
+      _$ChildWithPrivateSuperCWProxyImpl(this);
+}
