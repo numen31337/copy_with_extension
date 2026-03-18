@@ -4,6 +4,12 @@ description: Automatically generating `copyWith` extensions code for classes wit
 repository: https://github.com/numen31337/copy_with_extension
 homepage: https://github.com/numen31337/copy_with_extension/tree/master/copy_with_extension_gen
 issue_tracker: https://github.com/numen31337/copy_with_extension/issues
+topics:
+  - copy-with
+  - code-generation
+  - build-runner
+  - immutability
+  - codegen
 
 environment:
   sdk: ^3.6.0

@@ -4,6 +4,12 @@ description: Annotation for generating `copyWith` extensions code using `copy_wi
 homepage: https://github.com/numen31337/copy_with_extension/tree/master/copy_with_extension
 repository: https://github.com/numen31337/copy_with_extension
 issue_tracker: https://github.com/numen31337/copy_with_extension/issues
+topics:
+  - copy-with
+  - code-generation
+  - build-runner
+  - immutability
+  - codegen
 
 environment:
   sdk: ^3.6.0
