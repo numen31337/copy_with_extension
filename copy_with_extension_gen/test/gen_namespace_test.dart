@@ -1,6 +1,6 @@
+import 'dart:async' as ns2;
 import 'dart:typed_data' as ns;
 import 'dart:typed_data' as ns1;
-import 'dart:async' as ns2;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';

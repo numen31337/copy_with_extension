@@ -1,3 +1,4 @@
+import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
 import 'package:analyzer/dart/ast/ast.dart'
     show
         ConstructorDeclaration,
@@ -6,7 +7,6 @@ import 'package:analyzer/dart/ast/ast.dart'
         NamedExpression,
         SimpleIdentifier,
         SuperConstructorInvocation;
-import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
 import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, ConstructorElement;
