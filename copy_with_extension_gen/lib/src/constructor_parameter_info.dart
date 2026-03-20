@@ -1,3 +1,5 @@
+// ignore_for_file: experimental_member_use
+
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';

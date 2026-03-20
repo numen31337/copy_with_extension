@@ -1,3 +1,5 @@
+// ignore_for_file: experimental_member_use
+
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, FieldElement, LibraryElement;
 import 'package:analyzer/dart/element/type.dart' show DartType, InterfaceType;

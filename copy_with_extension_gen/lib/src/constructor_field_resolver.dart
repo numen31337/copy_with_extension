@@ -1,3 +1,5 @@
+// ignore_for_file: experimental_member_use
+
 import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
 import 'package:analyzer/dart/ast/ast.dart'
     show

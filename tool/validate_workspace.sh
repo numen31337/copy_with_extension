@@ -25,12 +25,16 @@ else
   dart pub upgrade
 fi
 
-dart analyze copy_with_extension copy_with_extension_gen
-
 rm -rf copy_with_extension_gen/.dart_tool/build
 rm -rf copy_with_extension_gen/.dart_tool/build_entrypoint
+find copy_with_extension_gen/test -name '*.g.dart' -delete
 
 pushd copy_with_extension_gen >/dev/null
 dart run build_runner build --delete-conflicting-outputs
+popd >/dev/null
+
+dart analyze copy_with_extension copy_with_extension_gen
+
+pushd copy_with_extension_gen >/dev/null
 dart test --reporter github
 popd >/dev/null

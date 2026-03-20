@@ -52,7 +52,10 @@ void main() {
 
     test('genericFromClass copy retains type', () {
       expect(
-        generic.copyWith.genericFromClass([]).genericFromClass.runtimeType,
+        generic.copyWith
+            .genericFromClass(<List<bool>>[])
+            .genericFromClass
+            .runtimeType,
         <List<bool>>[].runtimeType,
       );
     });
@@ -76,7 +79,10 @@ void main() {
 
     test('copyWith.nullableGeneric type', () {
       expect(
-        generic.copyWith.nullableGeneric([]).nullableGeneric.runtimeType,
+        generic.copyWith
+            .nullableGeneric(<String?>[])
+            .nullableGeneric
+            .runtimeType,
         <String?>[].runtimeType,
       );
     });
@@ -97,7 +103,10 @@ void main() {
 
     test('copyWith.deepNestedGeneric type', () {
       expect(
-        generic.copyWith.deepNestedGeneric([]).deepNestedGeneric.runtimeType,
+        generic.copyWith
+            .deepNestedGeneric(<List<List<int?>?>>[])
+            .deepNestedGeneric
+            .runtimeType,
         <List<List<int?>?>>[].runtimeType,
       );
     });
