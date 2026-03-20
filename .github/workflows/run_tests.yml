@@ -109,11 +109,15 @@ jobs:
       - name: Check outdated packages
         if: matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest'
         run: |
-          warning_msg="$(dart pub outdated)"
-          warning_formatted=${warning_msg//$'\n'/}
-          if [[ $warning_formatted =~ "constrained" ]]; then
-            echo "$warning_msg"
-            echo -n "::warning ::$warning_formatted"
+          outdated_packages="$(dart pub outdated --json | jq -r '.packages[] | select(.upgradable.version != .resolvable.version) | [.package, .kind, (.current.version // "-"), (.upgradable.version // "-"), (.resolvable.version // "-"), (.latest.version // "-")] | @tsv' | awk -F '\t' '{printf "- %s [%s]: current %s, upgradable %s, resolvable %s, latest %s\n", $1, $2, $3, $4, $5, $6}')"
+          if [[ -n "$outdated_packages" ]]; then
+            echo 'Outdated packages constrained below a resolvable version:'
+            echo "$outdated_packages"
+            {
+              echo '### Outdated Packages'
+              echo
+              echo "$outdated_packages"
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Check files are in sync
