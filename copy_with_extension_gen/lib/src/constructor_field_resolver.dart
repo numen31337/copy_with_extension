@@ -21,7 +21,7 @@ import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 /// different names as well as parameters forwarded to a super constructor.
 class ConstructorFieldResolver {
   ConstructorFieldResolver(this._classElement, this._constructor)
-      : _forwardMap = _buildForwardMap(_constructor);
+    : _forwardMap = _buildForwardMap(_constructor);
 
   final ClassElement _classElement;
   final ConstructorElement _constructor;
@@ -45,8 +45,10 @@ class ConstructorFieldResolver {
     if (superConstructor == null || superClass == null) {
       return null;
     }
-    return ConstructorFieldResolver(superClass, superConstructor)
-        .resolve(forwarded);
+    return ConstructorFieldResolver(
+      superClass,
+      superConstructor,
+    ).resolve(forwarded);
   }
 
   static Map<String, String> _buildForwardMap(ConstructorElement constructor) {
@@ -62,8 +64,9 @@ class ConstructorFieldResolver {
       );
       return const {};
     }
-    final declaration =
-        parsed.getFragmentDeclaration(constructor.firstFragment);
+    final declaration = parsed.getFragmentDeclaration(
+      constructor.firstFragment,
+    );
     final node = declaration?.node;
     if (node is! ConstructorDeclaration) {
       log.warning(
@@ -82,8 +85,10 @@ class ConstructorFieldResolver {
     for (final initializer in node.initializers) {
       if (initializer is ConstructorFieldInitializer) {
         final fieldName = initializer.fieldName.name;
-        final paramNames =
-            _extractForwardedParameters(initializer.expression, parameterNames);
+        final paramNames = _extractForwardedParameters(
+          initializer.expression,
+          parameterNames,
+        );
         for (final paramName in paramNames) {
           result[paramName] = fieldName;
         }
@@ -93,8 +98,10 @@ class ConstructorFieldResolver {
             constructor.superConstructor?.formalParameters ?? const [];
         for (final arg in initializer.argumentList.arguments) {
           if (arg is NamedExpression) {
-            final paramNames =
-                _extractForwardedParameters(arg.expression, parameterNames);
+            final paramNames = _extractForwardedParameters(
+              arg.expression,
+              parameterNames,
+            );
             for (final paramName in paramNames) {
               result[paramName] = arg.name.label.name;
             }

@@ -31,9 +31,15 @@ String extensionTemplate({
     settings: settings,
     superInfo: superInfo,
   );
-  final copyWithNullBlock = copyWithNull
-      ? copyWithNullTemplate(typeAnnotation, fields, constructor, skipFields)
-      : '';
+  final copyWithNullBlock =
+      copyWithNull
+          ? copyWithNullTemplate(
+            typeAnnotation,
+            fields,
+            constructor,
+            skipFields,
+          )
+          : '';
 
   return '''
     $proxy

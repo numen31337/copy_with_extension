@@ -5,9 +5,10 @@ class Settings {
     required this.skipFields,
     required this.immutableFields,
     Set<String>? annotations,
-  }) : annotations = (annotations ?? defaultAnnotations)
-            .map((e) => e.toLowerCase())
-            .toSet();
+  }) : annotations =
+           (annotations ?? defaultAnnotations)
+               .map((e) => e.toLowerCase())
+               .toSet();
 
   /// Creates [Settings] from a configuration map, typically coming from
   /// a `build.yaml` file.
@@ -16,9 +17,10 @@ class Settings {
     if (json.containsKey('annotations')) {
       final configAnnotations = json['annotations'];
       if (configAnnotations != null) {
-        rawAnnotations = (configAnnotations as List<dynamic>)
-            .map((e) => e.toString())
-            .toSet();
+        rawAnnotations =
+            (configAnnotations as List<dynamic>)
+                .map((e) => e.toString())
+                .toSet();
       }
     }
 

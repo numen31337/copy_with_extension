@@ -24,11 +24,7 @@ void main() {
 
     final output = await generateForElement(
       CopyWithGenerator(
-        Settings(
-          copyWithNull: false,
-          skipFields: false,
-          immutableFields: true,
-        ),
+        Settings(copyWithNull: false, skipFields: false, immutableFields: true),
       ),
       reader,
       'ImmutableFixture',

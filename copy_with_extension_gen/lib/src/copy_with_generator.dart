@@ -65,12 +65,15 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     );
 
     var resolvedConstructorName = classAnnotation.constructor;
-    final targetConstructor = classAnnotation.constructor != null
-        ? classElement.getNamedConstructor(classAnnotation.constructor!)
-        : classElement.unnamedConstructor;
+    final targetConstructor =
+        classAnnotation.constructor != null
+            ? classElement.getNamedConstructor(classAnnotation.constructor!)
+            : classElement.unnamedConstructor;
     if (targetConstructor is ConstructorElement) {
-      final resolved =
-          ConstructorUtils.resolveRedirects(classElement, targetConstructor);
+      final resolved = ConstructorUtils.resolveRedirects(
+        classElement,
+        targetConstructor,
+      );
       final name = resolved.name;
       resolvedConstructorName = name == 'new' ? null : name;
     }
@@ -117,12 +120,16 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     List<ConstructorParameterInfo> fields,
   ) {
     if (superInfo != null) {
-      final superFields = ConstructorUtils.constructorFields(
-        superInfo.element,
-        superInfo.constructor,
-        annotations: settings.annotations,
-        immutableFields: superInfo.immutableFields,
-      ).where((f) => !f.fieldAnnotation.immutable).map((f) => f.name).toSet();
+      final superFields =
+          ConstructorUtils.constructorFields(
+                superInfo.element,
+                superInfo.constructor,
+                annotations: settings.annotations,
+                immutableFields: superInfo.immutableFields,
+              )
+              .where((f) => !f.fieldAnnotation.immutable)
+              .map((f) => f.name)
+              .toSet();
       final fieldNames = fields.map((e) => e.name).toSet();
       if (!fieldNames.containsAll(superFields)) {
         return null;

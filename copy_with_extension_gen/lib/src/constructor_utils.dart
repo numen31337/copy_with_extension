@@ -20,9 +20,10 @@ class ConstructorUtils {
     required Set<String> annotations,
     required bool immutableFields,
   }) {
-    final targetConstructor = constructor != null
-        ? element.getNamedConstructor(constructor)
-        : element.unnamedConstructor;
+    final targetConstructor =
+        constructor != null
+            ? element.getNamedConstructor(constructor)
+            : element.unnamedConstructor;
 
     if (targetConstructor is! ConstructorElement) {
       final className = element.displayName;
@@ -73,7 +74,8 @@ class ConstructorUtils {
       );
 
       final classField = field.classField;
-      final isAccessible = classField != null &&
+      final isAccessible =
+          classField != null &&
           (!classField.isPrivate || classField.library == element.library);
       if (isAccessible) {
         fields.add(field);
@@ -110,6 +112,5 @@ class ConstructorUtils {
   static String constructorFor(
     String typeAnnotation,
     String? namedConstructor,
-  ) =>
-      "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
+  ) => "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
 }

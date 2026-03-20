@@ -29,7 +29,7 @@ class CopyWithProxy {
 @CopyWith()
 class CopyWithRenamedImmutable {
   const CopyWithRenamedImmutable({required int seed, required this.label})
-      : immutable = seed;
+    : immutable = seed;
 
   @CopyWithField(immutable: true)
   final int immutable;
@@ -134,11 +134,7 @@ void main() {
       final dynamic call = original.copyWith.call;
 
       expect(
-        () => Function.apply(
-          call as Function,
-          const [],
-          const {#immutable: 2},
-        ),
+        () => Function.apply(call as Function, const [], const {#immutable: 2}),
         throwsA(isA<NoSuchMethodError>()),
       );
     });
@@ -146,8 +142,7 @@ void main() {
 
   group('CopyWithProxyChaining', () {
     test('multiple proxy calls update fields', () {
-      final result = const CopyWithProxyChaining()
-          .copyWith
+      final result = const CopyWithProxyChaining().copyWith
           .id('test')
           .copyWith
           .field('testField');

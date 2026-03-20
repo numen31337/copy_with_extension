@@ -23,10 +23,7 @@ Future<void> expectGeneratedCodeMatchesGolden({
     reader,
     elementName,
   );
-  await expectMatchesGolden(
-    actual: output,
-    goldenFilePath: goldenFilePath,
-  );
+  await expectMatchesGolden(actual: output, goldenFilePath: goldenFilePath);
 }
 
 /// Compares [actual] with file content from [goldenFilePath].

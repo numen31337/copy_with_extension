@@ -8,8 +8,7 @@ import 'package:source_gen/source_gen.dart' show SharedPartBuilder;
 ///
 /// Not meant to be invoked by hand-authored code.
 Builder copyWith(BuilderOptions config) {
-  return SharedPartBuilder(
-    [CopyWithGenerator(Settings.fromConfig(config.config))],
-    'copyWith',
-  );
+  return SharedPartBuilder([
+    CopyWithGenerator(Settings.fromConfig(config.config)),
+  ], 'copyWith');
 }

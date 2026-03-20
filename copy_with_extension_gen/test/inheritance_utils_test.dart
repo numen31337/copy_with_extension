@@ -73,35 +73,39 @@ void main() {
   });
 
   group('hasNonSkippedFieldProxy', () {
-    test('walks alias chain and respects skipped annotated ancestors',
-        () async {
-      final reader = await initializeLibraryReaderForDirectory(
-        'test',
-        'inheritance_utils_test.dart',
-      );
-      final middleType = reader.findType('InheritanceIntermediate');
-      expect(middleType, isNotNull);
-      final middle = middleType!;
-      final localField = middle.getField('local');
+    test(
+      'walks alias chain and respects skipped annotated ancestors',
+      () async {
+        final reader = await initializeLibraryReaderForDirectory(
+          'test',
+          'inheritance_utils_test.dart',
+        );
+        final middleType = reader.findType('InheritanceIntermediate');
+        expect(middleType, isNotNull);
+        final middle = middleType!;
+        final localField = middle.getField('local');
 
-      final result = hasNonSkippedFieldProxy(localField, settings);
-      expect(result, isFalse);
-    });
+        final result = hasNonSkippedFieldProxy(localField, settings);
+        expect(result, isFalse);
+      },
+    );
 
-    test('walks alias chain and finds non-skipped annotated ancestors',
-        () async {
-      final reader = await initializeLibraryReaderForDirectory(
-        'test',
-        'inheritance_utils_test.dart',
-      );
-      final middleType = reader.findType('InheritanceIntermediateNonSkip');
-      expect(middleType, isNotNull);
-      final middle = middleType!;
-      final localField = middle.getField('local');
+    test(
+      'walks alias chain and finds non-skipped annotated ancestors',
+      () async {
+        final reader = await initializeLibraryReaderForDirectory(
+          'test',
+          'inheritance_utils_test.dart',
+        );
+        final middleType = reader.findType('InheritanceIntermediateNonSkip');
+        expect(middleType, isNotNull);
+        final middle = middleType!;
+        final localField = middle.getField('local');
 
-      final result = hasNonSkippedFieldProxy(localField, settings);
-      expect(result, isTrue);
-    });
+        final result = hasNonSkippedFieldProxy(localField, settings);
+        expect(result, isTrue);
+      },
+    );
 
     test('returns false for null field', () {
       final FieldElement? field = null;

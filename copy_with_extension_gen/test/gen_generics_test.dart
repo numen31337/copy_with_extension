@@ -34,12 +34,13 @@ void main() {
     late Generics<bool, List<bool>> generic;
 
     setUp(() {
-      generic = const Generics<bool, List<bool>>(
-        basicGeneric: [],
-        genericFromClass: [],
-        nullableGeneric: [],
-        deepNestedGeneric: [],
-      ).copyWith().copyWithNull();
+      generic =
+          const Generics<bool, List<bool>>(
+            basicGeneric: [],
+            genericFromClass: [],
+            nullableGeneric: [],
+            deepNestedGeneric: [],
+          ).copyWith().copyWithNull();
     });
 
     test('basicGeneric type', () {

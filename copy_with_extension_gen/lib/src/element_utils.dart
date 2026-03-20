@@ -54,9 +54,10 @@ class ElementUtils {
 
     if (type is ParameterizedType) {
       final element = type.element;
-      final name = element != null
-          ? '${libraryImportPrefix(library, element.library)}${element.name}'
-          : displayStringWithoutNullability(type);
+      final name =
+          element != null
+              ? '${libraryImportPrefix(library, element.library)}${element.name}'
+              : displayStringWithoutNullability(type);
 
       if (type.typeArguments.isNotEmpty) {
         final args = type.typeArguments
@@ -138,13 +139,17 @@ class ElementUtils {
     LibraryElement library,
     RecordType type,
   ) {
-    final positional = type.positionalFields
-        .map((field) => typeNameWithPrefix(library, field.type))
-        .toList();
-    final named = type.namedFields
-        .map((field) =>
-            '${typeNameWithPrefix(library, field.type)} ${field.name}')
-        .toList();
+    final positional =
+        type.positionalFields
+            .map((field) => typeNameWithPrefix(library, field.type))
+            .toList();
+    final named =
+        type.namedFields
+            .map(
+              (field) =>
+                  '${typeNameWithPrefix(library, field.type)} ${field.name}',
+            )
+            .toList();
 
     final segments = <String>[];
     if (positional.isNotEmpty) {
@@ -163,7 +168,9 @@ class ElementUtils {
 
   /// Returns the import prefix for [targetLibrary] if one exists in [library].
   static String libraryImportPrefix(
-      LibraryElement library, LibraryElement? targetLibrary) {
+    LibraryElement library,
+    LibraryElement? targetLibrary,
+  ) {
     if (targetLibrary == null) return '';
     final unit = library.fragments.first;
     for (final PrefixElement prefix in unit.prefixes) {

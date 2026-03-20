@@ -20,32 +20,30 @@ class ConstructorParameterInfo {
     String? fieldName,
     required Set<String> annotations,
     bool immutableDefault = false,
-  })  : name = fieldName ?? element.displayName,
-        constructorParamName = element.displayName,
-        fieldAnnotation = _readFieldAnnotation(
-          classElement,
-          fieldName ?? element.displayName,
-          immutableDefault,
-        ),
-        classField = ClassFieldLookup.find(
-          classElement,
-          fieldName ?? element.displayName,
-        ),
-        metadata = _readFieldMetadata(
-          ClassFieldLookup.find(
-            classElement,
-            fieldName ?? element.displayName,
-          ),
-          annotations,
-        ),
-        isInherited = _isInherited(
-          fieldName ?? element.displayName,
-          classElement,
-          annotatedSuper,
-        ),
-        nullable = element.type.nullabilitySuffix != NullabilitySuffix.none ||
-            element.type is DynamicType,
-        type = _fullTypeName(element);
+  }) : name = fieldName ?? element.displayName,
+       constructorParamName = element.displayName,
+       fieldAnnotation = _readFieldAnnotation(
+         classElement,
+         fieldName ?? element.displayName,
+         immutableDefault,
+       ),
+       classField = ClassFieldLookup.find(
+         classElement,
+         fieldName ?? element.displayName,
+       ),
+       metadata = _readFieldMetadata(
+         ClassFieldLookup.find(classElement, fieldName ?? element.displayName),
+         annotations,
+       ),
+       isInherited = _isInherited(
+         fieldName ?? element.displayName,
+         classElement,
+         annotatedSuper,
+       ),
+       nullable =
+           element.type.nullabilitySuffix != NullabilitySuffix.none ||
+           element.type is DynamicType,
+       type = _fullTypeName(element);
 
   /// Name of the parameter as declared in the constructor.
   final String constructorParamName;
