@@ -18,14 +18,14 @@ myInstance.copyWithNull(fieldName: true, anotherField: true) // Nullify multiple
 #### In your `pubspec.yaml` file
 - Add to `dependencies` section `copy_with_extension: ^13.0.0`
 - Add to `dev_dependencies` section `copy_with_extension_gen: ^13.0.0`
-- Add to `dev_dependencies` section `build_runner: ^2.8.0`
-- Set `environment` to at least Dart `3.0.0` version like so: `">=3.0.0 <4.0.0"`
+- Add to `dev_dependencies` section `build_runner: ^2.10.0`
+- Set `environment` to at least Dart `3.7.0` version like so: `">=3.7.0 <4.0.0"`
 
 Your `pubspec.yaml` should look like this:
 
 ```yaml
 environment:
-  sdk: ">=3.0.0 <4.0.0"
+  sdk: ">=3.7.0 <4.0.0"
 
 dependencies:
   ...
@@ -33,7 +33,7 @@ dependencies:
   
 dev_dependencies:
   ...
-  build_runner: ^2.8.0
+  build_runner: ^2.10.0
   copy_with_extension_gen: ^13.0.0
 ```
 
