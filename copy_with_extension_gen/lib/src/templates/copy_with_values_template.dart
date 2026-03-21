@@ -34,9 +34,10 @@ String copyWithValuesTemplate(
           ? '$r _value.${v.name},'
           : '$r ${v.constructorParamName}: _value.${v.name},';
     }
-    final placeholder = v.nullable
-        ? '${v.name} == const \$CopyWithPlaceholder()'
-        : '${v.name} == const \$CopyWithPlaceholder() || ${v.name} == null';
+    final placeholder =
+        v.nullable
+            ? '${v.name} == const \$CopyWithPlaceholder()'
+            : '${v.name} == const \$CopyWithPlaceholder() || ${v.name} == null';
 
     return '''$r ${v.isPositioned ? '' : '${v.constructorParamName}:'}'''
         '''
@@ -46,9 +47,10 @@ String copyWithValuesTemplate(
         : ${v.name} as ${v.type},''';
   });
 
-  final constructorBody = isAbstract
-      ? ''
-      : '{ return ${ConstructorUtils.constructorFor(typeAnnotation, constructor)}($paramsInput); }';
+  final constructorBody =
+      isAbstract
+          ? ''
+          : '{ return ${ConstructorUtils.constructorFor(typeAnnotation, constructor)}($paramsInput); }';
   final callParameters =
       constructorInput.trim().isEmpty ? '' : '{$constructorInput}';
 

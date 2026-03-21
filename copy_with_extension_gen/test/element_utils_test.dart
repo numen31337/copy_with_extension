@@ -41,8 +41,10 @@ void main() {
       final field = fixture.getField('aliasWithArgs');
       expect(field, isNotNull);
 
-      final result =
-          ElementUtils.typeNameWithPrefix(fixture.library, field!.type);
+      final result = ElementUtils.typeNameWithPrefix(
+        fixture.library,
+        field!.type,
+      );
       expect(result, 'LocalAlias<String>');
     });
 
@@ -50,8 +52,10 @@ void main() {
       final field = fixture.getField('aliasWithoutArgs');
       expect(field, isNotNull);
 
-      final result =
-          ElementUtils.typeNameWithPrefix(fixture.library, field!.type);
+      final result = ElementUtils.typeNameWithPrefix(
+        fixture.library,
+        field!.type,
+      );
       expect(result, 'LocalScalar');
     });
 
@@ -59,8 +63,10 @@ void main() {
       final field = fixture.getField('parameterized');
       expect(field, isNotNull);
 
-      final result =
-          ElementUtils.typeNameWithPrefix(fixture.library, field!.type);
+      final result = ElementUtils.typeNameWithPrefix(
+        fixture.library,
+        field!.type,
+      );
       expect(result, 'List<ns.Uint8List>');
     });
 
@@ -68,8 +74,10 @@ void main() {
       final field = fixture.getField('callback');
       expect(field, isNotNull);
 
-      final result =
-          ElementUtils.typeNameWithPrefix(fixture.library, field!.type);
+      final result = ElementUtils.typeNameWithPrefix(
+        fixture.library,
+        field!.type,
+      );
       expect(result, 'void Function(ns.Uint8List)');
     });
   });

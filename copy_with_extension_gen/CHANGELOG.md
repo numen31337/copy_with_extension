@@ -1,3 +1,7 @@
+## 14.0.0
+* Raise the minimum Dart SDK to `^3.7.0`.
+* Expand `analyzer` compatibility to `>=8.1.1 <13.0.0`.
+
 ## 13.0.0
 * **BREAKING** Remove `package:copy_with_extension_gen/builder.dart`. Import `package:copy_with_extension_gen/copy_with_extension_gen.dart` instead when wiring the builder factory directly.
 * Preserve import prefixes in generated function-typed field signatures.

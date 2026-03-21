@@ -1,9 +1,11 @@
+// ignore_for_file: experimental_member_use
+
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart' show DynamicType;
-import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
@@ -18,32 +20,30 @@ class ConstructorParameterInfo {
     String? fieldName,
     required Set<String> annotations,
     bool immutableDefault = false,
-  })  : name = fieldName ?? element.displayName,
-        constructorParamName = element.displayName,
-        fieldAnnotation = _readFieldAnnotation(
-          classElement,
-          fieldName ?? element.displayName,
-          immutableDefault,
-        ),
-        classField = ClassFieldLookup.find(
-          classElement,
-          fieldName ?? element.displayName,
-        ),
-        metadata = _readFieldMetadata(
-          ClassFieldLookup.find(
-            classElement,
-            fieldName ?? element.displayName,
-          ),
-          annotations,
-        ),
-        isInherited = _isInherited(
-          fieldName ?? element.displayName,
-          classElement,
-          annotatedSuper,
-        ),
-        nullable = element.type.nullabilitySuffix != NullabilitySuffix.none ||
-            element.type is DynamicType,
-        type = _fullTypeName(element);
+  }) : name = fieldName ?? element.displayName,
+       constructorParamName = element.displayName,
+       fieldAnnotation = _readFieldAnnotation(
+         classElement,
+         fieldName ?? element.displayName,
+         immutableDefault,
+       ),
+       classField = ClassFieldLookup.find(
+         classElement,
+         fieldName ?? element.displayName,
+       ),
+       metadata = _readFieldMetadata(
+         ClassFieldLookup.find(classElement, fieldName ?? element.displayName),
+         annotations,
+       ),
+       isInherited = _isInherited(
+         fieldName ?? element.displayName,
+         classElement,
+         annotatedSuper,
+       ),
+       nullable =
+           element.type.nullabilitySuffix != NullabilitySuffix.none ||
+           element.type is DynamicType,
+       type = _fullTypeName(element);
 
   /// Name of the parameter as declared in the constructor.
   final String constructorParamName;

@@ -1,3 +1,5 @@
+// ignore_for_file: experimental_member_use
+
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, FieldElement, LibraryElement;
 import 'package:analyzer/dart/element/type.dart' show DartType, InterfaceType;
@@ -69,9 +71,10 @@ class AnnotatedCopyWithSuper {
     final expectedArity = element.typeParameters.length;
     if (expectedArity == 0 || typeArguments.isEmpty) return '';
     if (typeArguments.length < expectedArity) return '';
-    final normalizedTypeArguments = typeArguments.length == expectedArity
-        ? typeArguments
-        : typeArguments.take(expectedArity).toList(growable: false);
+    final normalizedTypeArguments =
+        typeArguments.length == expectedArity
+            ? typeArguments
+            : typeArguments.take(expectedArity).toList(growable: false);
     final names = normalizedTypeArguments
         .map((e) => ElementUtils.typeNameWithPrefix(originLibrary, e))
         .join(', ');

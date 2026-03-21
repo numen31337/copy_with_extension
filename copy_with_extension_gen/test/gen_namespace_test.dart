@@ -1,6 +1,6 @@
+import 'dart:async' as ns2;
 import 'dart:typed_data' as ns;
 import 'dart:typed_data' as ns1;
-import 'dart:async' as ns2;
 
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';
@@ -52,18 +52,22 @@ void main() {
   test('Field specific copyWith methods work', () {
     final original = const NamespaceTestClass();
 
-    final withNamespaced =
-        original.copyWith.namespacedProperty(ns.Uint16List(0));
+    final withNamespaced = original.copyWith.namespacedProperty(
+      ns.Uint16List(0),
+    );
     expect(withNamespaced.namespacedProperty, isA<ns.Uint16List>());
 
-    final withNamespaced1 =
-        original.copyWith.namespacedProperty1(ns1.Uint16List(0));
+    final withNamespaced1 = original.copyWith.namespacedProperty1(
+      ns1.Uint16List(0),
+    );
     expect(withNamespaced1.namespacedProperty1, isA<ns1.Uint16List>());
 
     final future = ns2.Future<ns1.Uint16List>.value(ns1.Uint16List(0));
     final withNamespaced2 = original.copyWith.namespacedProperty2(future);
     expect(
-        withNamespaced2.namespacedProperty2, isA<ns2.Future<ns1.Uint16List>>());
+      withNamespaced2.namespacedProperty2,
+      isA<ns2.Future<ns1.Uint16List>>(),
+    );
 
     final withRegular = original.copyWith.regularProperty(const Uint16List());
     expect(withRegular.regularProperty, isA<Uint16List>());

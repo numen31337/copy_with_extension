@@ -146,8 +146,12 @@ void main() {
       expect(leaf._secret, 0);
 
       // Field methods handle namespaced, generic and unannotated fields.
-      final withValues =
-          leaf.copyWith.data(ns.Uint16List(2)).copyWith.b(2).copyWith.c(3.0);
+      final withValues = leaf.copyWith
+          .data(ns.Uint16List(2))
+          .copyWith
+          .b(2)
+          .copyWith
+          .c(3.0);
       expect(withValues.data, isA<ns.Uint16List>());
       expect(withValues.b, 2);
       expect(withValues.c, 3.0);

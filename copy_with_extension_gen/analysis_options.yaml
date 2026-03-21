@@ -1,4 +1,4 @@
-include: package:flutter_lints/flutter.yaml
+include: package:lints/recommended.yaml
 
 analyzer:
   language:
@@ -8,5 +8,8 @@ analyzer:
 
 linter:
   rules:
+    always_declare_return_types: true
     cast_nullable_to_non_nullable: true
+    directives_ordering: true
     sort_constructors_first: true
+    unawaited_futures: true

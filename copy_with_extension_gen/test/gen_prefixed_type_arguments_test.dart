@@ -26,18 +26,16 @@ class PrefixedFunctionField {
 
 void main() {
   test('Generic type argument retains prefix', () {
-    final result = PrefixedChild(field: typed.Uint8List(1)).copyWith(
-      field: typed.Uint8List(2),
-    );
+    final result = PrefixedChild(
+      field: typed.Uint8List(1),
+    ).copyWith(field: typed.Uint8List(2));
     expect(result.field, isA<typed.Uint8List>());
   });
 
   test('Function type argument retains prefix', () {
     final result = PrefixedFunctionField(
       callback: (_) {},
-    ).copyWith(
-      callback: (_) {},
-    );
+    ).copyWith(callback: (_) {});
     expect(result.callback, isA<void Function(typed.Uint8List)>());
   });
 }

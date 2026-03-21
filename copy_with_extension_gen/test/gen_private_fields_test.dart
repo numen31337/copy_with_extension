@@ -1,9 +1,8 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';
 
-import 'helpers/golden_test_utils.dart';
-
 import 'helpers/gen_private_fields_parent.dart' as pp;
+import 'helpers/golden_test_utils.dart';
 
 part 'gen_private_fields_test.g.dart';
 

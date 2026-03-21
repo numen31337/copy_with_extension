@@ -8,4 +8,6 @@ class PrivateParent {
 
   final int _secret;
   final int id;
+
+  int get secretForTest => _secret;
 }

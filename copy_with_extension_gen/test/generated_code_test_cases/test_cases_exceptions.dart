@@ -24,12 +24,14 @@ class NoParamNamedConstructor {
 }
 
 @ShouldThrow(
-    'Could not find a constructor named "test" in class WrongConstructor.')
+  'Could not find a constructor named "test" in class WrongConstructor.',
+)
 @CopyWith(constructor: "test")
 class WrongConstructor {}
 
 @ShouldThrow(
-    'Class NoDefaultConstructor must define an unnamed constructor to enable copyWith generation.')
+  'Class NoDefaultConstructor must define an unnamed constructor to enable copyWith generation.',
+)
 @CopyWith()
 class NoDefaultConstructor {
   NoDefaultConstructor.nonDefault();
@@ -40,9 +42,7 @@ class NoDefaultConstructor {
 )
 @CopyWith()
 class TestNullability {
-  TestNullability(
-    int this.nullableWithNonNullableConstructor,
-  );
+  TestNullability(int this.nullableWithNonNullableConstructor);
 
   // Some info on this: https://github.com/numen31337/copy_with_extension/pull/69
   // If a field is nullable, you can change the type of the constructor parameter to be non-nullable. However, if you do this, an exception may be thrown because the constructor only accepts non-nullable parameters. The issue is that we cannot guarantee that the parameter will be non-null when calling the constructor in the `copyWith` function. Therefore, even if the constructor constructs an object with a nullable field, it is currently impossible to achieve this in the implementation.

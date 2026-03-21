@@ -23,10 +23,8 @@ void main() {
   });
 
   test('Field specific methods are not generated', () {
-    final dynamic proxy = const SkipFieldsClass(
-      id: 1,
-      optional: 'foo',
-    ).copyWith;
+    final dynamic proxy =
+        const SkipFieldsClass(id: 1, optional: 'foo').copyWith;
     expect(() => proxy.id(2), throwsNoSuchMethodError);
   });
 }

@@ -48,7 +48,7 @@ class SubNamed extends SuperNamed {
 @CopyWith(constructor: 'other')
 class SubNamedOther extends SuperNamed {
   const SubNamedOther.other({required super.a, required this.b})
-      : super.named();
+    : super.named();
 
   final String b;
 }

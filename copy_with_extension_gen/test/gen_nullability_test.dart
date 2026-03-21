@@ -11,7 +11,7 @@ part 'gen_nullability_test.g.dart';
 @CopyWith()
 class TestNullability {
   TestNullability(this.dynamicField, this.integers, {int? constructorFallback})
-      : constructorFallback = constructorFallback ?? 0;
+    : constructorFallback = constructorFallback ?? 0;
 
   /// https://github.com/numen31337/copy_with_extension/issues/74
   /// Test for crash on `instance.dynamicField!`.
@@ -105,11 +105,11 @@ class _FakeConstructorParameterInfo implements ConstructorParameterInfo {
     required this.nullable,
     required bool immutable,
     this.isPositioned = false,
-  })  : fieldAnnotation = CopyWithFieldAnnotation(immutable: immutable),
-        type = 'int',
-        classField = null,
-        metadata = const [],
-        isInherited = false;
+  }) : fieldAnnotation = CopyWithFieldAnnotation(immutable: immutable),
+       type = 'int',
+       classField = null,
+       metadata = const [],
+       isInherited = false;
 
   @override
   final String constructorParamName;
@@ -254,19 +254,20 @@ void main() {
   });
 
   test(
-      'copyWithNull is inherited when superclass enables it and child has nullable field',
-      () {
-    final original = ChildInheritsCopyNull(a: 1, b: 'b');
+    'copyWithNull is inherited when superclass enables it and child has nullable field',
+    () {
+      final original = ChildInheritsCopyNull(a: 1, b: 'b');
 
-    final updated = original.copyWithNull(b: true);
-    expect(updated, isA<ChildInheritsCopyNull>());
-    expect(updated.a, 1);
-    expect(updated.b, isNull);
+      final updated = original.copyWithNull(b: true);
+      expect(updated, isA<ChildInheritsCopyNull>());
+      expect(updated.a, 1);
+      expect(updated.b, isNull);
 
-    final unchanged = original.copyWithNull();
-    expect(unchanged.a, 1);
-    expect(unchanged.b, 'b');
-  });
+      final unchanged = original.copyWithNull();
+      expect(unchanged.a, 1);
+      expect(unchanged.b, 'b');
+    },
+  );
 
   group('skipFields + copyWithNull on the same class', () {
     test('call updates values while keeping nullable field', () {

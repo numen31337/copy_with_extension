@@ -57,7 +57,7 @@ class BaseItem {
 @CopyWith()
 class FormItem extends BaseItem {
   FormItem({required this.quantities})
-      : super(focusNodeCount: quantities.length);
+    : super(focusNodeCount: quantities.length);
 
   final List<String> quantities;
 }

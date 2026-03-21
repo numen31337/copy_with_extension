@@ -29,12 +29,14 @@ String copyWithProxyTemplate(
   // inline the required functionality instead.
   final shouldExtendSuper =
       superInfo != null && superInfo.element.library == superInfo.originLibrary;
-  final extendsProxy = shouldExtendSuper
-      ? ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxy${superInfo.typeArgumentsAnnotation()}'
-      : '';
-  final extendsImpl = shouldExtendSuper
-      ? ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxyImpl${superInfo.typeArgumentsAnnotation()}'
-      : '';
+  final extendsProxy =
+      shouldExtendSuper
+          ? ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxy${superInfo.typeArgumentsAnnotation()}'
+          : '';
+  final extendsImpl =
+      shouldExtendSuper
+          ? ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxyImpl${superInfo.typeArgumentsAnnotation()}'
+          : '';
   bool delegatesToSuper(ConstructorParameterInfo field) =>
       shouldExtendSuper &&
       field.isInherited &&
@@ -50,27 +52,32 @@ String copyWithProxyTemplate(
   // modification of a single field via `instance.copyWith.fieldName(value)`.
   // Inherited fields delegate to the superclass implementation to avoid
   // duplicating logic.
-  final nonNullableFunctions = fieldsForProxyMethods.map((e) {
-    final shouldDelegate = delegatesToSuper(e);
-    final body = shouldDelegate
-        ? 'super.${e.name}(${e.name}) as $type$typeParameterNames'
-        : 'call(${e.name}: ${e.name})';
-    final annotations = e.metadata.isEmpty ? '' : '${e.metadata.join(' ')} ';
-    return '''
+  final nonNullableFunctions = fieldsForProxyMethods
+      .map((e) {
+        final shouldDelegate = delegatesToSuper(e);
+        final body =
+            shouldDelegate
+                ? 'super.${e.name}(${e.name}) as $type$typeParameterNames'
+                : 'call(${e.name}: ${e.name})';
+        final annotations =
+            e.metadata.isEmpty ? '' : '${e.metadata.join(' ')} ';
+        return '''
     @override
     $type$typeParameterNames ${e.name}($annotations${e.type} ${e.name}) => $body;
     ''';
-  }).join('\n');
+      })
+      .join('\n');
 
   // Interface used by the proxy class. It mirrors the proxy methods above.
-  final nonNullableFunctionsInterface = fieldsForProxyMethods.map(
-    (e) {
-      final annotations = e.metadata.isEmpty ? '' : '${e.metadata.join(' ')} ';
-      return '''
+  final nonNullableFunctionsInterface = fieldsForProxyMethods
+      .map((e) {
+        final annotations =
+            e.metadata.isEmpty ? '' : '${e.metadata.join(' ')} ';
+        return '''
     ${delegatesToSuper(e) ? '@override\n    ' : ''}$type$typeParameterNames ${e.name}($annotations${e.type} ${e.name});
     ''';
-    },
-  ).join('\n');
+      })
+      .join('\n');
 
   return '''
       abstract class _\$${type}CWProxy$typeParameters$extendsProxy {

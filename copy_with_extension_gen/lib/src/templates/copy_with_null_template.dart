@@ -11,10 +11,12 @@ String copyWithNullTemplate(
   bool skipFields,
 ) {
   final uniqueFields = uniqueConstructorFields(fields);
-  final nullableMutableFields = uniqueFields
-      .where(
-          (element) => element.nullable && !element.fieldAnnotation.immutable)
-      .toList();
+  final nullableMutableFields =
+      uniqueFields
+          .where(
+            (element) => element.nullable && !element.fieldAnnotation.immutable,
+          )
+          .toList();
   // Return an empty string when the class has no nullable mutable fields.
   if (nullableMutableFields.isEmpty) {
     return '';
