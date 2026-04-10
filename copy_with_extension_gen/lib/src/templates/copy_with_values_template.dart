@@ -1,67 +1,65 @@
-import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/constructor_utils.dart';
+import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
 
 /// Generates the body of the `call` method used by the proxy.
 /// The returned snippet can be used either as an abstract interface (when [isAbstract] is `true`)
 /// or as a concrete implementation that instantiates the target class.
 String copyWithValuesTemplate(
-  String typeAnnotation,
-  List<ConstructorParameterInfo> allFields,
-  List<ConstructorParameterInfo> uniqueFields,
-  String? constructor,
-  bool skipFields,
-  bool isAbstract, {
+  ResolvedCopyWithSpec spec, {
+  required bool isAbstract,
   bool addOverride = false,
 }) {
   // Build the parameter list for the generated function or abstract interface. Immutable fields are excluded entirely.
-  final constructorInput = uniqueFields.fold<String>('', (r, v) {
-    if (v.fieldAnnotation.immutable) return r;
-
-    final annotations = v.metadata.isEmpty ? '' : '${v.metadata.join(' ')} ';
+  final constructorInput = spec.uniqueMutableFields.fold<String>('', (
+    r,
+    field,
+  ) {
+    final annotations =
+        field.metadata.isEmpty ? '' : '${field.metadata.join(' ')} ';
     if (isAbstract) {
       // When generating the interface, parameters are typed directly.
-      return '$r\n    $annotations${v.type} ${v.name},';
+      return '$r\n    $annotations${field.type} ${field.name},';
     } else {
       // The implementation uses [\$CopyWithPlaceholder] to detect whether a parameter was passed.
-      return '$r\n    ${annotations}Object? ${v.name} = const \$CopyWithPlaceholder(),';
+      return '$r\n    ${annotations}Object? ${field.name} = const \$CopyWithPlaceholder(),';
     }
   });
 
   // Generate the parameters passed to the constructor when creating the new instance. Immutable fields are copied from the existing value.
-  final paramsInput = allFields.fold<String>('', (r, v) {
-    if (v.fieldAnnotation.immutable) {
-      return v.isPositioned
-          ? '$r _value.${v.name},'
-          : '$r ${v.constructorParamName}: _value.${v.name},';
+  final paramsInput = spec.constructorFields.fold<String>('', (r, field) {
+    if (!field.isMutable) {
+      return field.isPositioned
+          ? '$r _value.${field.name},'
+          : '$r ${field.constructorParamName}: _value.${field.name},';
     }
     final placeholder =
-        v.nullable
-            ? '${v.name} == const \$CopyWithPlaceholder()'
-            : '${v.name} == const \$CopyWithPlaceholder() || ${v.name} == null';
+        field.nullable
+            ? '${field.name} == const \$CopyWithPlaceholder()'
+            : '${field.name} == const \$CopyWithPlaceholder() || ${field.name} == null';
 
-    return '''$r ${v.isPositioned ? '' : '${v.constructorParamName}:'}'''
+    return '''$r ${field.isPositioned ? '' : '${field.constructorParamName}:'}'''
         '''
         $placeholder
-        ? _value.${v.name}
+        ? _value.${field.name}
         // ignore: cast_nullable_to_non_nullable
-        : ${v.name} as ${v.type},''';
+        : ${field.name} as ${field.type},''';
   });
 
   final constructorBody =
       isAbstract
           ? ''
-          : '{ return ${ConstructorUtils.constructorFor(typeAnnotation, constructor)}($paramsInput); }';
+          : '{ return ${ConstructorUtils.constructorFor(spec.typeAnnotation, spec.constructorName)}($paramsInput); }';
   final callParameters =
       constructorInput.trim().isEmpty ? '' : '{$constructorInput}';
 
   return '''
         /// Creates a new instance with the provided field values.
-        /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored.${skipFields ? '' : ' To update a single field use `$typeAnnotation(...).copyWith.fieldName(value)`.'}
+        /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored.${spec.skipFields ? '' : ' To update a single field use `${spec.typeAnnotation}(...).copyWith.fieldName(value)`.'}
         ///
         /// Example:
         /// ```dart
-        /// $typeAnnotation(...).copyWith(id: 12, name: "My name")
+        /// ${spec.typeAnnotation}(...).copyWith(id: 12, name: "My name")
         /// ```
-${addOverride ? '        @override\n' : ''}        $typeAnnotation call($callParameters) $constructorBody
+${addOverride ? '        @override\n' : ''}        ${spec.typeAnnotation} call($callParameters) $constructorBody
     ''';
 }

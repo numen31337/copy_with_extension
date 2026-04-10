@@ -2,6 +2,7 @@ import 'package:analyzer/dart/element/element.dart' show FieldElement;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
+import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
 import 'package:copy_with_extension_gen/src/templates/copy_with_null_template.dart';
 import 'package:copy_with_extension_gen/src/templates/copy_with_values_template.dart';
 import 'package:test/test.dart';
@@ -307,7 +308,8 @@ void main() {
         immutable: false,
       ),
     ];
-    final result = copyWithNullTemplate('Test', fields, null, false);
+    final spec = ResolvedCopyWithSpec.testing(fields: fields);
+    final result = copyWithNullTemplate(spec);
     expect(result, contains('a,'));
     expect(result, contains('b == true ? null : this.b'));
   });
@@ -320,14 +322,8 @@ void main() {
       immutable: true,
       isPositioned: true,
     );
-    final result = copyWithValuesTemplate(
-      'Test',
-      [field],
-      [field],
-      null,
-      false,
-      false,
-    );
+    final spec = ResolvedCopyWithSpec.testing(fields: [field]);
+    final result = copyWithValuesTemplate(spec, isAbstract: false);
     expect(result, contains('_value.a,'));
   });
 }
