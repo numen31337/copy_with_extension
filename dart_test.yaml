@@ -1,0 +1,4 @@
+# Keep package-directory test invocations from discovering generated
+# `.dart_tool/build` bootstrap suites when run from the workspace root.
+compilers:
+  - source

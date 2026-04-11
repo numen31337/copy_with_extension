@@ -2,9 +2,9 @@ import 'package:analyzer/dart/element/element.dart' show FieldElement;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
-import 'package:source_gen_test/source_gen_test.dart'
-    show initializeLibraryReaderForDirectory;
 import 'package:test/test.dart';
+
+import 'helpers/source_gen_test_utils.dart';
 
 @CopyWith()
 class InheritanceParent<T> {
@@ -56,7 +56,7 @@ void main() {
 
   group('findAnnotatedSuper', () {
     test('resolves aliased superclass and keeps type arguments', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'inheritance_utils_test.dart',
       );
@@ -76,7 +76,7 @@ void main() {
     test(
       'walks alias chain and respects skipped annotated ancestors',
       () async {
-        final reader = await initializeLibraryReaderForDirectory(
+        final reader = await initializePackageLibraryReaderForDirectory(
           'test',
           'inheritance_utils_test.dart',
         );
@@ -93,7 +93,7 @@ void main() {
     test(
       'walks alias chain and finds non-skipped annotated ancestors',
       () async {
-        final reader = await initializeLibraryReaderForDirectory(
+        final reader = await initializePackageLibraryReaderForDirectory(
           'test',
           'inheritance_utils_test.dart',
         );

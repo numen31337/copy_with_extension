@@ -2,9 +2,10 @@ import 'dart:io';
 
 import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
-import 'package:source_gen_test/source_gen_test.dart'
-    show generateForElement, initializeLibraryReaderForDirectory;
+import 'package:source_gen_test/source_gen_test.dart' show generateForElement;
 import 'package:test/test.dart';
+
+import 'source_gen_test_utils.dart';
 
 /// Generates output for [elementName] and verifies it against [goldenFilePath].
 Future<void> expectGeneratedCodeMatchesGolden({
@@ -14,7 +15,7 @@ Future<void> expectGeneratedCodeMatchesGolden({
   required String goldenFilePath,
   Settings? settings,
 }) async {
-  final reader = await initializeLibraryReaderForDirectory(
+  final reader = await initializePackageLibraryReaderForDirectory(
     sourceDirectory,
     sourceFile,
   );
@@ -33,7 +34,8 @@ Future<void> expectMatchesGolden({
   required String actual,
   required String goldenFilePath,
 }) async {
-  final goldenFile = File(goldenFilePath);
+  final resolvedGoldenFilePath = resolvePackagePath(goldenFilePath);
+  final goldenFile = File(resolvedGoldenFilePath);
   final normalizedActual = _normalize(actual);
 
   if (_shouldUpdateGoldens) {
@@ -43,7 +45,7 @@ Future<void> expectMatchesGolden({
 
   if (!await goldenFile.exists()) {
     fail(
-      'Golden file not found: "$goldenFilePath". '
+      'Golden file not found: "$resolvedGoldenFilePath". '
       'Run with UPDATE_GOLDENS=true to create it.',
     );
   }
@@ -53,8 +55,8 @@ Future<void> expectMatchesGolden({
     normalizedActual,
     expected,
     reason:
-        'Golden mismatch at "$goldenFilePath". Run with UPDATE_GOLDENS=true '
-        'to refresh expected output.',
+        'Golden mismatch at "$resolvedGoldenFilePath". '
+        'Run with UPDATE_GOLDENS=true to refresh expected output.',
   );
 }
 

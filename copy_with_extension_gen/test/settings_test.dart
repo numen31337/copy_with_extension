@@ -3,9 +3,10 @@ import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
-import 'package:source_gen_test/source_gen_test.dart'
-    show generateForElement, initializeLibraryReaderForDirectory;
+import 'package:source_gen_test/source_gen_test.dart' show generateForElement;
 import 'package:test/test.dart';
+
+import 'helpers/source_gen_test_utils.dart';
 
 class Obsolete {
   const Obsolete(this.message);
@@ -250,7 +251,7 @@ void main() {
 
   group('Annotation forwarding', () {
     test('forwards default annotations', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -273,7 +274,7 @@ void main() {
     });
 
     test('custom annotations override defaults', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -297,7 +298,7 @@ void main() {
     });
 
     test('empty annotations disable propagation', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -323,7 +324,7 @@ void main() {
 
   group('Constructor field resolver', () {
     test('maps field initializers with renamed parameters', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -345,7 +346,7 @@ void main() {
     });
 
     test('follows parameter forwarding through super constructors', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -368,7 +369,7 @@ void main() {
     });
 
     test('does not treat shadowed closure identifiers as bindings', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -396,7 +397,7 @@ void main() {
     });
 
     test('does not bind by inherited field name alone', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -418,7 +419,7 @@ void main() {
     });
 
     test('rejects derived super-constructor aliases', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -446,7 +447,7 @@ void main() {
     });
 
     test('rejects parameters bound to local and super fields', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -474,7 +475,7 @@ void main() {
     });
 
     test('rejects initializing formals also bound to super fields', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -504,7 +505,7 @@ void main() {
     });
 
     test('rejects derived same-name field initializers', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -534,7 +535,7 @@ void main() {
     test(
       'rejects same-name parameters without field binding evidence',
       () async {
-        final reader = await initializeLibraryReaderForDirectory(
+        final reader = await initializePackageLibraryReaderForDirectory(
           'test',
           'settings_test.dart',
         );
@@ -565,7 +566,7 @@ void main() {
     );
 
     test('supports defaulted same-name field initializers', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -587,7 +588,7 @@ void main() {
     });
 
     test('supports defaulted renamed field initializers', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -610,7 +611,7 @@ void main() {
     });
 
     test('rejects defaulted parameters that target multiple fields', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -640,7 +641,7 @@ void main() {
     });
 
     test('supports defaulted renamed super-constructor forwarding', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -665,7 +666,7 @@ void main() {
     test(
       'supports multi-level defaulted super-constructor forwarding',
       () async {
-        final reader = await initializeLibraryReaderForDirectory(
+        final reader = await initializePackageLibraryReaderForDirectory(
           'test',
           'settings_test.dart',
         );
@@ -690,7 +691,7 @@ void main() {
     );
 
     test('rejects positional derived super-constructor aliases', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -720,7 +721,7 @@ void main() {
     });
 
     test('uses same-name fallback for factory constructors', () async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'settings_test.dart',
       );
@@ -746,7 +747,7 @@ void main() {
     test(
       'does not delegate inherited proxy methods to a skipped superclass',
       () async {
-        final reader = await initializeLibraryReaderForDirectory(
+        final reader = await initializePackageLibraryReaderForDirectory(
           'test',
           'settings_test.dart',
         );

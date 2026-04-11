@@ -1,0 +1,403 @@
+diff --git a/copy_with_extension_gen/test/element_utils_test.dart b/copy_with_extension_gen/test/element_utils_test.dart
+index 3a41f63..1784bc9 100644
+--- a/copy_with_extension_gen/test/element_utils_test.dart
++++ b/copy_with_extension_gen/test/element_utils_test.dart
+@@ -2,10 +2,10 @@ import 'dart:typed_data' as ns;
+ 
+ import 'package:analyzer/dart/element/element.dart' show ClassElement;
+ import 'package:copy_with_extension_gen/src/element_utils.dart';
+-import 'package:source_gen_test/source_gen_test.dart'
+-    show initializeLibraryReaderForDirectory;
+ import 'package:test/test.dart';
+ 
++import 'helpers/source_gen_test_utils.dart';
++
+ typedef LocalAlias<T> = List<T>;
+ typedef LocalScalar = int;
+ 
+@@ -28,7 +28,7 @@ void main() {
+     late ClassElement fixture;
+ 
+     setUpAll(() async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'element_utils_test.dart',
+       );
+diff --git a/copy_with_extension_gen/test/empty_parameter_list_generation_test.dart b/copy_with_extension_gen/test/empty_parameter_list_generation_test.dart
+index b13f376..9618413 100644
+--- a/copy_with_extension_gen/test/empty_parameter_list_generation_test.dart
++++ b/copy_with_extension_gen/test/empty_parameter_list_generation_test.dart
+@@ -1,10 +1,11 @@
+ import 'package:copy_with_extension/copy_with_extension.dart';
+ import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
+ import 'package:copy_with_extension_gen/src/settings.dart';
+-import 'package:source_gen_test/source_gen_test.dart'
+-    show generateForElement, initializeLibraryReaderForDirectory;
++import 'package:source_gen_test/source_gen_test.dart' show generateForElement;
+ import 'package:test/test.dart';
+ 
++import 'helpers/source_gen_test_utils.dart';
++
+ @CopyWith(immutableFields: true, copyWithNull: true)
+ class Issue125Fixture {
+   const Issue125Fixture({required this.name, this.age});
+@@ -24,7 +25,7 @@ class AllImmutableFixture {
+ 
+ void main() {
+   Future<String> generateOutput(String target) async {
+-    final reader = await initializeLibraryReaderForDirectory(
++    final reader = await initializePackageLibraryReaderForDirectory(
+       'test',
+       'empty_parameter_list_generation_test.dart',
+     );
+diff --git a/copy_with_extension_gen/test/generated_code_test_cases/main_test.dart b/copy_with_extension_gen/test/generated_code_test_cases/main_test.dart
+index ae03c4b..bd0ff61 100644
+--- a/copy_with_extension_gen/test/generated_code_test_cases/main_test.dart
++++ b/copy_with_extension_gen/test/generated_code_test_cases/main_test.dart
+@@ -2,16 +2,14 @@ import 'package:copy_with_extension/copy_with_extension.dart';
+ import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
+ import 'package:copy_with_extension_gen/src/settings.dart';
+ import 'package:source_gen_test/source_gen_test.dart'
+-    show
+-        initializeLibraryReaderForDirectory,
+-        initializeBuildLogTracking,
+-        testAnnotatedElements;
++    show initializeBuildLogTracking, testAnnotatedElements;
+ import 'package:test/test.dart';
+ 
+ import '../helpers/golden_test_utils.dart';
++import '../helpers/source_gen_test_utils.dart';
+ 
+ Future<void> main() async {
+-  final reader = await initializeLibraryReaderForDirectory(
++  final reader = await initializePackageLibraryReaderForDirectory(
+     'test/generated_code_test_cases',
+     'source_gen_entrypoint.dart',
+   );
+diff --git a/copy_with_extension_gen/test/helpers/golden_test_utils.dart b/copy_with_extension_gen/test/helpers/golden_test_utils.dart
+index 2153945..34b82b0 100644
+--- a/copy_with_extension_gen/test/helpers/golden_test_utils.dart
++++ b/copy_with_extension_gen/test/helpers/golden_test_utils.dart
+@@ -2,10 +2,11 @@ import 'dart:io';
+ 
+ import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
+ import 'package:copy_with_extension_gen/src/settings.dart';
+-import 'package:source_gen_test/source_gen_test.dart'
+-    show generateForElement, initializeLibraryReaderForDirectory;
++import 'package:source_gen_test/source_gen_test.dart' show generateForElement;
+ import 'package:test/test.dart';
+ 
++import 'source_gen_test_utils.dart';
++
+ /// Generates output for [elementName] and verifies it against [goldenFilePath].
+ Future<void> expectGeneratedCodeMatchesGolden({
+   required String sourceDirectory,
+@@ -14,7 +15,7 @@ Future<void> expectGeneratedCodeMatchesGolden({
+   required String goldenFilePath,
+   Settings? settings,
+ }) async {
+-  final reader = await initializeLibraryReaderForDirectory(
++  final reader = await initializePackageLibraryReaderForDirectory(
+     sourceDirectory,
+     sourceFile,
+   );
+@@ -33,7 +34,8 @@ Future<void> expectMatchesGolden({
+   required String actual,
+   required String goldenFilePath,
+ }) async {
+-  final goldenFile = File(goldenFilePath);
++  final resolvedGoldenFilePath = resolvePackagePath(goldenFilePath);
++  final goldenFile = File(resolvedGoldenFilePath);
+   final normalizedActual = _normalize(actual);
+ 
+   if (_shouldUpdateGoldens) {
+@@ -43,7 +45,7 @@ Future<void> expectMatchesGolden({
+ 
+   if (!await goldenFile.exists()) {
+     fail(
+-      'Golden file not found: "$goldenFilePath". '
++      'Golden file not found: "$resolvedGoldenFilePath". '
+       'Run with UPDATE_GOLDENS=true to create it.',
+     );
+   }
+@@ -53,8 +55,8 @@ Future<void> expectMatchesGolden({
+     normalizedActual,
+     expected,
+     reason:
+-        'Golden mismatch at "$goldenFilePath". Run with UPDATE_GOLDENS=true '
+-        'to refresh expected output.',
++        'Golden mismatch at "$resolvedGoldenFilePath". '
++        'Run with UPDATE_GOLDENS=true to refresh expected output.',
+   );
+ }
+ 
+diff --git a/copy_with_extension_gen/test/immutable_fields_generator_test.dart b/copy_with_extension_gen/test/immutable_fields_generator_test.dart
+index e6dc311..1d5a5a5 100644
+--- a/copy_with_extension_gen/test/immutable_fields_generator_test.dart
++++ b/copy_with_extension_gen/test/immutable_fields_generator_test.dart
+@@ -1,10 +1,11 @@
+ import 'package:copy_with_extension/copy_with_extension.dart';
+ import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
+ import 'package:copy_with_extension_gen/src/settings.dart';
+-import 'package:source_gen_test/source_gen_test.dart'
+-    show generateForElement, initializeLibraryReaderForDirectory;
++import 'package:source_gen_test/source_gen_test.dart' show generateForElement;
+ import 'package:test/test.dart';
+ 
++import 'helpers/source_gen_test_utils.dart';
++
+ @CopyWith()
+ class ImmutableFixture {
+   const ImmutableFixture({this.a, this.b});
+@@ -17,7 +18,7 @@ class ImmutableFixture {
+ 
+ void main() {
+   test('immutableFields setting marks fields immutable by default', () async {
+-    final reader = await initializeLibraryReaderForDirectory(
++    final reader = await initializePackageLibraryReaderForDirectory(
+       'test',
+       'immutable_fields_generator_test.dart',
+     );
+diff --git a/copy_with_extension_gen/test/inheritance_utils_test.dart b/copy_with_extension_gen/test/inheritance_utils_test.dart
+index a13aa99..f02f445 100644
+--- a/copy_with_extension_gen/test/inheritance_utils_test.dart
++++ b/copy_with_extension_gen/test/inheritance_utils_test.dart
+@@ -2,10 +2,10 @@ import 'package:analyzer/dart/element/element.dart' show FieldElement;
+ import 'package:copy_with_extension/copy_with_extension.dart';
+ import 'package:copy_with_extension_gen/src/inheritance.dart';
+ import 'package:copy_with_extension_gen/src/settings.dart';
+-import 'package:source_gen_test/source_gen_test.dart'
+-    show initializeLibraryReaderForDirectory;
+ import 'package:test/test.dart';
+ 
++import 'helpers/source_gen_test_utils.dart';
++
+ @CopyWith()
+ class InheritanceParent<T> {
+   const InheritanceParent(this.value);
+@@ -56,7 +56,7 @@ void main() {
+ 
+   group('findAnnotatedSuper', () {
+     test('resolves aliased superclass and keeps type arguments', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'inheritance_utils_test.dart',
+       );
+@@ -76,7 +76,7 @@ void main() {
+     test(
+       'walks alias chain and respects skipped annotated ancestors',
+       () async {
+-        final reader = await initializeLibraryReaderForDirectory(
++        final reader = await initializePackageLibraryReaderForDirectory(
+           'test',
+           'inheritance_utils_test.dart',
+         );
+@@ -93,7 +93,7 @@ void main() {
+     test(
+       'walks alias chain and finds non-skipped annotated ancestors',
+       () async {
+-        final reader = await initializeLibraryReaderForDirectory(
++        final reader = await initializePackageLibraryReaderForDirectory(
+           'test',
+           'inheritance_utils_test.dart',
+         );
+diff --git a/copy_with_extension_gen/test/settings_test.dart b/copy_with_extension_gen/test/settings_test.dart
+index 37cafe1..4c3ec3e 100644
+--- a/copy_with_extension_gen/test/settings_test.dart
++++ b/copy_with_extension_gen/test/settings_test.dart
+@@ -3,10 +3,11 @@ import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
+ import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
+ import 'package:copy_with_extension_gen/src/settings.dart';
+ import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
+-import 'package:source_gen_test/source_gen_test.dart'
+-    show generateForElement, initializeLibraryReaderForDirectory;
++import 'package:source_gen_test/source_gen_test.dart' show generateForElement;
+ import 'package:test/test.dart';
+ 
++import 'helpers/source_gen_test_utils.dart';
++
+ class Obsolete {
+   const Obsolete(this.message);
+   final String message;
+@@ -250,7 +251,7 @@ void main() {
+ 
+   group('Annotation forwarding', () {
+     test('forwards default annotations', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -273,7 +274,7 @@ void main() {
+     });
+ 
+     test('custom annotations override defaults', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -297,7 +298,7 @@ void main() {
+     });
+ 
+     test('empty annotations disable propagation', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -323,7 +324,7 @@ void main() {
+ 
+   group('Constructor field resolver', () {
+     test('maps field initializers with renamed parameters', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -345,7 +346,7 @@ void main() {
+     });
+ 
+     test('follows parameter forwarding through super constructors', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -368,7 +369,7 @@ void main() {
+     });
+ 
+     test('does not treat shadowed closure identifiers as bindings', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -396,7 +397,7 @@ void main() {
+     });
+ 
+     test('does not bind by inherited field name alone', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -418,7 +419,7 @@ void main() {
+     });
+ 
+     test('rejects derived super-constructor aliases', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -446,7 +447,7 @@ void main() {
+     });
+ 
+     test('rejects parameters bound to local and super fields', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -474,7 +475,7 @@ void main() {
+     });
+ 
+     test('rejects initializing formals also bound to super fields', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -504,7 +505,7 @@ void main() {
+     });
+ 
+     test('rejects derived same-name field initializers', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -534,7 +535,7 @@ void main() {
+     test(
+       'rejects same-name parameters without field binding evidence',
+       () async {
+-        final reader = await initializeLibraryReaderForDirectory(
++        final reader = await initializePackageLibraryReaderForDirectory(
+           'test',
+           'settings_test.dart',
+         );
+@@ -565,7 +566,7 @@ void main() {
+     );
+ 
+     test('supports defaulted same-name field initializers', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -587,7 +588,7 @@ void main() {
+     });
+ 
+     test('supports defaulted renamed field initializers', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -610,7 +611,7 @@ void main() {
+     });
+ 
+     test('rejects defaulted parameters that target multiple fields', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -640,7 +641,7 @@ void main() {
+     });
+ 
+     test('supports defaulted renamed super-constructor forwarding', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -665,7 +666,7 @@ void main() {
+     test(
+       'supports multi-level defaulted super-constructor forwarding',
+       () async {
+-        final reader = await initializeLibraryReaderForDirectory(
++        final reader = await initializePackageLibraryReaderForDirectory(
+           'test',
+           'settings_test.dart',
+         );
+@@ -690,7 +691,7 @@ void main() {
+     );
+ 
+     test('rejects positional derived super-constructor aliases', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -720,7 +721,7 @@ void main() {
+     });
+ 
+     test('uses same-name fallback for factory constructors', () async {
+-      final reader = await initializeLibraryReaderForDirectory(
++      final reader = await initializePackageLibraryReaderForDirectory(
+         'test',
+         'settings_test.dart',
+       );
+@@ -746,7 +747,7 @@ void main() {
+     test(
+       'does not delegate inherited proxy methods to a skipped superclass',
+       () async {
+-        final reader = await initializeLibraryReaderForDirectory(
++        final reader = await initializePackageLibraryReaderForDirectory(
+           'test',
+           'settings_test.dart',
+         );

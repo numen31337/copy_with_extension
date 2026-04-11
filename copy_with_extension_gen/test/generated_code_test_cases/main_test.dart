@@ -2,16 +2,14 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen_test/source_gen_test.dart'
-    show
-        initializeLibraryReaderForDirectory,
-        initializeBuildLogTracking,
-        testAnnotatedElements;
+    show initializeBuildLogTracking, testAnnotatedElements;
 import 'package:test/test.dart';
 
 import '../helpers/golden_test_utils.dart';
+import '../helpers/source_gen_test_utils.dart';
 
 Future<void> main() async {
-  final reader = await initializeLibraryReaderForDirectory(
+  final reader = await initializePackageLibraryReaderForDirectory(
     'test/generated_code_test_cases',
     'source_gen_entrypoint.dart',
   );
