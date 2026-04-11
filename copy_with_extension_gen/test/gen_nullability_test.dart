@@ -109,6 +109,7 @@ class _FakeConstructorParameterInfo implements ConstructorParameterInfo {
   }) : fieldAnnotation = CopyWithFieldAnnotation(immutable: immutable),
        type = 'int',
        classField = null,
+       classFieldNullable = false,
        metadata = const [],
        isInherited = false;
 
@@ -127,11 +128,11 @@ class _FakeConstructorParameterInfo implements ConstructorParameterInfo {
   @override
   final FieldElement? classField;
   @override
+  final bool classFieldNullable;
+  @override
   final List<String> metadata;
   @override
   final bool isInherited;
-  @override
-  bool get classFieldNullable => true;
 }
 
 void main() {

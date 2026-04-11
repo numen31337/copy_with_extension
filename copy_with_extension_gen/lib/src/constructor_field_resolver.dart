@@ -11,18 +11,22 @@ class ConstructorFieldResolver {
   ConstructorFieldResolver._(
     this._classElement,
     this._bindingGraph, {
+    required ClassFieldLookupCache fieldLookup,
     ConstructorFieldResolver? superResolver,
-  }) : _superResolver = superResolver;
+  }) : _fieldLookup = fieldLookup,
+       _superResolver = superResolver;
 
   final ClassElement _classElement;
   final ConstructorBindingGraph _bindingGraph;
+  final ClassFieldLookupCache _fieldLookup;
   final ConstructorFieldResolver? _superResolver;
 
   /// Creates a resolver for [constructor] and its super-constructor chain.
   static Future<ConstructorFieldResolver> create(
     ClassElement classElement,
-    ConstructorElement constructor,
-  ) async {
+    ConstructorElement constructor, {
+    ClassFieldLookupCache? fieldLookup,
+  }) async {
     final bindingGraph = await ConstructorBindingGraph.build(constructor);
     final superConstructor = constructor.superConstructor;
     final superClass = classElement.supertype?.element as ClassElement?;
@@ -40,6 +44,7 @@ class ConstructorFieldResolver {
     return ConstructorFieldResolver._(
       classElement,
       bindingGraph,
+      fieldLookup: fieldLookup ?? ClassFieldLookupCache(classElement),
       superResolver: superResolver,
     );
   }
@@ -50,7 +55,7 @@ class ConstructorFieldResolver {
     final hasSameNameField =
         _bindingGraph.isResolved
             ? _classElement.getField(paramName) != null
-            : ClassFieldLookup.find(_classElement, paramName) != null;
+            : _fieldLookup.exists(paramName);
     final canUseSameNameField =
         (!_bindingGraph.isResolved &&
             !_bindingGraph.hasBindingsForSource(paramName)) ||

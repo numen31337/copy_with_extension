@@ -27,3 +27,28 @@ class ClassFieldLookup {
     return find(classElement, fieldName) != null;
   }
 }
+
+/// Per-class cache for field resolution across the inheritance hierarchy.
+///
+/// Analyzer field walks can be repeated many times while resolving constructor
+/// parameters, annotations, and generated proxy policy. Keeping one cache per
+/// generation step ensures every caller observes the same resolved element.
+class ClassFieldLookupCache {
+  ClassFieldLookupCache(this._classElement);
+
+  final ClassElement _classElement;
+  final Map<String, FieldElement?> _fields = <String, FieldElement?>{};
+
+  /// Returns [fieldName] from the cached class hierarchy lookup.
+  FieldElement? find(String fieldName) {
+    return _fields.putIfAbsent(
+      fieldName,
+      () => ClassFieldLookup.find(_classElement, fieldName),
+    );
+  }
+
+  /// Returns `true` when [fieldName] exists in the cached class hierarchy.
+  bool exists(String fieldName) {
+    return find(fieldName) != null;
+  }
+}

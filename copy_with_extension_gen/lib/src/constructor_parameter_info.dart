@@ -3,7 +3,7 @@
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
-import 'package:analyzer/dart/element/type.dart' show DynamicType;
+import 'package:analyzer/dart/element/type.dart' show DartType, DynamicType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
@@ -13,38 +13,18 @@ import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /// Represents a single class field with the additional metadata needed for code generation.
 class ConstructorParameterInfo {
-  ConstructorParameterInfo(
-    FormalParameterElement element,
-    ClassElement classElement, {
+  const ConstructorParameterInfo._({
+    required this.constructorParamName,
+    required this.name,
+    required this.nullable,
+    required this.type,
+    required this.fieldAnnotation,
     required this.isPositioned,
-    ClassElement? annotatedSuper,
-    String? fieldName,
-    required Set<String> annotations,
-    bool immutableDefault = false,
-  }) : name = fieldName ?? element.displayName,
-       constructorParamName = element.displayName,
-       fieldAnnotation = _readFieldAnnotation(
-         classElement,
-         fieldName ?? element.displayName,
-         immutableDefault,
-       ),
-       classField = ClassFieldLookup.find(
-         classElement,
-         fieldName ?? element.displayName,
-       ),
-       metadata = _readFieldMetadata(
-         ClassFieldLookup.find(classElement, fieldName ?? element.displayName),
-         annotations,
-       ),
-       isInherited = _isInherited(
-         fieldName ?? element.displayName,
-         classElement,
-         annotatedSuper,
-       ),
-       nullable =
-           element.type.nullabilitySuffix != NullabilitySuffix.none ||
-           element.type is DynamicType,
-       type = _fullTypeName(element);
+    required this.classField,
+    required this.classFieldNullable,
+    required this.metadata,
+    required this.isInherited,
+  });
 
   /// Name of the parameter as declared in the constructor.
   final String constructorParamName;
@@ -69,6 +49,9 @@ class ConstructorParameterInfo {
   /// given name wasn't found on the class or its superclasses.
   final FieldElement? classField;
 
+  /// Whether the corresponding class field is nullable.
+  final bool classFieldNullable;
+
   /// Metadata annotations copied from the corresponding class field that should
   /// be reflected in generated `copyWith` methods.
   final List<String> metadata;
@@ -78,12 +61,6 @@ class ConstructorParameterInfo {
   /// Fields introduced by unannotated intermediate classes are generated
   /// locally because the proxy only extends the nearest annotated superclass.
   final bool isInherited;
-
-  /// Returns `true` if the corresponding class field is nullable.
-  bool get classFieldNullable =>
-      classField != null &&
-      (classField!.type.nullabilitySuffix != NullabilitySuffix.none ||
-          classField!.type is DynamicType);
 
   @override
   String toString() {
@@ -125,7 +102,7 @@ class ConstructorParameterInfo {
 
   /// Restores the `CopyWithField` annotation provided by the user.
   static CopyWithFieldAnnotation _readFieldAnnotation(
-    ClassElement classElement,
+    FieldElement? fieldElement,
     String fieldName,
     bool immutableDefault,
   ) {
@@ -141,8 +118,7 @@ class ConstructorParameterInfo {
       return const CopyWithFieldAnnotation(immutable: true);
     }
 
-    final fieldElement = ClassFieldLookup.find(classElement, fieldName);
-    if (fieldElement is! FieldElement) {
+    if (fieldElement == null) {
       return defaults;
     }
 
@@ -156,6 +132,11 @@ class ConstructorParameterInfo {
     final immutable = reader.peek('immutable')?.boolValue;
 
     return CopyWithFieldAnnotation(immutable: immutable ?? defaults.immutable);
+  }
+
+  static bool _isNullable(DartType type) {
+    return type.nullabilitySuffix != NullabilitySuffix.none ||
+        type is DynamicType;
   }
 
   /// Restores metadata annotations for [field] that need to be transferred to
@@ -184,4 +165,117 @@ class ConstructorParameterInfo {
         .map((annotation) => annotation.toSource())
         .toList();
   }
+}
+
+/// Builds [ConstructorParameterInfo] instances while sharing per-generation
+/// field and inherited-field resolution.
+class ConstructorParameterInfoFactory {
+  ConstructorParameterInfoFactory({
+    required ClassElement classElement,
+    required ClassElement? annotatedSuper,
+    required Set<String> annotations,
+    required bool immutableDefault,
+    ClassFieldLookupCache? fieldLookup,
+  }) : _classElement = classElement,
+       _annotatedSuper = annotatedSuper,
+       _annotations = annotations,
+       _immutableDefault = immutableDefault,
+       _fieldLookup = fieldLookup ?? ClassFieldLookupCache(classElement);
+
+  final ClassElement _classElement;
+  final ClassElement? _annotatedSuper;
+  final Set<String> _annotations;
+  final bool _immutableDefault;
+  final ClassFieldLookupCache _fieldLookup;
+  final Map<String, bool> _inheritedByFieldName = <String, bool>{};
+
+  ConstructorParameterInfo create(
+    FormalParameterElement element, {
+    required bool isPositioned,
+    String? fieldName,
+  }) {
+    final resolvedFieldName = fieldName ?? element.displayName;
+    final resolved = _ResolvedConstructorField.from(
+      parameter: element,
+      fieldName: resolvedFieldName,
+      fieldLookup: _fieldLookup,
+      annotations: _annotations,
+      immutableDefault: _immutableDefault,
+      isInherited: _isInherited(resolvedFieldName),
+    );
+
+    return ConstructorParameterInfo._(
+      constructorParamName: element.displayName,
+      name: resolvedFieldName,
+      nullable: resolved.parameterNullable,
+      type: resolved.parameterType,
+      fieldAnnotation: resolved.fieldAnnotation,
+      isPositioned: isPositioned,
+      classField: resolved.classField,
+      classFieldNullable: resolved.classFieldNullable,
+      metadata: resolved.metadata,
+      isInherited: resolved.isInherited,
+    );
+  }
+
+  bool _isInherited(String fieldName) {
+    return _inheritedByFieldName.putIfAbsent(
+      fieldName,
+      () => ConstructorParameterInfo._isInherited(
+        fieldName,
+        _classElement,
+        _annotatedSuper,
+      ),
+    );
+  }
+}
+
+class _ResolvedConstructorField {
+  const _ResolvedConstructorField({
+    required this.classField,
+    required this.classFieldNullable,
+    required this.fieldAnnotation,
+    required this.metadata,
+    required this.isInherited,
+    required this.parameterNullable,
+    required this.parameterType,
+  });
+
+  factory _ResolvedConstructorField.from({
+    required FormalParameterElement parameter,
+    required String fieldName,
+    required ClassFieldLookupCache fieldLookup,
+    required Set<String> annotations,
+    required bool immutableDefault,
+    required bool isInherited,
+  }) {
+    final classField = fieldLookup.find(fieldName);
+
+    return _ResolvedConstructorField(
+      classField: classField,
+      classFieldNullable:
+          classField != null &&
+          ConstructorParameterInfo._isNullable(classField.type),
+      fieldAnnotation: ConstructorParameterInfo._readFieldAnnotation(
+        classField,
+        fieldName,
+        immutableDefault,
+      ),
+      metadata: ConstructorParameterInfo._readFieldMetadata(
+        classField,
+        annotations,
+      ),
+      isInherited: isInherited,
+      parameterNullable: ConstructorParameterInfo._isNullable(parameter.type),
+      parameterType: ConstructorParameterInfo._fullTypeName(parameter),
+    );
+  }
+
+  final FieldElement? classField;
+  final bool classFieldNullable;
+  final CopyWithFieldAnnotation fieldAnnotation;
+  final List<String> metadata;
+  final bool isInherited;
+  final bool parameterNullable;
+  final String parameterType;
 }

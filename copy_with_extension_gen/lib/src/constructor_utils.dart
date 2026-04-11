@@ -57,9 +57,18 @@ class ConstructorUtils {
         );
       }
     }
+    final fieldLookup = ClassFieldLookupCache(element);
     final resolver = await ConstructorFieldResolver.create(
       element,
       resolvedConstructor,
+      fieldLookup: fieldLookup,
+    );
+    final parameterInfoFactory = ConstructorParameterInfoFactory(
+      classElement: element,
+      annotatedSuper: annotatedSuper,
+      annotations: annotations,
+      immutableDefault: immutableFields,
+      fieldLookup: fieldLookup,
     );
     final fields = <ConstructorParameterInfo>[];
 
@@ -69,20 +78,16 @@ class ConstructorUtils {
       if (fieldName == null) {
         if (resolver.hasBindingEvidence(paramName) ||
             parameter.isRequired ||
-            ClassFieldLookup.find(element, paramName) != null) {
+            fieldLookup.exists(paramName)) {
           _throwUnresolvedFieldParameter(element, parameter);
         }
         continue;
       }
 
-      final field = ConstructorParameterInfo(
+      final field = parameterInfoFactory.create(
         parameter,
-        element,
         isPositioned: parameter.isPositional,
-        annotatedSuper: annotatedSuper,
         fieldName: fieldName,
-        annotations: annotations,
-        immutableDefault: immutableFields,
       );
 
       final classField = field.classField;
