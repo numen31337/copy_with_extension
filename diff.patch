@@ -1,0 +1,404 @@
+diff --git a/copy_with_extension_gen/lib/src/constructor_field_resolver.dart b/copy_with_extension_gen/lib/src/constructor_field_resolver.dart
+index a152292..0db49b6 100644
+--- a/copy_with_extension_gen/lib/src/constructor_field_resolver.dart
++++ b/copy_with_extension_gen/lib/src/constructor_field_resolver.dart
+@@ -1,151 +1,116 @@
+-// ignore_for_file: experimental_member_use
+-
+-import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
+-import 'package:analyzer/dart/ast/ast.dart'
+-    show
+-        ConstructorDeclaration,
+-        ConstructorFieldInitializer,
+-        Expression,
+-        NamedExpression,
+-        SimpleIdentifier,
+-        SuperConstructorInvocation;
+-import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
+ import 'package:analyzer/dart/element/element.dart'
+     show ClassElement, ConstructorElement;
+-import 'package:build/build.dart' show log;
+ import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
++import 'package:copy_with_extension_gen/src/constructor_binding_graph.dart';
+ 
+ /// Resolves constructor parameters to the corresponding class fields.
+ ///
+-/// This resolver handles parameters that are forwarded to fields with
+-/// different names as well as parameters forwarded to a super constructor.
++/// Resolution is driven by an explicit binding graph so direct assignment,
++/// derived expressions, and super-constructor forwarding remain distinct.
+ class ConstructorFieldResolver {
+-  ConstructorFieldResolver(this._classElement, this._constructor)
+-    : _forwardMap = _buildForwardMap(_constructor);
++  ConstructorFieldResolver._(
++    this._classElement,
++    this._bindingGraph, {
++    ConstructorFieldResolver? superResolver,
++  }) : _superResolver = superResolver;
+ 
+   final ClassElement _classElement;
+-  final ConstructorElement _constructor;
+-  final Map<String, String> _forwardMap;
++  final ConstructorBindingGraph _bindingGraph;
++  final ConstructorFieldResolver? _superResolver;
++
++  /// Creates a resolver for [constructor] and its super-constructor chain.
++  static Future<ConstructorFieldResolver> create(
++    ClassElement classElement,
++    ConstructorElement constructor,
++  ) async {
++    final bindingGraph = await ConstructorBindingGraph.build(constructor);
++    final superConstructor = constructor.superConstructor;
++    final superClass = classElement.supertype?.element as ClassElement?;
++
++    final superResolver =
++        bindingGraph.hasSuperBindings &&
++                superConstructor != null &&
++                superClass != null
++            ? await ConstructorFieldResolver.create(
++              superClass,
++              superConstructor,
++            )
++            : null;
++
++    return ConstructorFieldResolver._(
++      classElement,
++      bindingGraph,
++      superResolver: superResolver,
++    );
++  }
+ 
+   /// Returns the field name for [paramName] or `null` if the field
+   /// cannot be resolved on this class or any annotated superclasses.
+   String? resolve(String paramName) {
+-    if (ClassFieldLookup.exists(_classElement, paramName)) {
++    final hasSameNameField =
++        _bindingGraph.isResolved
++            ? _classElement.getField(paramName) != null
++            : ClassFieldLookup.find(_classElement, paramName) != null;
++    final canUseSameNameField =
++        (!_bindingGraph.isResolved &&
++            !_bindingGraph.hasBindingsForSource(paramName)) ||
++        _bindingGraph.hasOnlySameNameFieldBindingsForSource(paramName);
++    if (hasSameNameField && canUseSameNameField) {
+       return paramName;
+     }
+-    final forwarded = _forwardMap[paramName];
+-    if (forwarded == null) {
+-      return null;
+-    }
+-    if (ClassFieldLookup.exists(_classElement, forwarded)) {
+-      return forwarded;
+-    }
+-    final superConstructor = _constructor.superConstructor;
+-    final superClass = _classElement.supertype?.element as ClassElement?;
+-    if (superConstructor == null || superClass == null) {
++
++    final localField = _resolveLocalField(paramName);
++    final superField = _resolveSuperField(paramName);
++
++    if (localField != null && superField != null) {
+       return null;
+     }
+-    return ConstructorFieldResolver(
+-      superClass,
+-      superConstructor,
+-    ).resolve(forwarded);
++
++    return localField ?? superField;
+   }
+ 
+-  static Map<String, String> _buildForwardMap(ConstructorElement constructor) {
+-    final library = constructor.library;
+-    final session = library.session;
+-
+-    final parsed = session.getParsedLibraryByElement(library);
+-    if (parsed is! ParsedLibraryResult) {
+-      log.warning(
+-        'copy_with_extension_gen: Unable to parse library for '
+-        '${constructor.enclosingElement.displayName}; constructor field '
+-        'forwarding will be limited.',
+-      );
+-      return const {};
+-    }
+-    final declaration = parsed.getFragmentDeclaration(
+-      constructor.firstFragment,
+-    );
+-    final node = declaration?.node;
+-    if (node is! ConstructorDeclaration) {
+-      log.warning(
+-        'copy_with_extension_gen: Unable to resolve constructor node for '
+-        '${constructor.enclosingElement.displayName}.${constructor.displayName}; '
+-        'constructor field forwarding will be limited.',
+-      );
+-      return const {};
+-    }
++  /// Whether binding analysis found constructor initializer evidence for
++  /// [paramName].
++  bool hasBindingEvidence(String paramName) {
++    return _bindingGraph.hasBindingsForSource(paramName);
++  }
+ 
+-    final parameterNames =
+-        constructor.formalParameters.map((p) => p.displayName).toSet();
+-
+-    final result = <String, String>{};
+-
+-    for (final initializer in node.initializers) {
+-      if (initializer is ConstructorFieldInitializer) {
+-        final fieldName = initializer.fieldName.name;
+-        final paramNames = _extractForwardedParameters(
+-          initializer.expression,
+-          parameterNames,
+-        );
+-        for (final paramName in paramNames) {
+-          result[paramName] = fieldName;
+-        }
+-      } else if (initializer is SuperConstructorInvocation) {
+-        var positionalIndex = 0;
+-        final superParams =
+-            constructor.superConstructor?.formalParameters ?? const [];
+-        for (final arg in initializer.argumentList.arguments) {
+-          if (arg is NamedExpression) {
+-            final paramNames = _extractForwardedParameters(
+-              arg.expression,
+-              parameterNames,
+-            );
+-            for (final paramName in paramNames) {
+-              result[paramName] = arg.name.label.name;
+-            }
+-          } else {
+-            final paramNames = _extractForwardedParameters(arg, parameterNames);
+-            if (positionalIndex < superParams.length) {
+-              final superParam = superParams[positionalIndex];
+-              for (final paramName in paramNames) {
+-                result[paramName] = superParam.displayName;
+-              }
+-            }
+-            positionalIndex++;
+-          }
+-        }
++  String? _resolveLocalField(String paramName) {
++    String? resolvedField;
++
++    for (final fieldName in _bindingGraph.fieldTargetsForSource(paramName)) {
++      if (_classElement.getField(fieldName) == null) {
++        continue;
++      }
++      if (resolvedField != null && resolvedField != fieldName) {
++        return null;
+       }
++      resolvedField = fieldName;
+     }
+ 
+-    return result;
++    return resolvedField;
+   }
+ 
+-  /// Returns the names of all parameters from [parameterNames] referenced
+-  /// within [expression].
+-  static Iterable<String> _extractForwardedParameters(
+-    Expression expression,
+-    Set<String> parameterNames,
+-  ) {
+-    final visitor = _ForwardedParameterVisitor(parameterNames);
+-    expression.accept(visitor);
+-    return visitor.names;
+-  }
+-}
+-
+-class _ForwardedParameterVisitor extends RecursiveAstVisitor<void> {
+-  _ForwardedParameterVisitor(this.candidates);
+-
+-  final Set<String> candidates;
+-  final Set<String> names = {};
++  String? _resolveSuperField(String paramName) {
++    final superResolver = _superResolver;
++    if (superResolver == null) {
++      return null;
++    }
+ 
+-  @override
+-  void visitSimpleIdentifier(SimpleIdentifier node) {
+-    final name = node.name;
+-    if (candidates.contains(name)) {
+-      names.add(name);
++    String? resolvedField;
++    for (final superParameter in _bindingGraph.superTargetsForSource(
++      paramName,
++    )) {
++      final candidate = superResolver.resolve(superParameter);
++      if (candidate == null) {
++        continue;
++      }
++      if (resolvedField != null && resolvedField != candidate) {
++        return null;
++      }
++      resolvedField = candidate;
+     }
+-    super.visitSimpleIdentifier(node);
++
++    return resolvedField;
+   }
+ }
+diff --git a/copy_with_extension_gen/lib/src/constructor_utils.dart b/copy_with_extension_gen/lib/src/constructor_utils.dart
+index b107511..4d4a33e 100644
+--- a/copy_with_extension_gen/lib/src/constructor_utils.dart
++++ b/copy_with_extension_gen/lib/src/constructor_utils.dart
+@@ -1,5 +1,6 @@
+ import 'package:analyzer/dart/element/element.dart'
+-    show ClassElement, ConstructorElement;
++    show ClassElement, ConstructorElement, FormalParameterElement;
++import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
+ import 'package:copy_with_extension_gen/src/constructor_field_resolver.dart';
+ import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
+ import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
+@@ -13,13 +14,13 @@ class ConstructorUtils {
+   ///
+   /// Will throw an [InvalidGenerationSourceError] if the constructor cannot be
+   /// resolved or has no parameters.
+-  static List<ConstructorParameterInfo> constructorFields(
++  static Future<List<ConstructorParameterInfo>> constructorFields(
+     ClassElement element,
+     String? constructor, {
+     ClassElement? annotatedSuper,
+     required Set<String> annotations,
+     required bool immutableFields,
+-  }) {
++  }) async {
+     final targetConstructor =
+         constructor != null
+             ? element.getNamedConstructor(constructor)
+@@ -56,12 +57,23 @@ class ConstructorUtils {
+         );
+       }
+     }
+-    final resolver = ConstructorFieldResolver(element, resolvedConstructor);
++    final resolver = await ConstructorFieldResolver.create(
++      element,
++      resolvedConstructor,
++    );
+     final fields = <ConstructorParameterInfo>[];
+ 
+     for (final parameter in parameters) {
+       final paramName = parameter.displayName;
+       final fieldName = resolver.resolve(paramName);
++      if (fieldName == null) {
++        if (resolver.hasBindingEvidence(paramName) ||
++            parameter.isRequired ||
++            ClassFieldLookup.find(element, paramName) != null) {
++          _throwUnresolvedFieldParameter(element, parameter);
++        }
++        continue;
++      }
+ 
+       final field = ConstructorParameterInfo(
+         parameter,
+@@ -77,6 +89,9 @@ class ConstructorUtils {
+       final isAccessible =
+           classField != null &&
+           (!classField.isPrivate || classField.library == element.library);
++      if (!isAccessible && parameter.isRequired) {
++        _throwUnresolvedFieldParameter(element, parameter);
++      }
+       if (isAccessible) {
+         fields.add(field);
+       }
+@@ -85,6 +100,19 @@ class ConstructorUtils {
+     return fields;
+   }
+ 
++  static Never _throwUnresolvedFieldParameter(
++    ClassElement element,
++    FormalParameterElement parameter,
++  ) {
++    throw InvalidGenerationSourceError(
++      'Constructor parameter "${parameter.displayName}" in class '
++      '${element.displayName} could not be resolved to exactly one accessible '
++      'class field. copyWith generation requires constructor parameters that '
++      'set fields to map directly to one field.',
++      element: parameter,
++    );
++  }
++
+   /// Follows redirecting or factory constructors until the final generative
+   /// constructor is reached.
+   ///
+diff --git a/copy_with_extension_gen/lib/src/copy_with_generator.dart b/copy_with_extension_gen/lib/src/copy_with_generator.dart
+index 421d957..376ddfb 100644
+--- a/copy_with_extension_gen/lib/src/copy_with_generator.dart
++++ b/copy_with_extension_gen/lib/src/copy_with_generator.dart
+@@ -22,18 +22,18 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
+   /// parameters and user provided settings, and returns the source code for
+   /// the extension as a string.
+   @override
+-  String generateForAnnotatedElement(
++  Future<String> generateForAnnotatedElement(
+     Element element,
+     ConstantReader annotation,
+     BuildStep buildStep,
+-  ) {
++  ) async {
+     final classElement = _expectClassElement(element);
+     final classAnnotation = AnnotationUtils.readClassAnnotation(
+       settings,
+       annotation,
+     );
+     final spec =
+-        CopyWithGenerationContext(
++        await CopyWithGenerationContext(
+           classElement: classElement,
+           annotation: classAnnotation,
+           settings: settings,
+diff --git a/copy_with_extension_gen/lib/src/resolved_copy_with_spec.dart b/copy_with_extension_gen/lib/src/resolved_copy_with_spec.dart
+index b9b38f9..66c34a6 100644
+--- a/copy_with_extension_gen/lib/src/resolved_copy_with_spec.dart
++++ b/copy_with_extension_gen/lib/src/resolved_copy_with_spec.dart
+@@ -27,16 +27,16 @@ class CopyWithGenerationContext {
+ 
+   /// Resolves constructor, inheritance, and per-field generation behavior into
+   /// a single spec consumed by the templates.
+-  ResolvedCopyWithSpec resolve() {
++  Future<ResolvedCopyWithSpec> resolve() async {
+     var superInfo = _findSuperInfo();
+-    final fields = ConstructorUtils.constructorFields(
++    final fields = await ConstructorUtils.constructorFields(
+       classElement,
+       annotation.constructor,
+       annotatedSuper: superInfo?.element,
+       annotations: settings.annotations,
+       immutableFields: annotation.immutableFields,
+     );
+-    superInfo = _validateSuperFields(superInfo, fields);
++    superInfo = await _validateSuperFields(superInfo, fields);
+     _validateFieldNullability(fields);
+ 
+     final shouldExtendSuperProxy =
+@@ -101,18 +101,19 @@ class CopyWithGenerationContext {
+     return superInfo;
+   }
+ 
+-  AnnotatedCopyWithSuper? _validateSuperFields(
++  Future<AnnotatedCopyWithSuper?> _validateSuperFields(
+     AnnotatedCopyWithSuper? superInfo,
+     List<ConstructorParameterInfo> fields,
+-  ) {
++  ) async {
+     if (superInfo != null) {
++      final resolvedSuperFields = await ConstructorUtils.constructorFields(
++        superInfo.element,
++        superInfo.constructor,
++        annotations: settings.annotations,
++        immutableFields: superInfo.immutableFields,
++      );
+       final superFields =
+-          ConstructorUtils.constructorFields(
+-                superInfo.element,
+-                superInfo.constructor,
+-                annotations: settings.annotations,
+-                immutableFields: superInfo.immutableFields,
+-              )
++          resolvedSuperFields
+               .where((field) => !field.fieldAnnotation.immutable)
+               .map((field) => field.name)
+               .toSet();

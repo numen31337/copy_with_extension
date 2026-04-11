@@ -27,16 +27,16 @@ class CopyWithGenerationContext {
 
   /// Resolves constructor, inheritance, and per-field generation behavior into
   /// a single spec consumed by the templates.
-  ResolvedCopyWithSpec resolve() {
+  Future<ResolvedCopyWithSpec> resolve() async {
     var superInfo = _findSuperInfo();
-    final fields = ConstructorUtils.constructorFields(
+    final fields = await ConstructorUtils.constructorFields(
       classElement,
       annotation.constructor,
       annotatedSuper: superInfo?.element,
       annotations: settings.annotations,
       immutableFields: annotation.immutableFields,
     );
-    superInfo = _validateSuperFields(superInfo, fields);
+    superInfo = await _validateSuperFields(superInfo, fields);
     _validateFieldNullability(fields);
 
     final shouldExtendSuperProxy =
@@ -101,18 +101,19 @@ class CopyWithGenerationContext {
     return superInfo;
   }
 
-  AnnotatedCopyWithSuper? _validateSuperFields(
+  Future<AnnotatedCopyWithSuper?> _validateSuperFields(
     AnnotatedCopyWithSuper? superInfo,
     List<ConstructorParameterInfo> fields,
-  ) {
+  ) async {
     if (superInfo != null) {
+      final resolvedSuperFields = await ConstructorUtils.constructorFields(
+        superInfo.element,
+        superInfo.constructor,
+        annotations: settings.annotations,
+        immutableFields: superInfo.immutableFields,
+      );
       final superFields =
-          ConstructorUtils.constructorFields(
-                superInfo.element,
-                superInfo.constructor,
-                annotations: settings.annotations,
-                immutableFields: superInfo.immutableFields,
-              )
+          resolvedSuperFields
               .where((field) => !field.fieldAnnotation.immutable)
               .map((field) => field.name)
               .toSet();

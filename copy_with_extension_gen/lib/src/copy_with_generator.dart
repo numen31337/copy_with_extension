@@ -22,18 +22,18 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   /// parameters and user provided settings, and returns the source code for
   /// the extension as a string.
   @override
-  String generateForAnnotatedElement(
+  Future<String> generateForAnnotatedElement(
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
-  ) {
+  ) async {
     final classElement = _expectClassElement(element);
     final classAnnotation = AnnotationUtils.readClassAnnotation(
       settings,
       annotation,
     );
     final spec =
-        CopyWithGenerationContext(
+        await CopyWithGenerationContext(
           classElement: classElement,
           annotation: classAnnotation,
           settings: settings,

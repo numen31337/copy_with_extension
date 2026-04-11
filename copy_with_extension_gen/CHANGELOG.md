@@ -1,3 +1,7 @@
+## Unreleased
+* **BREAKING** Constructor parameter resolution now requires an alias-safe binding. Parameters used only in derived initializer expressions, such as `super(a: b + 1)` or `field = normalize(input)`, are rejected instead of being treated as direct field aliases.
+* Support defaulted constructor bindings, including renamed forms like `field = input ?? defaultValue`, while preserving nullable fallback support for non-nullable fields.
+
 ## 14.0.0
 * Raise the minimum Dart SDK to `^3.7.0`.
 * Expand `analyzer` compatibility to `>=8.1.1 <13.0.0`.
