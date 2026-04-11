@@ -8,6 +8,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
+import 'package:copy_with_extension_gen/src/inheritance.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /// Represents a single class field with the additional metadata needed for code generation.
@@ -72,8 +73,10 @@ class ConstructorParameterInfo {
   /// be reflected in generated `copyWith` methods.
   final List<String> metadata;
 
-  /// `true` if this field is declared in a superclass rather than the current
-  /// class. Used to annotate overridden members in generated proxies.
+  /// `true` if this field is supplied by the generated superclass proxy.
+  ///
+  /// Fields introduced by unannotated intermediate classes are generated
+  /// locally because the proxy only extends the nearest annotated superclass.
   final bool isInherited;
 
   /// Returns `true` if the corresponding class field is nullable.
@@ -87,8 +90,8 @@ class ConstructorParameterInfo {
     return 'type:$type name:$name fieldAnnotation:$fieldAnnotation nullable:$nullable';
   }
 
-  /// Determines whether [fieldName] is declared on a superclass of
-  /// [classElement].
+  /// Determines whether [fieldName] is inherited through the generated proxy
+  /// superclass.
   static bool _isInherited(
     String fieldName,
     ClassElement classElement,
@@ -96,22 +99,18 @@ class ConstructorParameterInfo {
   ) {
     if (classElement.getField(fieldName) != null) return false;
 
-    if (annotatedSuper != null) {
-      if (annotatedSuper.getField(fieldName) != null) return true;
-      for (final type in annotatedSuper.allSupertypes) {
-        if (type.element.getField(fieldName) != null) {
-          return true;
-        }
-      }
+    final declaredAboveClass = InheritanceTraversal.declaresField(
+      classElement,
+      fieldName,
+      includeSelf: false,
+    );
+    if (!declaredAboveClass) {
       return false;
     }
 
-    for (final type in classElement.allSupertypes) {
-      if (type.element.getField(fieldName) != null) {
-        return true;
-      }
-    }
-    return false;
+    if (annotatedSuper == null) return true;
+
+    return InheritanceTraversal.declaresField(annotatedSuper, fieldName);
   }
 
   /// Returns full type name including namespace for all nested type arguments.

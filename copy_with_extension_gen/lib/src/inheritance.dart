@@ -19,6 +19,106 @@ import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
  * strategy in the future.
  */
 
+const _copyWithChecker = TypeChecker.typeNamed(CopyWith);
+
+/// One class reached while walking a class `extends` chain.
+///
+/// [element] is normalized so typedef aliases point at their underlying class,
+/// while [type] preserves the original instantiated type used to reach it.
+class InheritanceStep {
+  const InheritanceStep({required this.type, required this.element});
+
+  /// The instantiated type from the class hierarchy.
+  final InterfaceType type;
+
+  /// The class element represented by [type], with aliases unwrapped.
+  final ClassElement element;
+}
+
+/// Normalized helpers for walking class inheritance.
+///
+/// These APIs deliberately follow only the superclass chain. Interfaces and
+/// mixins are not generated proxy ancestors, so callers that make proxy
+/// decisions should not inspect `allSupertypes` directly. This is intentionally
+/// narrower than `ClassFieldLookup`, which resolves actual field elements
+/// across the full interface surface for constructor and metadata handling.
+class InheritanceTraversal {
+  const InheritanceTraversal._();
+
+  /// Returns [classElement] followed by each superclass in order.
+  static List<InheritanceStep> selfAndAncestorsOf(ClassElement classElement) {
+    return _walk(classElement.thisType);
+  }
+
+  /// Returns each superclass of [classElement] in order.
+  static List<InheritanceStep> ancestorsOf(ClassElement classElement) {
+    return _walk(classElement.supertype);
+  }
+
+  /// Returns the first field named [fieldName] in [classElement]'s superclass
+  /// chain, optionally including [classElement] itself.
+  static FieldElement? findField(
+    ClassElement classElement,
+    String fieldName, {
+    bool includeSelf = true,
+  }) {
+    final steps =
+        includeSelf
+            ? selfAndAncestorsOf(classElement)
+            : ancestorsOf(classElement);
+    for (final step in steps) {
+      final field = step.element.getField(fieldName);
+      if (field is FieldElement) {
+        return field;
+      }
+    }
+    return null;
+  }
+
+  /// Returns `true` when [fieldName] is declared anywhere in the selected
+  /// class chain.
+  static bool declaresField(
+    ClassElement classElement,
+    String fieldName, {
+    bool includeSelf = true,
+  }) {
+    return findField(classElement, fieldName, includeSelf: includeSelf) != null;
+  }
+
+  static List<InheritanceStep> _walk(InterfaceType? startType) {
+    final steps = <InheritanceStep>[];
+    final visited = <ClassElement>{};
+    var currentType = startType;
+
+    while (currentType != null) {
+      final element = _normalizedClassElement(currentType);
+      if (element == null || !visited.add(element)) {
+        break;
+      }
+
+      steps.add(InheritanceStep(type: currentType, element: element));
+      // Advance through the instantiated type so generic substitutions from
+      // intermediate classes and aliases are preserved in later steps.
+      currentType = currentType.superclass;
+    }
+
+    return steps;
+  }
+
+  static ClassElement? _normalizedClassElement(InterfaceType type) {
+    final alias = type.alias;
+    if (alias != null) {
+      final aliased = alias.element.aliasedType.element;
+      if (aliased is ClassElement) {
+        return aliased;
+      }
+    }
+
+    final element = type.element;
+    return element is ClassElement ? element : null;
+  }
+}
+
 /// Details about a superclass annotated with `@CopyWith`.
 ///
 /// This object bundles the information necessary for proxy inheritance
@@ -90,24 +190,14 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(
   ClassElement classElement,
   Settings settings,
 ) {
-  const checker = TypeChecker.typeNamed(CopyWith);
   final library = classElement.library;
-  var supertype = classElement.supertype;
-  while (supertype != null) {
-    var element = supertype.element;
-    final alias = supertype.alias;
-    if (alias != null) {
-      final aliased = alias.element.aliasedType.element;
-      if (aliased is ClassElement) {
-        element = aliased;
-      }
-    }
-    if (element is ClassElement && checker.hasAnnotationOf(element)) {
+  for (final ancestor in InheritanceTraversal.ancestorsOf(classElement)) {
+    final element = ancestor.element;
+    if (_copyWithChecker.hasAnnotationOf(element)) {
       final name = element.displayName;
       final prefix = ElementUtils.libraryImportPrefix(library, element.library);
-      final annotation = checker.firstAnnotationOf(element);
+      final annotation = _copyWithChecker.firstAnnotationOf(element);
       if (annotation == null) {
-        supertype = supertype.superclass;
         continue;
       }
       final classAnnotation = AnnotationUtils.readClassAnnotation(
@@ -117,7 +207,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(
       return AnnotatedCopyWithSuper(
         name: name,
         prefix: prefix,
-        typeArguments: _resolveSuperTypeArguments(supertype, element),
+        typeArguments: _resolveSuperTypeArguments(ancestor.type, element),
         element: element,
         skipFields: classAnnotation.skipFields,
         copyWithNull: classAnnotation.copyWithNull,
@@ -126,7 +216,6 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(
         originLibrary: library,
       );
     }
-    supertype = supertype.superclass;
   }
   return null;
 }
@@ -175,11 +264,18 @@ List<DartType> _resolveSuperTypeArguments(
 /// declaring class and returns `false` if no such ancestor is found.
 bool hasNonSkippedFieldProxy(FieldElement? field, Settings settings) {
   if (field == null) return false;
-  const checker = TypeChecker.typeNamed(CopyWith);
-  var current = field.enclosingElement as ClassElement?;
-  while (current != null) {
-    if (checker.hasAnnotationOf(current)) {
-      final annotation = checker.firstAnnotationOf(current);
+
+  final declaringClass = field.enclosingElement;
+  if (declaringClass is! ClassElement) {
+    return false;
+  }
+
+  for (final ancestor in InheritanceTraversal.selfAndAncestorsOf(
+    declaringClass,
+  )) {
+    final element = ancestor.element;
+    if (_copyWithChecker.hasAnnotationOf(element)) {
+      final annotation = _copyWithChecker.firstAnnotationOf(element);
       if (annotation == null) return !settings.skipFields;
       final classAnnotation = AnnotationUtils.readClassAnnotation(
         settings,
@@ -187,16 +283,6 @@ bool hasNonSkippedFieldProxy(FieldElement? field, Settings settings) {
       );
       return !classAnnotation.skipFields;
     }
-    final nextType = current.supertype;
-    var next = nextType?.element;
-    final alias = nextType?.alias;
-    if (alias != null) {
-      final aliased = alias.element.aliasedType.element;
-      if (aliased is ClassElement) {
-        next = aliased;
-      }
-    }
-    current = next is ClassElement ? next : null;
   }
   return false;
 }
