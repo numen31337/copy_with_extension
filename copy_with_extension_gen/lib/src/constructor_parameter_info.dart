@@ -8,6 +8,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
+import 'package:copy_with_extension_gen/src/field_resolution_config.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
@@ -172,20 +173,14 @@ class ConstructorParameterInfo {
 class ConstructorParameterInfoFactory {
   ConstructorParameterInfoFactory({
     required ClassElement classElement,
-    required ClassElement? annotatedSuper,
-    required Set<String> annotations,
-    required bool immutableDefault,
+    required FieldResolutionConfig config,
     ClassFieldLookupCache? fieldLookup,
   }) : _classElement = classElement,
-       _annotatedSuper = annotatedSuper,
-       _annotations = annotations,
-       _immutableDefault = immutableDefault,
+       _config = config,
        _fieldLookup = fieldLookup ?? ClassFieldLookupCache(classElement);
 
   final ClassElement _classElement;
-  final ClassElement? _annotatedSuper;
-  final Set<String> _annotations;
-  final bool _immutableDefault;
+  final FieldResolutionConfig _config;
   final ClassFieldLookupCache _fieldLookup;
   final Map<String, bool> _inheritedByFieldName = <String, bool>{};
 
@@ -199,8 +194,7 @@ class ConstructorParameterInfoFactory {
       parameter: element,
       fieldName: resolvedFieldName,
       fieldLookup: _fieldLookup,
-      annotations: _annotations,
-      immutableDefault: _immutableDefault,
+      config: _config,
       isInherited: _isInherited(resolvedFieldName),
     );
 
@@ -224,7 +218,7 @@ class ConstructorParameterInfoFactory {
       () => ConstructorParameterInfo._isInherited(
         fieldName,
         _classElement,
-        _annotatedSuper,
+        _config.annotatedSuper,
       ),
     );
   }
@@ -245,8 +239,7 @@ class _ResolvedConstructorField {
     required FormalParameterElement parameter,
     required String fieldName,
     required ClassFieldLookupCache fieldLookup,
-    required Set<String> annotations,
-    required bool immutableDefault,
+    required FieldResolutionConfig config,
     required bool isInherited,
   }) {
     final classField = fieldLookup.find(fieldName);
@@ -259,11 +252,11 @@ class _ResolvedConstructorField {
       fieldAnnotation: ConstructorParameterInfo._readFieldAnnotation(
         classField,
         fieldName,
-        immutableDefault,
+        config.immutableDefault,
       ),
       metadata: ConstructorParameterInfo._readFieldMetadata(
         classField,
-        annotations,
+        config.annotations,
       ),
       isInherited: isInherited,
       parameterNullable: ConstructorParameterInfo._isNullable(parameter.type),

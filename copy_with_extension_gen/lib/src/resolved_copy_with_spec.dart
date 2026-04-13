@@ -6,6 +6,7 @@ import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
+import 'package:copy_with_extension_gen/src/field_resolution_config.dart';
 import 'package:copy_with_extension_gen/src/inheritance.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
@@ -32,9 +33,11 @@ class CopyWithGenerationContext {
     final fields = await ConstructorUtils.constructorFields(
       classElement,
       annotation.constructor,
-      annotatedSuper: superInfo?.element,
-      annotations: settings.annotations,
-      immutableFields: annotation.immutableFields,
+      FieldResolutionConfig(
+        annotations: settings.annotations,
+        immutableDefault: annotation.immutableFields,
+        annotatedSuper: superInfo?.element,
+      ),
     );
     superInfo = await _validateSuperFields(superInfo, fields);
     _validateFieldNullability(fields);
@@ -103,8 +106,10 @@ class CopyWithGenerationContext {
       final resolvedSuperFields = await ConstructorUtils.constructorFields(
         superInfo.element,
         superInfo.constructor,
-        annotations: settings.annotations,
-        immutableFields: superInfo.immutableFields,
+        FieldResolutionConfig(
+          annotations: settings.annotations,
+          immutableDefault: superInfo.immutableFields,
+        ),
       );
       final superFields =
           resolvedSuperFields
@@ -160,26 +165,30 @@ class ResolvedCopyWithField {
   final ConstructorParameterInfo parameter;
   final bool delegatesToSuper;
 
-  String get constructorParamName => parameter.constructorParamName;
+  // ── Properties used by templates ──────────────────────────────────────
+
   String get name => parameter.name;
   bool get nullable => parameter.nullable;
   String get type => parameter.type;
-  bool get isPositioned => parameter.isPositioned;
-  List<String> get metadata => parameter.metadata;
-  FieldElement? get classField => parameter.classField;
-  bool get isInherited => parameter.isInherited;
   bool get isMutable => !parameter.fieldAnnotation.immutable;
   bool get supportsCopyWithNull => nullable && isMutable;
 
   /// Metadata annotations formatted as a prefix for generated parameters.
   /// Returns an empty string when there are no annotations.
-  String get annotationPrefix =>
-      metadata.isEmpty ? '' : '${metadata.join(' ')} ';
+  String get annotationPrefix {
+    final m = parameter.metadata;
+    return m.isEmpty ? '' : '${m.join(' ')} ';
+  }
 
   /// Constructor argument prefix for named parameters (e.g. `fieldName: `),
   /// empty for positional parameters.
   String get constructorArgPrefix =>
-      isPositioned ? '' : '$constructorParamName: ';
+      parameter.isPositioned ? '' : '${parameter.constructorParamName}: ';
+
+  // ── Properties used during resolution ─────────────────────────────────
+
+  FieldElement? get classField => parameter.classField;
+  bool get isInherited => parameter.isInherited;
 }
 
 /// Fully resolved generator input consumed by rendering templates.

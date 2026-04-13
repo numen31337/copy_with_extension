@@ -3,6 +3,7 @@ import 'package:analyzer/dart/element/element.dart'
 import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension_gen/src/constructor_field_resolver.dart';
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
+import 'package:copy_with_extension_gen/src/field_resolution_config.dart';
 import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
 
 /// Utilities related to constructors.
@@ -16,11 +17,9 @@ class ConstructorUtils {
   /// resolved or has no parameters.
   static Future<List<ConstructorParameterInfo>> constructorFields(
     ClassElement element,
-    String? constructor, {
-    ClassElement? annotatedSuper,
-    required Set<String> annotations,
-    required bool immutableFields,
-  }) async {
+    String? constructor,
+    FieldResolutionConfig config,
+  ) async {
     final targetConstructor =
         constructor != null
             ? element.getNamedConstructor(constructor)
@@ -65,9 +64,7 @@ class ConstructorUtils {
     );
     final parameterInfoFactory = ConstructorParameterInfoFactory(
       classElement: element,
-      annotatedSuper: annotatedSuper,
-      annotations: annotations,
-      immutableDefault: immutableFields,
+      config: config,
       fieldLookup: fieldLookup,
     );
     final fields = <ConstructorParameterInfo>[];
