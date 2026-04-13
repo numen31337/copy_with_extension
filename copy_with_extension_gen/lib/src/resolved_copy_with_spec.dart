@@ -245,7 +245,8 @@ class ResolvedCopyWithSpec {
       typeParametersNames: typeParametersNames,
       constructorName: constructorName,
       skipFields: skipFields,
-      generatesCopyWithNull: generatesCopyWithNull ??
+      generatesCopyWithNull:
+          generatesCopyWithNull ??
           categorized.uniqueNullableMutableFields.isNotEmpty,
       superInfo: null,
       shouldExtendSuperProxy: delegatedFieldNames.isNotEmpty,
@@ -295,8 +296,7 @@ class ResolvedCopyWithSpec {
 
   /// Proxy interface reference with type argument names (no bounds),
   /// e.g. `_$FooCWProxy<T>`.
-  String get proxyInterfaceRef =>
-      '$proxyInterfaceBaseName$typeParametersNames';
+  String get proxyInterfaceRef => '$proxyInterfaceBaseName$typeParametersNames';
 
   /// Proxy impl reference with type argument names (no bounds),
   /// e.g. `_$FooCWProxyImpl<T>`.

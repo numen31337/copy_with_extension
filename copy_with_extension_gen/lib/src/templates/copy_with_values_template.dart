@@ -41,10 +41,7 @@ ${addOverride ? '        @override\n' : ''}        ${spec.typeAnnotation} call($
 }
 
 /// Builds a single parameter for the `call` method signature.
-String _callParameter(
-  ResolvedCopyWithField field, {
-  required bool isAbstract,
-}) {
+String _callParameter(ResolvedCopyWithField field, {required bool isAbstract}) {
   if (isAbstract) {
     // When generating the interface, parameters are typed directly.
     return '${field.annotationPrefix}${field.type} ${field.name},';

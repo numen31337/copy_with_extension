@@ -12,9 +12,7 @@ String copyWithNullTemplate(ResolvedCopyWithSpec spec) {
   // Build the constructor parameter list. Only nullable and mutable fields
   // need a boolean flag to specify nullification.
   final nullConstructorInput = nullableMutableFields
-      .map(
-        (field) => '${field.annotationPrefix}bool ${field.name} = false,',
-      )
+      .map((field) => '${field.annotationPrefix}bool ${field.name} = false,')
       .join(' ');
 
   // Build the actual invocation parameters for the constructor call.
