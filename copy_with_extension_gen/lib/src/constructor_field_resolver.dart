@@ -29,7 +29,8 @@ class ConstructorFieldResolver {
   }) async {
     final bindingGraph = await ConstructorBindingGraph.build(constructor);
     final superConstructor = constructor.superConstructor;
-    final superClass = classElement.supertype?.element as ClassElement?;
+    final superElement = classElement.supertype?.element;
+    final superClass = superElement is ClassElement ? superElement : null;
 
     final superResolver =
         bindingGraph.hasSuperBindings &&

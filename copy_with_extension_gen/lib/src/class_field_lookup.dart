@@ -3,11 +3,19 @@
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, FieldElement;
 
-/// Utilities for resolving fields across a class inheritance hierarchy.
+/// Resolves fields across the full class type surface (superclasses, mixins,
+/// and interfaces via [ClassElement.allSupertypes]).
+///
+/// This is intentionally broader than [InheritanceTraversal], which only
+/// walks the direct superclass chain. Use this lookup for constructor
+/// parameter resolution and metadata, where a field may originate from a
+/// mixin or interface. Use [InheritanceTraversal] for proxy inheritance
+/// decisions that must follow the `extends` chain only.
 class ClassFieldLookup {
   const ClassFieldLookup._();
 
-  /// Returns [fieldName] from [classElement] or its supertypes.
+  /// Returns [fieldName] from [classElement] or any of its supertypes,
+  /// including mixins and interfaces.
   static FieldElement? find(ClassElement classElement, String fieldName) {
     final ownField = classElement.getField(fieldName);
     if (ownField is FieldElement) return ownField;
