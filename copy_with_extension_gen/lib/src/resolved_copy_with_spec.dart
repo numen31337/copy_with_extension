@@ -277,21 +277,30 @@ class ResolvedCopyWithSpec {
 
   // ── Generated type names ──────────────────────────────────────────────
 
-  /// Abstract proxy interface name, e.g. `_$FooCWProxy`.
+  /// Bare proxy interface name without type parameters, e.g. `_$FooCWProxy`.
+  /// Use for constructor declarations where type parameters are not allowed.
+  String get proxyInterfaceBaseName => '_\$${className}CWProxy';
+
+  /// Bare proxy implementation name without type parameters,
+  /// e.g. `_$FooCWProxyImpl`. Use for constructor declarations.
+  String get proxyImplBaseName => '_\$${className}CWProxyImpl';
+
+  /// Abstract proxy interface declaration, e.g. `_$FooCWProxy<T extends Foo>`.
   String get proxyInterfaceName =>
-      '_\$${className}CWProxy$typeParametersAnnotation';
+      '$proxyInterfaceBaseName$typeParametersAnnotation';
 
-  /// Concrete proxy implementation name, e.g. `_$FooCWProxyImpl`.
-  String get proxyImplName =>
-      '_\$${className}CWProxyImpl$typeParametersAnnotation';
+  /// Concrete proxy implementation declaration,
+  /// e.g. `_$FooCWProxyImpl<T extends Foo>`.
+  String get proxyImplName => '$proxyImplBaseName$typeParametersAnnotation';
 
-  /// Proxy interface name with only type parameter names (no bounds),
+  /// Proxy interface reference with type argument names (no bounds),
   /// e.g. `_$FooCWProxy<T>`.
-  String get proxyInterfaceRef => '_\$${className}CWProxy$typeParametersNames';
+  String get proxyInterfaceRef =>
+      '$proxyInterfaceBaseName$typeParametersNames';
 
-  /// Proxy impl name with only type parameter names (no bounds),
+  /// Proxy impl reference with type argument names (no bounds),
   /// e.g. `_$FooCWProxyImpl<T>`.
-  String get proxyImplRef => '_\$${className}CWProxyImpl$typeParametersNames';
+  String get proxyImplRef => '$proxyImplBaseName$typeParametersNames';
 
   /// Extension name, e.g. `$FooCopyWith` or `_$FooCopyWith` for private
   /// classes.
