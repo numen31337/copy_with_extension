@@ -40,7 +40,7 @@ String copyWithProxyTemplate(ResolvedCopyWithSpec spec) {
       .join('\n');
 
   return '''
-      abstract class _\$${spec.className}CWProxy${spec.typeParametersAnnotation}${spec.proxyExtendsClause} {
+      abstract class ${spec.proxyInterfaceName}${spec.proxyExtendsClause} {
         $nonNullableFunctionsInterface
 
         ${copyWithValuesTemplate(spec, isAbstract: true, addOverride: spec.shouldExtendSuperProxy)};
@@ -48,8 +48,8 @@ String copyWithProxyTemplate(ResolvedCopyWithSpec spec) {
 
       /// Callable proxy for `copyWith` functionality.
       /// Use as `instanceOf${spec.className}.copyWith(...)`${spec.skipFields ? '' : ' or call `instanceOf${spec.className}.copyWith.fieldName(value)` for a single field'}.
-      class _\$${spec.className}CWProxyImpl${spec.typeParametersAnnotation}${spec.proxyImplExtendsClause} implements _\$${spec.className}CWProxy${spec.typeParametersNames} {
-        const _\$${spec.className}CWProxyImpl(${spec.shouldExtendSuperProxy ? '${spec.typeAnnotation} super._value' : 'this._value'});
+      class ${spec.proxyImplName}${spec.proxyImplExtendsClause} implements ${spec.proxyInterfaceRef} {
+        const ${spec.proxyImplRef}(${spec.shouldExtendSuperProxy ? '${spec.typeAnnotation} super._value' : 'this._value'});
 
         ${spec.shouldExtendSuperProxy ? '@override\n        ${spec.typeAnnotation} get _value => super._value as ${spec.typeAnnotation};' : 'final ${spec.typeAnnotation} _value;'}
 

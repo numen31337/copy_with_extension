@@ -13,11 +13,11 @@ String extensionTemplate(ResolvedCopyWithSpec spec) {
   return '''
     $proxy
 
-    extension ${spec.privacyPrefix}\$${spec.className}CopyWith${spec.typeParametersAnnotation} on ${spec.className}${spec.typeParametersNames} {
+    extension ${spec.extensionName} on ${spec.typeAnnotation} {
       /// Returns a callable class used to build a new instance with modified fields.
       /// Example: `instanceOf${spec.className}.copyWith(...)`${spec.skipFields ? "" : " or `instanceOf${spec.className}.copyWith.fieldName(...)`"}.
       // ignore: library_private_types_in_public_api
-      _\$${spec.className}CWProxy${spec.typeParametersNames} get copyWith => _\$${spec.className}CWProxyImpl${spec.typeParametersNames}(this);
+      ${spec.proxyInterfaceRef} get copyWith => ${spec.proxyImplRef}(this);
 
       $copyWithNullBlock
     }

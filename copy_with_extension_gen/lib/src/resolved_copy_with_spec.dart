@@ -53,16 +53,10 @@ class CopyWithGenerationContext {
           ),
         )
         .toList(growable: false);
-    final uniqueFields = _uniqueFields(resolvedFields);
-    final uniqueMutableFields = uniqueFields
-        .where((field) => field.isMutable)
-        .toList(growable: false);
-    final uniqueNullableMutableFields = uniqueMutableFields
-        .where((field) => field.supportsCopyWithNull)
-        .toList(growable: false);
-    final proxyMethodFields = uniqueMutableFields
-        .where((field) => !annotation.skipFields || field.delegatesToSuper)
-        .toList(growable: false);
+    final categorized = _CategorizedFields.from(
+      resolvedFields,
+      skipFields: annotation.skipFields,
+    );
 
     return ResolvedCopyWithSpec._(
       isPrivate: classElement.isPrivate,
@@ -80,14 +74,14 @@ class CopyWithGenerationContext {
       generatesCopyWithNull:
           annotation.copyWithNull ||
           (superInfo?.copyWithNull == true &&
-              uniqueNullableMutableFields.isNotEmpty),
+              categorized.uniqueNullableMutableFields.isNotEmpty),
       superInfo: superInfo,
       shouldExtendSuperProxy: shouldExtendSuperProxy,
       constructorFields: resolvedFields,
-      uniqueFields: uniqueFields,
-      uniqueMutableFields: uniqueMutableFields,
-      uniqueNullableMutableFields: uniqueNullableMutableFields,
-      proxyMethodFields: proxyMethodFields,
+      uniqueFields: categorized.uniqueFields,
+      uniqueMutableFields: categorized.uniqueMutableFields,
+      uniqueNullableMutableFields: categorized.uniqueNullableMutableFields,
+      proxyMethodFields: categorized.proxyMethodFields,
     );
   }
 
@@ -239,13 +233,10 @@ class ResolvedCopyWithSpec {
           ),
         )
         .toList(growable: false);
-    final uniqueFields = _uniqueFields(resolvedFields);
-    final uniqueMutableFields = uniqueFields
-        .where((field) => field.isMutable)
-        .toList(growable: false);
-    final uniqueNullableMutableFields = uniqueMutableFields
-        .where((field) => field.supportsCopyWithNull)
-        .toList(growable: false);
+    final categorized = _CategorizedFields.from(
+      resolvedFields,
+      skipFields: skipFields,
+    );
 
     return ResolvedCopyWithSpec._(
       isPrivate: isPrivate,
@@ -254,17 +245,15 @@ class ResolvedCopyWithSpec {
       typeParametersNames: typeParametersNames,
       constructorName: constructorName,
       skipFields: skipFields,
-      generatesCopyWithNull:
-          generatesCopyWithNull ?? uniqueNullableMutableFields.isNotEmpty,
+      generatesCopyWithNull: generatesCopyWithNull ??
+          categorized.uniqueNullableMutableFields.isNotEmpty,
       superInfo: null,
       shouldExtendSuperProxy: delegatedFieldNames.isNotEmpty,
       constructorFields: resolvedFields,
-      uniqueFields: uniqueFields,
-      uniqueMutableFields: uniqueMutableFields,
-      uniqueNullableMutableFields: uniqueNullableMutableFields,
-      proxyMethodFields: uniqueMutableFields
-          .where((field) => !skipFields || field.delegatesToSuper)
-          .toList(growable: false),
+      uniqueFields: categorized.uniqueFields,
+      uniqueMutableFields: categorized.uniqueMutableFields,
+      uniqueNullableMutableFields: categorized.uniqueNullableMutableFields,
+      proxyMethodFields: categorized.proxyMethodFields,
     );
   }
 
@@ -286,6 +275,31 @@ class ResolvedCopyWithSpec {
   String get typeAnnotation => '$className$typeParametersNames';
   String get privacyPrefix => isPrivate ? '_' : '';
 
+  // ── Generated type names ──────────────────────────────────────────────
+
+  /// Abstract proxy interface name, e.g. `_$FooCWProxy`.
+  String get proxyInterfaceName =>
+      '_\$${className}CWProxy$typeParametersAnnotation';
+
+  /// Concrete proxy implementation name, e.g. `_$FooCWProxyImpl`.
+  String get proxyImplName =>
+      '_\$${className}CWProxyImpl$typeParametersAnnotation';
+
+  /// Proxy interface name with only type parameter names (no bounds),
+  /// e.g. `_$FooCWProxy<T>`.
+  String get proxyInterfaceRef => '_\$${className}CWProxy$typeParametersNames';
+
+  /// Proxy impl name with only type parameter names (no bounds),
+  /// e.g. `_$FooCWProxyImpl<T>`.
+  String get proxyImplRef => '_\$${className}CWProxyImpl$typeParametersNames';
+
+  /// Extension name, e.g. `$FooCopyWith` or `_$FooCopyWith` for private
+  /// classes.
+  String get extensionName =>
+      '${privacyPrefix}\$${className}CopyWith$typeParametersAnnotation';
+
+  // ── Inheritance clauses ───────────────────────────────────────────────
+
   String get proxyExtendsClause => _superExtendsClause('CWProxy');
   String get proxyImplExtendsClause => _superExtendsClause('CWProxyImpl');
 
@@ -299,12 +313,46 @@ class ResolvedCopyWithSpec {
   }
 }
 
-List<ResolvedCopyWithField> _uniqueFields(
-  Iterable<ResolvedCopyWithField> fields,
-) {
-  final uniqueFields = <String, ResolvedCopyWithField>{};
-  for (final field in fields) {
-    uniqueFields.putIfAbsent(field.name, () => field);
+/// Pre-computed field categories derived from a flat resolved field list.
+///
+/// Centralizes the unique/mutable/nullable/proxy filtering so the same
+/// logic is shared between [CopyWithGenerationContext.resolve] and
+/// [ResolvedCopyWithSpec.testing].
+class _CategorizedFields {
+  const _CategorizedFields._({
+    required this.uniqueFields,
+    required this.uniqueMutableFields,
+    required this.uniqueNullableMutableFields,
+    required this.proxyMethodFields,
+  });
+
+  factory _CategorizedFields.from(
+    List<ResolvedCopyWithField> resolvedFields, {
+    required bool skipFields,
+  }) {
+    final seen = <String, ResolvedCopyWithField>{};
+    for (final field in resolvedFields) {
+      seen.putIfAbsent(field.name, () => field);
+    }
+    final uniqueFields = seen.values.toList(growable: false);
+    final uniqueMutableFields = uniqueFields
+        .where((field) => field.isMutable)
+        .toList(growable: false);
+
+    return _CategorizedFields._(
+      uniqueFields: uniqueFields,
+      uniqueMutableFields: uniqueMutableFields,
+      uniqueNullableMutableFields: uniqueMutableFields
+          .where((field) => field.supportsCopyWithNull)
+          .toList(growable: false),
+      proxyMethodFields: uniqueMutableFields
+          .where((field) => !skipFields || field.delegatesToSuper)
+          .toList(growable: false),
+    );
   }
-  return uniqueFields.values.toList(growable: false);
+
+  final List<ResolvedCopyWithField> uniqueFields;
+  final List<ResolvedCopyWithField> uniqueMutableFields;
+  final List<ResolvedCopyWithField> uniqueNullableMutableFields;
+  final List<ResolvedCopyWithField> proxyMethodFields;
 }
