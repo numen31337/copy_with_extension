@@ -9,22 +9,18 @@ String copyWithNullTemplate(ResolvedCopyWithSpec spec) {
     return '';
   }
 
-  // Build the constructor parameter list. Only nullable and mutable fields need a boolean flag to specify nullification.
-  final nullConstructorInput = nullableMutableFields.fold<String>('', (
-    r,
-    field,
-  ) {
-    return '$r ${field.annotationPrefix}bool ${field.name} = false,';
-  });
+  // Build the constructor parameter list. Only nullable and mutable fields
+  // need a boolean flag to specify nullification.
+  final nullConstructorInput = nullableMutableFields
+      .map(
+        (field) => '${field.annotationPrefix}bool ${field.name} = false,',
+      )
+      .join(' ');
 
   // Build the actual invocation parameters for the constructor call.
-  final nullParamsInput = spec.constructorFields.fold<String>('', (r, field) {
-    if (!field.supportsCopyWithNull) {
-      return '$r ${field.constructorArgPrefix}${field.name},';
-    } else {
-      return '$r ${field.constructorArgPrefix}${field.name} == true ? null : this.${field.name},';
-    }
-  });
+  final nullParamsInput = spec.constructorFields
+      .map((field) => _constructorArg(field))
+      .join(' ');
 
   final description = '''
     /// Returns a copy of the object with the selected fields set to `null`.
@@ -41,4 +37,11 @@ String copyWithNullTemplate(ResolvedCopyWithSpec spec) {
         return ${ConstructorUtils.constructorFor(spec.typeAnnotation, spec.constructorName)}($nullParamsInput);
       }
      ''';
+}
+
+String _constructorArg(ResolvedCopyWithField field) {
+  if (!field.supportsCopyWithNull) {
+    return '${field.constructorArgPrefix}${field.name},';
+  }
+  return '${field.constructorArgPrefix}${field.name} == true ? null : this.${field.name},';
 }

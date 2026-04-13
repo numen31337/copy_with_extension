@@ -9,36 +9,17 @@ String copyWithValuesTemplate(
   required bool isAbstract,
   bool addOverride = false,
 }) {
-  // Build the parameter list for the generated function or abstract interface. Immutable fields are excluded entirely.
-  final constructorInput = spec.uniqueMutableFields.fold<String>('', (
-    r,
-    field,
-  ) {
-    if (isAbstract) {
-      // When generating the interface, parameters are typed directly.
-      return '$r\n    ${field.annotationPrefix}${field.type} ${field.name},';
-    } else {
-      // The implementation uses [\$CopyWithPlaceholder] to detect whether a parameter was passed.
-      return '$r\n    ${field.annotationPrefix}Object? ${field.name} = const \$CopyWithPlaceholder(),';
-    }
-  });
+  // Build the parameter list for the generated function or abstract interface.
+  // Immutable fields are excluded entirely.
+  final constructorInput = spec.uniqueMutableFields
+      .map((field) => _callParameter(field, isAbstract: isAbstract))
+      .join('\n    ');
 
-  // Generate the parameters passed to the constructor when creating the new instance. Immutable fields are copied from the existing value.
-  final paramsInput = spec.constructorFields.fold<String>('', (r, field) {
-    if (!field.isMutable) {
-      return '$r ${field.constructorArgPrefix}_value.${field.name},';
-    }
-    final placeholder =
-        field.nullable
-            ? '${field.name} == const \$CopyWithPlaceholder()'
-            : '${field.name} == const \$CopyWithPlaceholder() || ${field.name} == null';
-
-    return '''$r ${field.constructorArgPrefix}'''
-        '''$placeholder
-        ? _value.${field.name}
-        // ignore: cast_nullable_to_non_nullable
-        : ${field.name} as ${field.type},''';
-  });
+  // Generate the parameters passed to the constructor when creating the new
+  // instance. Immutable fields are copied from the existing value.
+  final paramsInput = spec.constructorFields
+      .map((field) => _constructorArg(field))
+      .join(' ');
 
   final constructorBody =
       isAbstract
@@ -57,4 +38,34 @@ String copyWithValuesTemplate(
         /// ```
 ${addOverride ? '        @override\n' : ''}        ${spec.typeAnnotation} call($callParameters) $constructorBody
     ''';
+}
+
+/// Builds a single parameter for the `call` method signature.
+String _callParameter(
+  ResolvedCopyWithField field, {
+  required bool isAbstract,
+}) {
+  if (isAbstract) {
+    // When generating the interface, parameters are typed directly.
+    return '${field.annotationPrefix}${field.type} ${field.name},';
+  }
+  // The implementation uses [$CopyWithPlaceholder] to detect whether a
+  // parameter was passed.
+  return '${field.annotationPrefix}Object? ${field.name} = const \$CopyWithPlaceholder(),';
+}
+
+/// Builds a single argument for the constructor invocation inside `call`.
+String _constructorArg(ResolvedCopyWithField field) {
+  if (!field.isMutable) {
+    return '${field.constructorArgPrefix}_value.${field.name},';
+  }
+  final placeholder =
+      field.nullable
+          ? '${field.name} == const \$CopyWithPlaceholder()'
+          : '${field.name} == const \$CopyWithPlaceholder() || ${field.name} == null';
+
+  return '''${field.constructorArgPrefix}$placeholder
+        ? _value.${field.name}
+        // ignore: cast_nullable_to_non_nullable
+        : ${field.name} as ${field.type},''';
 }
