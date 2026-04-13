@@ -14,18 +14,15 @@ String copyWithNullTemplate(ResolvedCopyWithSpec spec) {
     r,
     field,
   ) {
-    final annotations =
-        field.metadata.isEmpty ? '' : '${field.metadata.join(' ')} ';
-    return '$r ${annotations}bool ${field.name} = false,';
+    return '$r ${field.annotationPrefix}bool ${field.name} = false,';
   });
 
   // Build the actual invocation parameters for the constructor call.
   final nullParamsInput = spec.constructorFields.fold<String>('', (r, field) {
-    final prefix = field.isPositioned ? '' : '${field.constructorParamName}:';
     if (!field.supportsCopyWithNull) {
-      return '$r $prefix ${field.name},';
+      return '$r ${field.constructorArgPrefix}${field.name},';
     } else {
-      return '$r $prefix ${field.name} == true ? null : this.${field.name},';
+      return '$r ${field.constructorArgPrefix}${field.name} == true ? null : this.${field.name},';
     }
   });
 

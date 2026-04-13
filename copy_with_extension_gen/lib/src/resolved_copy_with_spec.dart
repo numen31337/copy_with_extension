@@ -176,6 +176,16 @@ class ResolvedCopyWithField {
   bool get isInherited => parameter.isInherited;
   bool get isMutable => !parameter.fieldAnnotation.immutable;
   bool get supportsCopyWithNull => nullable && isMutable;
+
+  /// Metadata annotations formatted as a prefix for generated parameters.
+  /// Returns an empty string when there are no annotations.
+  String get annotationPrefix =>
+      metadata.isEmpty ? '' : '${metadata.join(' ')} ';
+
+  /// Constructor argument prefix for named parameters (e.g. `fieldName: `),
+  /// empty for positional parameters.
+  String get constructorArgPrefix =>
+      isPositioned ? '' : '$constructorParamName: ';
 }
 
 /// Fully resolved generator input consumed by rendering templates.
@@ -276,21 +286,15 @@ class ResolvedCopyWithSpec {
   String get typeAnnotation => '$className$typeParametersNames';
   String get privacyPrefix => isPrivate ? '_' : '';
 
-  String get proxyExtendsClause {
-    final superInfo = this.superInfo;
-    if (!shouldExtendSuperProxy || superInfo == null) {
-      return '';
-    }
-    return ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxy'
-        '${superInfo.typeArgumentsAnnotation()}';
-  }
+  String get proxyExtendsClause => _superExtendsClause('CWProxy');
+  String get proxyImplExtendsClause => _superExtendsClause('CWProxyImpl');
 
-  String get proxyImplExtendsClause {
+  String _superExtendsClause(String suffix) {
     final superInfo = this.superInfo;
     if (!shouldExtendSuperProxy || superInfo == null) {
       return '';
     }
-    return ' extends ${superInfo.prefix}_\$${superInfo.name}CWProxyImpl'
+    return ' extends ${superInfo.prefix}_\$${superInfo.name}$suffix'
         '${superInfo.typeArgumentsAnnotation()}';
   }
 }

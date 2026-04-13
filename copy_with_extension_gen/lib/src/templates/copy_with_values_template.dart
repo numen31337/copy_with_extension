@@ -14,32 +14,27 @@ String copyWithValuesTemplate(
     r,
     field,
   ) {
-    final annotations =
-        field.metadata.isEmpty ? '' : '${field.metadata.join(' ')} ';
     if (isAbstract) {
       // When generating the interface, parameters are typed directly.
-      return '$r\n    $annotations${field.type} ${field.name},';
+      return '$r\n    ${field.annotationPrefix}${field.type} ${field.name},';
     } else {
       // The implementation uses [\$CopyWithPlaceholder] to detect whether a parameter was passed.
-      return '$r\n    ${annotations}Object? ${field.name} = const \$CopyWithPlaceholder(),';
+      return '$r\n    ${field.annotationPrefix}Object? ${field.name} = const \$CopyWithPlaceholder(),';
     }
   });
 
   // Generate the parameters passed to the constructor when creating the new instance. Immutable fields are copied from the existing value.
   final paramsInput = spec.constructorFields.fold<String>('', (r, field) {
     if (!field.isMutable) {
-      return field.isPositioned
-          ? '$r _value.${field.name},'
-          : '$r ${field.constructorParamName}: _value.${field.name},';
+      return '$r ${field.constructorArgPrefix}_value.${field.name},';
     }
     final placeholder =
         field.nullable
             ? '${field.name} == const \$CopyWithPlaceholder()'
             : '${field.name} == const \$CopyWithPlaceholder() || ${field.name} == null';
 
-    return '''$r ${field.isPositioned ? '' : '${field.constructorParamName}:'}'''
-        '''
-        $placeholder
+    return '''$r ${field.constructorArgPrefix}'''
+        '''$placeholder
         ? _value.${field.name}
         // ignore: cast_nullable_to_non_nullable
         : ${field.name} as ${field.type},''';

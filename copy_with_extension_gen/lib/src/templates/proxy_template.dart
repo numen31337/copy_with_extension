@@ -2,6 +2,13 @@ import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
 
 import 'copy_with_values_template.dart';
 
+/// Returns the shared method signature for a single proxy field setter.
+String _proxyMethodSignature(
+  ResolvedCopyWithField field,
+  String typeAnnotation,
+) =>
+    '$typeAnnotation ${field.name}(${field.annotationPrefix}${field.type} ${field.name})';
+
 /// Generates the proxy classes that power the `copyWith` API.
 /// The proxy exposes both a `call` method and individual field setters.
 String copyWithProxyTemplate(ResolvedCopyWithSpec spec) {
@@ -11,16 +18,13 @@ String copyWithProxyTemplate(ResolvedCopyWithSpec spec) {
   // duplicating logic.
   final nonNullableFunctions = spec.proxyMethodFields
       .map((field) {
-        final shouldDelegate = field.delegatesToSuper;
         final body =
-            shouldDelegate
+            field.delegatesToSuper
                 ? 'super.${field.name}(${field.name}) as ${spec.typeAnnotation}'
                 : 'call(${field.name}: ${field.name})';
-        final annotations =
-            field.metadata.isEmpty ? '' : '${field.metadata.join(' ')} ';
         return '''
     @override
-    ${spec.typeAnnotation} ${field.name}($annotations${field.type} ${field.name}) => $body;
+    ${_proxyMethodSignature(field, spec.typeAnnotation)} => $body;
     ''';
       })
       .join('\n');
@@ -28,10 +32,9 @@ String copyWithProxyTemplate(ResolvedCopyWithSpec spec) {
   // Interface used by the proxy class. It mirrors the proxy methods above.
   final nonNullableFunctionsInterface = spec.proxyMethodFields
       .map((field) {
-        final annotations =
-            field.metadata.isEmpty ? '' : '${field.metadata.join(' ')} ';
+        final override = field.delegatesToSuper ? '@override\n    ' : '';
         return '''
-    ${field.delegatesToSuper ? '@override\n    ' : ''}${spec.typeAnnotation} ${field.name}($annotations${field.type} ${field.name});
+    $override${_proxyMethodSignature(field, spec.typeAnnotation)};
     ''';
       })
       .join('\n');
