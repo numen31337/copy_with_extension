@@ -56,12 +56,8 @@ String _constructorArg(ResolvedCopyWithField field) {
   if (!field.isMutable) {
     return '${field.constructorArgPrefix}_value.${field.name},';
   }
-  final placeholder =
-      field.nullable
-          ? '${field.name} == const \$CopyWithPlaceholder()'
-          : '${field.name} == const \$CopyWithPlaceholder() || ${field.name} == null';
 
-  return '''${field.constructorArgPrefix}$placeholder
+  return '''${field.constructorArgPrefix}${field.placeholderCheckExpression}
         ? _value.${field.name}
         // ignore: cast_nullable_to_non_nullable
         : ${field.name} as ${field.type},''';

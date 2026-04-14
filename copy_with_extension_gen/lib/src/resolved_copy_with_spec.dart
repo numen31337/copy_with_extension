@@ -1,7 +1,7 @@
 // ignore_for_file: experimental_member_use
 
 import 'package:analyzer/dart/element/element.dart'
-    show ClassElement, ConstructorElement, FieldElement;
+    show ClassElement, FieldElement;
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
@@ -30,7 +30,7 @@ class CopyWithGenerationContext {
   /// a single spec consumed by the templates.
   Future<ResolvedCopyWithSpec> resolve() async {
     var superInfo = _findSuperInfo();
-    final fields = await ConstructorUtils.constructorFields(
+    final result = await ConstructorUtils.constructorFields(
       classElement,
       annotation.constructor,
       FieldResolutionConfig(
@@ -39,6 +39,7 @@ class CopyWithGenerationContext {
         annotatedSuper: superInfo?.element,
       ),
     );
+    final fields = result.fields;
     superInfo = await _validateSuperFields(superInfo, fields);
     _validateFieldNullability(fields);
 
@@ -72,7 +73,7 @@ class CopyWithGenerationContext {
         classElement,
         true,
       ),
-      constructorName: _resolveConstructorName(),
+      constructorName: result.constructorName,
       skipFields: annotation.skipFields,
       generatesCopyWithNull:
           annotation.copyWithNull ||
@@ -103,7 +104,7 @@ class CopyWithGenerationContext {
     List<ConstructorParameterInfo> fields,
   ) async {
     if (superInfo != null) {
-      final resolvedSuperFields = await ConstructorUtils.constructorFields(
+      final superResult = await ConstructorUtils.constructorFields(
         superInfo.element,
         superInfo.constructor,
         FieldResolutionConfig(
@@ -111,11 +112,10 @@ class CopyWithGenerationContext {
           immutableDefault: superInfo.immutableFields,
         ),
       );
-      final superFields =
-          resolvedSuperFields
-              .where((field) => !field.fieldAnnotation.immutable)
-              .map((field) => field.name)
-              .toSet();
+      final superFields = superResult.fields
+          .where((field) => !field.fieldAnnotation.immutable)
+          .map((field) => field.name)
+          .toSet();
       final fieldNames = fields.map((field) => field.name).toSet();
       if (!fieldNames.containsAll(superFields)) {
         return null;
@@ -136,23 +136,6 @@ class CopyWithGenerationContext {
       }
     }
   }
-
-  String? _resolveConstructorName() {
-    final targetConstructor =
-        annotation.constructor != null
-            ? classElement.getNamedConstructor(annotation.constructor!)
-            : classElement.unnamedConstructor;
-    if (targetConstructor is! ConstructorElement) {
-      return annotation.constructor;
-    }
-
-    final resolved = ConstructorUtils.resolveRedirects(
-      classElement,
-      targetConstructor,
-    );
-    final name = resolved.name;
-    return name == 'new' ? null : name;
-  }
 }
 
 /// Resolved field model used by the templates.
@@ -172,6 +155,14 @@ class ResolvedCopyWithField {
   String get type => parameter.type;
   bool get isMutable => !parameter.fieldAnnotation.immutable;
   bool get supportsCopyWithNull => nullable && isMutable;
+
+  /// The conditional expression that tests whether the parameter was
+  /// explicitly supplied by the caller. Non-nullable fields include an
+  /// additional `|| $name == null` guard so that passing `null` for a
+  /// non-nullable parameter is treated as "not supplied".
+  String get placeholderCheckExpression => nullable
+      ? '$name == const \$CopyWithPlaceholder()'
+      : '$name == const \$CopyWithPlaceholder() || $name == null';
 
   /// Metadata annotations formatted as a prefix for generated parameters.
   /// Returns an empty string when there are no annotations.

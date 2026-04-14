@@ -15,7 +15,7 @@ class ConstructorUtils {
   ///
   /// Will throw an [InvalidGenerationSourceError] if the constructor cannot be
   /// resolved or has no parameters.
-  static Future<List<ConstructorParameterInfo>> constructorFields(
+  static Future<ConstructorFieldsResult> constructorFields(
     ClassElement element,
     String? constructor,
     FieldResolutionConfig config,
@@ -41,6 +41,8 @@ class ConstructorUtils {
     }
 
     final resolvedConstructor = resolveRedirects(element, targetConstructor);
+    final resolvedName = resolvedConstructor.name;
+    final constructorName = resolvedName == 'new' ? null : resolvedName;
     final parameters = resolvedConstructor.formalParameters;
     if (parameters.isEmpty) {
       final className = element.displayName;
@@ -99,7 +101,10 @@ class ConstructorUtils {
       }
     }
 
-    return fields;
+    return ConstructorFieldsResult(
+      fields: fields,
+      constructorName: constructorName,
+    );
   }
 
   static Never _throwUnresolvedFieldParameter(
@@ -143,4 +148,21 @@ class ConstructorUtils {
     String typeAnnotation,
     String? namedConstructor,
   ) => "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
+}
+
+/// Result of [ConstructorUtils.constructorFields], bundling the resolved
+/// constructor name alongside the parameter info list.
+class ConstructorFieldsResult {
+  const ConstructorFieldsResult({
+    required this.fields,
+    required this.constructorName,
+  });
+
+  /// Resolved constructor parameters participating in `copyWith` generation.
+  final List<ConstructorParameterInfo> fields;
+
+  /// The resolved constructor name, or `null` for the unnamed constructor.
+  /// Redirect chains are already followed; the `'new'` sentinel is normalized
+  /// to `null`.
+  final String? constructorName;
 }
