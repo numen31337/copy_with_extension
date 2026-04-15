@@ -67,105 +67,6 @@ class ConstructorParameterInfo {
   String toString() {
     return 'type:$type name:$name fieldAnnotation:$fieldAnnotation nullable:$nullable';
   }
-
-  /// Determines whether [fieldName] is inherited through the generated proxy
-  /// superclass.
-  static bool _isInherited(
-    String fieldName,
-    ClassElement classElement,
-    ClassElement? annotatedSuper,
-  ) {
-    if (classElement.getField(fieldName) != null) return false;
-
-    final declaredAboveClass = InheritanceTraversal.declaresField(
-      classElement,
-      fieldName,
-      includeSelf: false,
-    );
-    if (!declaredAboveClass) {
-      return false;
-    }
-
-    if (annotatedSuper == null) return true;
-
-    return InheritanceTraversal.declaresField(annotatedSuper, fieldName);
-  }
-
-  /// Returns full type name including namespace for all nested type arguments.
-  static String _fullTypeName(FormalParameterElement element) {
-    final library = element.library;
-    if (library is! LibraryElement) {
-      return element.type.getDisplayString();
-    }
-
-    return ElementUtils.typeNameWithPrefix(library, element.type);
-  }
-
-  /// Restores the `CopyWithField` annotation provided by the user.
-  static CopyWithFieldAnnotation _readFieldAnnotation(
-    FieldElement? fieldElement,
-    String fieldName,
-    bool immutableDefault,
-  ) {
-    final defaults = CopyWithFieldAnnotation.defaults(
-      immutable: immutableDefault,
-    );
-
-    final isPrivate = fieldName.startsWith('_');
-    if (isPrivate) {
-      // Treat private fields as immutable to avoid generating `copyWith`
-      // parameters starting with an underscore. Using such parameters in a
-      // public method results in analyzer errors.
-      return const CopyWithFieldAnnotation(immutable: true);
-    }
-
-    if (fieldElement == null) {
-      return defaults;
-    }
-
-    const checker = TypeChecker.typeNamed(CopyWithField);
-    final annotation = checker.firstAnnotationOf(fieldElement);
-    if (annotation is! DartObject) {
-      return defaults;
-    }
-
-    final reader = ConstantReader(annotation);
-    final immutable = reader.peek('immutable')?.boolValue;
-
-    return CopyWithFieldAnnotation(immutable: immutable ?? defaults.immutable);
-  }
-
-  static bool _isNullable(DartType type) {
-    return type.nullabilitySuffix != NullabilitySuffix.none ||
-        type is DynamicType;
-  }
-
-  /// Restores metadata annotations for [field] that need to be transferred to
-  /// generated parameters. Names in [annotations] are matched case-insensitively
-  /// so callers don't need to specify multiple variants.
-  static List<String> _readFieldMetadata(
-    FieldElement? field,
-    Set<String> annotations,
-  ) {
-    if (field == null || annotations.isEmpty) {
-      return const [];
-    }
-
-    return field.metadata.annotations
-        .where((annotation) {
-          final name = annotation.element?.name;
-          final enclosing = annotation.element?.enclosingElement?.name;
-          if (name == 'CopyWithField' || enclosing == 'CopyWithField') {
-            return false;
-          }
-          final nameLower = name?.toLowerCase();
-          final enclosingLower = enclosing?.toLowerCase();
-          return (nameLower != null && annotations.contains(nameLower)) ||
-              (enclosingLower != null && annotations.contains(enclosingLower));
-        })
-        .map((annotation) => annotation.toSource())
-        .toList();
-  }
 }
 
 /// Builds [ConstructorParameterInfo] instances while sharing per-generation
@@ -190,32 +91,30 @@ class ConstructorParameterInfoFactory {
     String? fieldName,
   }) {
     final resolvedFieldName = fieldName ?? element.displayName;
-    final resolved = _ResolvedConstructorField.from(
-      parameter: element,
-      fieldName: resolvedFieldName,
-      fieldLookup: _fieldLookup,
-      config: _config,
-      isInherited: _isInherited(resolvedFieldName),
-    );
+    final classField = _fieldLookup.find(resolvedFieldName);
 
     return ConstructorParameterInfo._(
       constructorParamName: element.displayName,
       name: resolvedFieldName,
-      nullable: resolved.parameterNullable,
-      type: resolved.parameterType,
-      fieldAnnotation: resolved.fieldAnnotation,
+      nullable: _isNullable(element.type),
+      type: _fullTypeName(element),
+      fieldAnnotation: _readFieldAnnotation(
+        classField,
+        resolvedFieldName,
+        _config.immutableDefault,
+      ),
       isPositioned: isPositioned,
-      classField: resolved.classField,
-      classFieldNullable: resolved.classFieldNullable,
-      metadata: resolved.metadata,
-      isInherited: resolved.isInherited,
+      classField: classField,
+      classFieldNullable: classField != null && _isNullable(classField.type),
+      metadata: _readFieldMetadata(classField, _config.annotations),
+      isInherited: _isInheritedCached(resolvedFieldName),
     );
   }
 
-  bool _isInherited(String fieldName) {
+  bool _isInheritedCached(String fieldName) {
     return _inheritedByFieldName.putIfAbsent(
       fieldName,
-      () => ConstructorParameterInfo._isInherited(
+      () => _isFieldInherited(
         fieldName,
         _classElement,
         _config.annotatedSuper,
@@ -224,51 +123,101 @@ class ConstructorParameterInfoFactory {
   }
 }
 
-class _ResolvedConstructorField {
-  const _ResolvedConstructorField({
-    required this.classField,
-    required this.classFieldNullable,
-    required this.fieldAnnotation,
-    required this.metadata,
-    required this.isInherited,
-    required this.parameterNullable,
-    required this.parameterType,
-  });
+/// Determines whether [fieldName] is inherited through the generated proxy
+/// superclass.
+bool _isFieldInherited(
+  String fieldName,
+  ClassElement classElement,
+  ClassElement? annotatedSuper,
+) {
+  if (classElement.getField(fieldName) != null) return false;
 
-  factory _ResolvedConstructorField.from({
-    required FormalParameterElement parameter,
-    required String fieldName,
-    required ClassFieldLookupCache fieldLookup,
-    required FieldResolutionConfig config,
-    required bool isInherited,
-  }) {
-    final classField = fieldLookup.find(fieldName);
-
-    return _ResolvedConstructorField(
-      classField: classField,
-      classFieldNullable:
-          classField != null &&
-          ConstructorParameterInfo._isNullable(classField.type),
-      fieldAnnotation: ConstructorParameterInfo._readFieldAnnotation(
-        classField,
-        fieldName,
-        config.immutableDefault,
-      ),
-      metadata: ConstructorParameterInfo._readFieldMetadata(
-        classField,
-        config.annotations,
-      ),
-      isInherited: isInherited,
-      parameterNullable: ConstructorParameterInfo._isNullable(parameter.type),
-      parameterType: ConstructorParameterInfo._fullTypeName(parameter),
-    );
+  final declaredAboveClass = InheritanceTraversal.declaresField(
+    classElement,
+    fieldName,
+    includeSelf: false,
+  );
+  if (!declaredAboveClass) {
+    return false;
   }
 
-  final FieldElement? classField;
-  final bool classFieldNullable;
-  final CopyWithFieldAnnotation fieldAnnotation;
-  final List<String> metadata;
-  final bool isInherited;
-  final bool parameterNullable;
-  final String parameterType;
+  if (annotatedSuper == null) return true;
+
+  return InheritanceTraversal.declaresField(annotatedSuper, fieldName);
+}
+
+/// Returns full type name including namespace for all nested type arguments.
+String _fullTypeName(FormalParameterElement element) {
+  final library = element.library;
+  if (library is! LibraryElement) {
+    return element.type.getDisplayString();
+  }
+
+  return ElementUtils.typeNameWithPrefix(library, element.type);
+}
+
+/// Restores the `CopyWithField` annotation provided by the user.
+CopyWithFieldAnnotation _readFieldAnnotation(
+  FieldElement? fieldElement,
+  String fieldName,
+  bool immutableDefault,
+) {
+  final defaults = CopyWithFieldAnnotation.defaults(
+    immutable: immutableDefault,
+  );
+
+  final isPrivate = fieldName.startsWith('_');
+  if (isPrivate) {
+    // Treat private fields as immutable to avoid generating `copyWith`
+    // parameters starting with an underscore. Using such parameters in a
+    // public method results in analyzer errors.
+    return const CopyWithFieldAnnotation(immutable: true);
+  }
+
+  if (fieldElement == null) {
+    return defaults;
+  }
+
+  const checker = TypeChecker.typeNamed(CopyWithField);
+  final annotation = checker.firstAnnotationOf(fieldElement);
+  if (annotation is! DartObject) {
+    return defaults;
+  }
+
+  final reader = ConstantReader(annotation);
+  final immutable = reader.peek('immutable')?.boolValue;
+
+  return CopyWithFieldAnnotation(immutable: immutable ?? defaults.immutable);
+}
+
+bool _isNullable(DartType type) {
+  return type.nullabilitySuffix != NullabilitySuffix.none ||
+      type is DynamicType;
+}
+
+/// Restores metadata annotations for [field] that need to be transferred to
+/// generated parameters. Names in [annotations] are matched case-insensitively
+/// so callers don't need to specify multiple variants.
+List<String> _readFieldMetadata(
+  FieldElement? field,
+  Set<String> annotations,
+) {
+  if (field == null || annotations.isEmpty) {
+    return const [];
+  }
+
+  return field.metadata.annotations
+      .where((annotation) {
+        final name = annotation.element?.name;
+        final enclosing = annotation.element?.enclosingElement?.name;
+        if (name == 'CopyWithField' || enclosing == 'CopyWithField') {
+          return false;
+        }
+        final nameLower = name?.toLowerCase();
+        final enclosingLower = enclosing?.toLowerCase();
+        return (nameLower != null && annotations.contains(nameLower)) ||
+            (enclosingLower != null && annotations.contains(enclosingLower));
+      })
+      .map((annotation) => annotation.toSource())
+      .toList();
 }

@@ -2,9 +2,9 @@ import 'package:analyzer/dart/element/element.dart' show ClassElement;
 
 /// Configuration for resolving constructor parameters into field metadata.
 ///
-/// Bundles the settings that flow together through [ConstructorUtils],
-/// [ConstructorParameterInfoFactory], and [_ResolvedConstructorField] so
-/// callers pass a single object instead of threading individual parameters.
+/// Bundles the settings that flow together through `ConstructorUtils` and
+/// `ConstructorParameterInfoFactory` so callers pass a single object instead
+/// of threading individual parameters.
 class FieldResolutionConfig {
   const FieldResolutionConfig({
     required this.annotations,
