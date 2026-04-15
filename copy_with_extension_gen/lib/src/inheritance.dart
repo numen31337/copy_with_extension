@@ -5,6 +5,7 @@ import 'package:analyzer/dart/element/element.dart'
 import 'package:analyzer/dart/element/type.dart' show DartType, InterfaceType;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/annotation_utils.dart';
+import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
@@ -130,10 +131,7 @@ class AnnotatedCopyWithSuper {
     required this.prefix,
     required this.typeArguments,
     required this.element,
-    required this.skipFields,
-    required this.copyWithNull,
-    required this.constructor,
-    required this.immutableFields,
+    required this.annotation,
     required this.originLibrary,
   });
 
@@ -149,18 +147,8 @@ class AnnotatedCopyWithSuper {
   /// The element for the superclass, used for field lookups.
   final ClassElement element;
 
-  /// Whether the superclass suppressed field-specific methods using
-  /// `skipFields: true`.
-  final bool skipFields;
-
-  /// Whether the superclass enables `copyWithNull` generation.
-  final bool copyWithNull;
-
-  /// Named constructor used by the superclass, if any.
-  final String? constructor;
-
-  /// Whether fields are immutable by default in the superclass.
-  final bool immutableFields;
+  /// The parsed `@CopyWith` annotation values declared on the superclass.
+  final CopyWithAnnotation annotation;
 
   /// Library in which the subclass is defined. Needed to resolve import
   /// prefixes when rendering [typeArguments].
@@ -209,10 +197,7 @@ AnnotatedCopyWithSuper? findAnnotatedSuper(
         prefix: prefix,
         typeArguments: _resolveSuperTypeArguments(ancestor.type, element),
         element: element,
-        skipFields: classAnnotation.skipFields,
-        copyWithNull: classAnnotation.copyWithNull,
-        constructor: classAnnotation.constructor,
-        immutableFields: classAnnotation.immutableFields,
+        annotation: classAnnotation,
         originLibrary: library,
       );
     }

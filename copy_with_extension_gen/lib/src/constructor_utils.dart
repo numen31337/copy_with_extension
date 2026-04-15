@@ -140,14 +140,6 @@ class ConstructorUtils {
     }
     return current;
   }
-
-  /// Returns constructor for the given type and optional named constructor
-  /// name. E.g. `TestConstructor` or `TestConstructor._private` when `_private`
-  /// constructor name is provided.
-  static String constructorFor(
-    String typeAnnotation,
-    String? namedConstructor,
-  ) => "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
 }
 
 /// Result of [ConstructorUtils.constructorFields], bundling the resolved

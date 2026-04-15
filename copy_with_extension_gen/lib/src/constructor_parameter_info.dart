@@ -114,11 +114,7 @@ class ConstructorParameterInfoFactory {
   bool _isInheritedCached(String fieldName) {
     return _inheritedByFieldName.putIfAbsent(
       fieldName,
-      () => _isFieldInherited(
-        fieldName,
-        _classElement,
-        _config.annotatedSuper,
-      ),
+      () => _isFieldInherited(fieldName, _classElement, _config.annotatedSuper),
     );
   }
 }
@@ -198,10 +194,7 @@ bool _isNullable(DartType type) {
 /// Restores metadata annotations for [field] that need to be transferred to
 /// generated parameters. Names in [annotations] are matched case-insensitively
 /// so callers don't need to specify multiple variants.
-List<String> _readFieldMetadata(
-  FieldElement? field,
-  Set<String> annotations,
-) {
+List<String> _readFieldMetadata(FieldElement? field, Set<String> annotations) {
   if (field == null || annotations.isEmpty) {
     return const [];
   }

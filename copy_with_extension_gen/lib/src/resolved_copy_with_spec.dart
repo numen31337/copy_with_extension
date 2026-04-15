@@ -1,7 +1,6 @@
 // ignore_for_file: experimental_member_use
 
-import 'package:analyzer/dart/element/element.dart'
-    show ClassElement, FieldElement;
+import 'package:analyzer/dart/element/element.dart' show ClassElement;
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
@@ -48,8 +47,8 @@ class CopyWithGenerationContext {
         superInfo.element.library == superInfo.originLibrary;
     final resolvedFields = fields
         .map(
-          (field) => ResolvedCopyWithField(
-            parameter: field,
+          (field) => ResolvedCopyWithField.from(
+            field,
             delegatesToSuper:
                 shouldExtendSuperProxy &&
                 field.isInherited &&
@@ -77,7 +76,7 @@ class CopyWithGenerationContext {
       skipFields: annotation.skipFields,
       generatesCopyWithNull:
           annotation.copyWithNull ||
-          (superInfo?.copyWithNull == true &&
+          (superInfo?.annotation.copyWithNull == true &&
               categorized.uniqueNullableMutableFields.isNotEmpty),
       superInfo: superInfo,
       shouldExtendSuperProxy: shouldExtendSuperProxy,
@@ -106,16 +105,17 @@ class CopyWithGenerationContext {
     if (superInfo != null) {
       final superResult = await ConstructorUtils.constructorFields(
         superInfo.element,
-        superInfo.constructor,
+        superInfo.annotation.constructor,
         FieldResolutionConfig(
           annotations: settings.annotations,
-          immutableDefault: superInfo.immutableFields,
+          immutableDefault: superInfo.annotation.immutableFields,
         ),
       );
-      final superFields = superResult.fields
-          .where((field) => !field.fieldAnnotation.immutable)
-          .map((field) => field.name)
-          .toSet();
+      final superFields =
+          superResult.fields
+              .where((field) => !field.fieldAnnotation.immutable)
+              .map((field) => field.name)
+              .toSet();
       final fieldNames = fields.map((field) => field.name).toSet();
       if (!fieldNames.containsAll(superFields)) {
         return null;
@@ -139,47 +139,69 @@ class CopyWithGenerationContext {
 }
 
 /// Resolved field model used by the templates.
+///
+/// Built from a [ConstructorParameterInfo] plus a spec-level [delegatesToSuper]
+/// flag. Stores only the data the spec actually exposes; resolution-only
+/// details (like the class field element) stay on [ConstructorParameterInfo].
 class ResolvedCopyWithField {
-  const ResolvedCopyWithField({
-    required this.parameter,
+  const ResolvedCopyWithField._({
+    required this.name,
+    required this.type,
+    required this.nullable,
+    required this.isMutable,
+    required this.isPositioned,
+    required this.constructorParamName,
+    required this.metadata,
     required this.delegatesToSuper,
   });
 
-  final ConstructorParameterInfo parameter;
+  /// Projects a [ConstructorParameterInfo] and its resolved super-delegation
+  /// flag into the spec-level view.
+  factory ResolvedCopyWithField.from(
+    ConstructorParameterInfo parameter, {
+    required bool delegatesToSuper,
+  }) {
+    return ResolvedCopyWithField._(
+      name: parameter.name,
+      type: parameter.type,
+      nullable: parameter.nullable,
+      isMutable: !parameter.fieldAnnotation.immutable,
+      isPositioned: parameter.isPositioned,
+      constructorParamName: parameter.constructorParamName,
+      metadata: parameter.metadata,
+      delegatesToSuper: delegatesToSuper,
+    );
+  }
+
+  final String name;
+  final String type;
+  final bool nullable;
+  final bool isMutable;
+  final bool isPositioned;
+  final String constructorParamName;
+  final List<String> metadata;
   final bool delegatesToSuper;
 
-  // ── Properties used by templates ──────────────────────────────────────
-
-  String get name => parameter.name;
-  bool get nullable => parameter.nullable;
-  String get type => parameter.type;
-  bool get isMutable => !parameter.fieldAnnotation.immutable;
   bool get supportsCopyWithNull => nullable && isMutable;
 
   /// The conditional expression that tests whether the parameter was
   /// explicitly supplied by the caller. Non-nullable fields include an
   /// additional `|| $name == null` guard so that passing `null` for a
   /// non-nullable parameter is treated as "not supplied".
-  String get placeholderCheckExpression => nullable
-      ? '$name == const \$CopyWithPlaceholder()'
-      : '$name == const \$CopyWithPlaceholder() || $name == null';
+  String get placeholderCheckExpression =>
+      nullable
+          ? '$name == const \$CopyWithPlaceholder()'
+          : '$name == const \$CopyWithPlaceholder() || $name == null';
 
   /// Metadata annotations formatted as a prefix for generated parameters.
   /// Returns an empty string when there are no annotations.
-  String get annotationPrefix {
-    final m = parameter.metadata;
-    return m.isEmpty ? '' : '${m.join(' ')} ';
-  }
+  String get annotationPrefix =>
+      metadata.isEmpty ? '' : '${metadata.join(' ')} ';
 
   /// Constructor argument prefix for named parameters (e.g. `fieldName: `),
   /// empty for positional parameters.
   String get constructorArgPrefix =>
-      parameter.isPositioned ? '' : '${parameter.constructorParamName}: ';
-
-  // ── Properties used during resolution ─────────────────────────────────
-
-  FieldElement? get classField => parameter.classField;
-  bool get isInherited => parameter.isInherited;
+      isPositioned ? '' : '$constructorParamName: ';
 }
 
 /// Fully resolved generator input consumed by rendering templates.
@@ -227,8 +249,8 @@ class ResolvedCopyWithSpec {
   }) {
     final resolvedFields = fields
         .map(
-          (field) => ResolvedCopyWithField(
-            parameter: field,
+          (field) => ResolvedCopyWithField.from(
+            field,
             delegatesToSuper: delegatedFieldNames.contains(field.name),
           ),
         )
@@ -275,6 +297,13 @@ class ResolvedCopyWithSpec {
 
   String get typeAnnotation => '$className$typeParametersNames';
   String get privacyPrefix => isPrivate ? '_' : '';
+
+  /// Fully qualified constructor invocation target, e.g. `Foo<T>` for the
+  /// unnamed constructor or `Foo<T>.named` for a named constructor.
+  String get constructorReference =>
+      constructorName == null
+          ? typeAnnotation
+          : '$typeAnnotation.$constructorName';
 
   // ── Generated type names ──────────────────────────────────────────────
 

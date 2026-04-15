@@ -1,4 +1,3 @@
-import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
 
 /// Generates the body of the `call` method used by the proxy.
@@ -24,7 +23,7 @@ String copyWithValuesTemplate(
   final constructorBody =
       isAbstract
           ? ''
-          : '{ return ${ConstructorUtils.constructorFor(spec.typeAnnotation, spec.constructorName)}($paramsInput); }';
+          : '{ return ${spec.constructorReference}($paramsInput); }';
   final callParameters =
       constructorInput.trim().isEmpty ? '' : '{$constructorInput}';
 

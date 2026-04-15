@@ -1,4 +1,3 @@
-import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
 
 /// Generates the `copyWithNull` method.
@@ -32,7 +31,7 @@ String copyWithNullTemplate(ResolvedCopyWithSpec spec) {
   return '''
       $description
       ${spec.typeAnnotation} copyWithNull({$nullConstructorInput}) {
-        return ${ConstructorUtils.constructorFor(spec.typeAnnotation, spec.constructorName)}($nullParamsInput);
+        return ${spec.constructorReference}($nullParamsInput);
       }
      ''';
 }
