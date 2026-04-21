@@ -204,6 +204,14 @@ enum ConstructorBindingComputation {
 
   /// The target is computed by an arbitrary expression and must not be treated
   /// as a field alias.
+  ///
+  /// Do not relax this back to "parameter is referenced in an initializer" as a
+  /// future compatibility shortcut. copyWith only has access to stored field
+  /// values, not to the original constructor arguments. For `super(a: b + 1)`,
+  /// mapping field `a` back to constructor parameter `b` would require an
+  /// inverse expression (`b = a - 1`). For `field = normalize(input)`, an
+  /// inverse may not exist. Supporting these cases safely needs explicit user
+  /// supplied mapping or inverse metadata, not identifier scraping.
   derivedExpression,
 }
 

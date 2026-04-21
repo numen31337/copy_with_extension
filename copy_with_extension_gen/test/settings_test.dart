@@ -111,6 +111,15 @@ class SameNameDerivedLocal {
   final int x;
 }
 
+int normalize(int value) => value.abs();
+
+@CopyWith()
+class RenamedFunctionDerivedLocal {
+  RenamedFunctionDerivedLocal({required int input}) : value = normalize(input);
+
+  final int value;
+}
+
 @CopyWith()
 class SameNameUnusedLocal {
   SameNameUnusedLocal({int? value}) : value = 0;
@@ -527,6 +536,37 @@ void main() {
             (error) => error.message,
             'message',
             contains('Constructor parameter "x" in class SameNameDerivedLocal'),
+          ),
+        ),
+      );
+    });
+
+    test('rejects derived renamed field initializers', () async {
+      final reader = await initializePackageLibraryReaderForDirectory(
+        'test',
+        'settings_test.dart',
+      );
+
+      await expectLater(
+        generateForElement(
+          CopyWithGenerator(
+            Settings(
+              copyWithNull: false,
+              skipFields: false,
+              immutableFields: false,
+            ),
+          ),
+          reader,
+          'RenamedFunctionDerivedLocal',
+        ),
+        throwsA(
+          isA<InvalidGenerationSourceError>().having(
+            (error) => error.message,
+            'message',
+            contains(
+              'Constructor parameter "input" in class '
+              'RenamedFunctionDerivedLocal',
+            ),
           ),
         ),
       );
