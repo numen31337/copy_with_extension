@@ -334,7 +334,7 @@ class ResolvedCopyWithSpec {
   /// Extension name, e.g. `$FooCopyWith` or `_$FooCopyWith` for private
   /// classes.
   String get extensionName =>
-      '${privacyPrefix}\$${className}CopyWith$typeParametersAnnotation';
+      '$privacyPrefix\$${className}CopyWith$typeParametersAnnotation';
 
   // ── Inheritance clauses ───────────────────────────────────────────────
 

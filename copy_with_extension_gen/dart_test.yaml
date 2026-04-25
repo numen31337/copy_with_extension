@@ -1,4 +1,3 @@
-# Keep package-local test runs from generating `.dart_tool/build` bootstrap
-# suites that are later discovered by workspace-root package-directory runs.
+# Keep package-local `dart test` runs on the source compiler.
 compilers:
   - source
