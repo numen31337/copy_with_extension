@@ -1,3 +1,5 @@
+// ignore_for_file: experimental_member_use
+
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, ConstructorElement;
 import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
