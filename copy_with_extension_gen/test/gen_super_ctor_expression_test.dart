@@ -10,8 +10,8 @@ class Base {
 }
 
 @CopyWith()
-class Derived extends Base {
-  Derived({required int b}) : super(a: b.abs());
+class RenamedDirectChild extends Base {
+  RenamedDirectChild({required int b}) : super(a: b);
 }
 
 @CopyWith()
@@ -21,30 +21,8 @@ class PosBase {
 }
 
 @CopyWith()
-class BinaryChild extends PosBase {
-  BinaryChild(int a) : super(a + 0);
-}
-
-int identity(int value) => value;
-
-@CopyWith()
-class FunctionChild extends PosBase {
-  FunctionChild(int a) : super(identity(a));
-}
-
-@CopyWith()
-class RenamedParamChild extends Base {
-  RenamedParamChild({required int b}) : super(a: b + 0);
-}
-
-@CopyWith()
-class RenamedFunctionChild extends Base {
-  RenamedFunctionChild({required int b}) : super(a: identity(b));
-}
-
-@CopyWith()
-class MultiParamChild extends Base {
-  MultiParamChild({required int b, required int c}) : super(a: (b + c) ~/ 2);
+class PositionalDirectChild extends PosBase {
+  PositionalDirectChild(super.a);
 }
 
 @CopyWith()
@@ -63,46 +41,18 @@ class FormItem extends BaseItem {
 }
 
 void main() {
-  test('copyWith handles super initializer property access', () {
-    final instance = Derived(b: 1);
+  test('copyWith handles direct renamed super initializer', () {
+    final instance = RenamedDirectChild(b: 1);
     final result = instance.copyWith(a: 2);
-    expect(result, isA<Derived>());
+    expect(result, isA<RenamedDirectChild>());
     expect(result.a, 2);
   });
 
-  test('copyWith handles binary expressions in super initializer', () {
-    final instance = BinaryChild(1);
+  test('copyWith handles direct positional super initializer', () {
+    final instance = PositionalDirectChild(1);
     final result = instance.copyWith(a: 2);
-    expect(result, isA<BinaryChild>());
+    expect(result, isA<PositionalDirectChild>());
     expect(result.a, 2);
-  });
-
-  test('copyWith handles function arguments in super initializer', () {
-    final instance = FunctionChild(1);
-    final result = instance.copyWith(a: 2);
-    expect(result, isA<FunctionChild>());
-    expect(result.a, 2);
-  });
-
-  test('copyWith handles expressions with renamed parameters', () {
-    final instance = RenamedParamChild(b: 1);
-    final result = instance.copyWith(a: 2);
-    expect(result, isA<RenamedParamChild>());
-    expect(result.a, 2);
-  });
-
-  test('copyWith handles function arguments with renamed parameters', () {
-    final instance = RenamedFunctionChild(b: 1);
-    final result = instance.copyWith(a: 2);
-    expect(result, isA<RenamedFunctionChild>());
-    expect(result.a, 2);
-  });
-
-  test('copyWith handles multiple parameters in super initializer', () {
-    final instance = MultiParamChild(b: 1, c: 3);
-    final result = instance.copyWith(a: 5);
-    expect(result, isA<MultiParamChild>());
-    expect(result.a, 5);
   });
 
   test('copyWith handles local fields used in super initializer', () {

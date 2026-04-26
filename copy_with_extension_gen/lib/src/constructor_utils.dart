@@ -1,7 +1,9 @@
 import 'package:analyzer/dart/element/element.dart'
-    show ClassElement, ConstructorElement;
+    show ClassElement, ConstructorElement, FormalParameterElement;
+import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension_gen/src/constructor_field_resolver.dart';
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
+import 'package:copy_with_extension_gen/src/field_resolution_config.dart';
 import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
 
 /// Utilities related to constructors.
@@ -13,13 +15,11 @@ class ConstructorUtils {
   ///
   /// Will throw an [InvalidGenerationSourceError] if the constructor cannot be
   /// resolved or has no parameters.
-  static List<ConstructorParameterInfo> constructorFields(
+  static Future<ConstructorFieldsResult> constructorFields(
     ClassElement element,
-    String? constructor, {
-    ClassElement? annotatedSuper,
-    required Set<String> annotations,
-    required bool immutableFields,
-  }) {
+    String? constructor,
+    FieldResolutionConfig config,
+  ) async {
     final targetConstructor =
         constructor != null
             ? element.getNamedConstructor(constructor)
@@ -41,6 +41,8 @@ class ConstructorUtils {
     }
 
     final resolvedConstructor = resolveRedirects(element, targetConstructor);
+    final resolvedName = resolvedConstructor.name;
+    final constructorName = resolvedName == 'new' ? null : resolvedName;
     final parameters = resolvedConstructor.formalParameters;
     if (parameters.isEmpty) {
       final className = element.displayName;
@@ -56,33 +58,66 @@ class ConstructorUtils {
         );
       }
     }
-    final resolver = ConstructorFieldResolver(element, resolvedConstructor);
+    final fieldLookup = ClassFieldLookupCache(element);
+    final resolver = await ConstructorFieldResolver.create(
+      element,
+      resolvedConstructor,
+      fieldLookup: fieldLookup,
+    );
+    final parameterInfoFactory = ConstructorParameterInfoFactory(
+      classElement: element,
+      config: config,
+      fieldLookup: fieldLookup,
+    );
     final fields = <ConstructorParameterInfo>[];
 
     for (final parameter in parameters) {
       final paramName = parameter.displayName;
       final fieldName = resolver.resolve(paramName);
+      if (fieldName == null) {
+        if (resolver.hasBindingEvidence(paramName) ||
+            parameter.isRequired ||
+            fieldLookup.exists(paramName)) {
+          _throwUnresolvedFieldParameter(element, parameter);
+        }
+        continue;
+      }
 
-      final field = ConstructorParameterInfo(
+      final field = parameterInfoFactory.create(
         parameter,
-        element,
         isPositioned: parameter.isPositional,
-        annotatedSuper: annotatedSuper,
         fieldName: fieldName,
-        annotations: annotations,
-        immutableDefault: immutableFields,
       );
 
       final classField = field.classField;
       final isAccessible =
           classField != null &&
           (!classField.isPrivate || classField.library == element.library);
+      if (!isAccessible && parameter.isRequired) {
+        _throwUnresolvedFieldParameter(element, parameter);
+      }
       if (isAccessible) {
         fields.add(field);
       }
     }
 
-    return fields;
+    return ConstructorFieldsResult(
+      fields: fields,
+      constructorName: constructorName,
+    );
+  }
+
+  static Never _throwUnresolvedFieldParameter(
+    ClassElement element,
+    FormalParameterElement parameter,
+  ) {
+    throw InvalidGenerationSourceError(
+      'Constructor parameter "${parameter.displayName}" in class '
+      '${element.displayName} could not be resolved to exactly one accessible '
+      'class field. copyWith generation requires constructor parameters that '
+      'set fields to map directly to one field.',
+      element: parameter,
+    );
   }
 
   /// Follows redirecting or factory constructors until the final generative
@@ -105,12 +140,21 @@ class ConstructorUtils {
     }
     return current;
   }
+}
 
-  /// Returns constructor for the given type and optional named constructor
-  /// name. E.g. `TestConstructor` or `TestConstructor._private` when `_private`
-  /// constructor name is provided.
-  static String constructorFor(
-    String typeAnnotation,
-    String? namedConstructor,
-  ) => "$typeAnnotation${namedConstructor == null ? "" : ".$namedConstructor"}";
+/// Result of [ConstructorUtils.constructorFields], bundling the resolved
+/// constructor name alongside the parameter info list.
+class ConstructorFieldsResult {
+  const ConstructorFieldsResult({
+    required this.fields,
+    required this.constructorName,
+  });
+
+  /// Resolved constructor parameters participating in `copyWith` generation.
+  final List<ConstructorParameterInfo> fields;
+
+  /// The resolved constructor name, or `null` for the unnamed constructor.
+  /// Redirect chains are already followed; the `'new'` sentinel is normalized
+  /// to `null`.
+  final String? constructorName;
 }

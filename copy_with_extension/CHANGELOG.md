@@ -1,3 +1,8 @@
+## 15.0.0
+* **BREAKING** Constructor parameter resolution now requires an alias-safe binding. Parameters used only in derived initializer expressions, such as `super(a: b + 1)` or `field = normalize(input)`, are rejected instead of being treated as direct field aliases. The previous behavior was unsound because `copyWith` only has stored field values, not original constructor arguments or inverse logic for computed values.
+* Refactor internal implementation structure to improve maintainability and prepare future changes.
+* Relax the `analyzer` constraint to `>=8.1.1 <14.0.0`.
+
 ## 14.0.0
 * Raise the minimum Dart SDK to `^3.7.0`.
 * Expand `analyzer` compatibility to `>=8.1.1 <13.0.0`.

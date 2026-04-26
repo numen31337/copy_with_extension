@@ -1,0 +1,3 @@
+# Keep package-local `dart test` runs on the source compiler.
+compilers:
+  - source

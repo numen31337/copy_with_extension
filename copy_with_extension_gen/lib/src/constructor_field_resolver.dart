@@ -1,151 +1,124 @@
 // ignore_for_file: experimental_member_use
 
-import 'package:analyzer/dart/analysis/results.dart' show ParsedLibraryResult;
-import 'package:analyzer/dart/ast/ast.dart'
-    show
-        ConstructorDeclaration,
-        ConstructorFieldInitializer,
-        Expression,
-        NamedExpression,
-        SimpleIdentifier,
-        SuperConstructorInvocation;
-import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
 import 'package:analyzer/dart/element/element.dart'
     show ClassElement, ConstructorElement;
-import 'package:build/build.dart' show log;
 import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
+import 'package:copy_with_extension_gen/src/constructor_binding_graph.dart';
 
 /// Resolves constructor parameters to the corresponding class fields.
 ///
-/// This resolver handles parameters that are forwarded to fields with
-/// different names as well as parameters forwarded to a super constructor.
+/// Resolution is driven by an explicit binding graph so direct assignment,
+/// derived expressions, and super-constructor forwarding remain distinct.
 class ConstructorFieldResolver {
-  ConstructorFieldResolver(this._classElement, this._constructor)
-    : _forwardMap = _buildForwardMap(_constructor);
+  ConstructorFieldResolver._(
+    this._classElement,
+    this._bindingGraph, {
+    required ClassFieldLookupCache fieldLookup,
+    ConstructorFieldResolver? superResolver,
+  }) : _fieldLookup = fieldLookup,
+       _superResolver = superResolver;
 
   final ClassElement _classElement;
-  final ConstructorElement _constructor;
-  final Map<String, String> _forwardMap;
+  final ConstructorBindingGraph _bindingGraph;
+  final ClassFieldLookupCache _fieldLookup;
+  final ConstructorFieldResolver? _superResolver;
+
+  /// Creates a resolver for [constructor] and its super-constructor chain.
+  static Future<ConstructorFieldResolver> create(
+    ClassElement classElement,
+    ConstructorElement constructor, {
+    ClassFieldLookupCache? fieldLookup,
+  }) async {
+    final bindingGraph = await ConstructorBindingGraph.build(constructor);
+    final superConstructor = constructor.superConstructor;
+    final superElement = classElement.supertype?.element;
+    final superClass = superElement is ClassElement ? superElement : null;
+
+    final superResolver =
+        bindingGraph.hasSuperBindings &&
+                superConstructor != null &&
+                superClass != null
+            ? await ConstructorFieldResolver.create(
+              superClass,
+              superConstructor,
+            )
+            : null;
+
+    return ConstructorFieldResolver._(
+      classElement,
+      bindingGraph,
+      fieldLookup: fieldLookup ?? ClassFieldLookupCache(classElement),
+      superResolver: superResolver,
+    );
+  }
 
   /// Returns the field name for [paramName] or `null` if the field
   /// cannot be resolved on this class or any annotated superclasses.
   String? resolve(String paramName) {
-    if (ClassFieldLookup.exists(_classElement, paramName)) {
+    final hasSameNameField =
+        _bindingGraph.isResolved
+            ? _classElement.getField(paramName) != null
+            : _fieldLookup.exists(paramName);
+    final canUseSameNameField =
+        (!_bindingGraph.isResolved &&
+            !_bindingGraph.hasBindingsForSource(paramName)) ||
+        _bindingGraph.hasOnlySameNameFieldBindingsForSource(paramName);
+    if (hasSameNameField && canUseSameNameField) {
       return paramName;
     }
-    final forwarded = _forwardMap[paramName];
-    if (forwarded == null) {
+
+    final localField = _resolveLocalField(paramName);
+    final superField = _resolveSuperField(paramName);
+
+    if (localField != null && superField != null) {
       return null;
     }
-    if (ClassFieldLookup.exists(_classElement, forwarded)) {
-      return forwarded;
-    }
-    final superConstructor = _constructor.superConstructor;
-    final superClass = _classElement.supertype?.element as ClassElement?;
-    if (superConstructor == null || superClass == null) {
-      return null;
-    }
-    return ConstructorFieldResolver(
-      superClass,
-      superConstructor,
-    ).resolve(forwarded);
+
+    return localField ?? superField;
   }
 
-  static Map<String, String> _buildForwardMap(ConstructorElement constructor) {
-    final library = constructor.library;
-    final session = library.session;
+  /// Whether binding analysis found constructor initializer evidence for
+  /// [paramName].
+  bool hasBindingEvidence(String paramName) {
+    return _bindingGraph.hasBindingsForSource(paramName);
+  }
 
-    final parsed = session.getParsedLibraryByElement(library);
-    if (parsed is! ParsedLibraryResult) {
-      log.warning(
-        'copy_with_extension_gen: Unable to parse library for '
-        '${constructor.enclosingElement.displayName}; constructor field '
-        'forwarding will be limited.',
-      );
-      return const {};
-    }
-    final declaration = parsed.getFragmentDeclaration(
-      constructor.firstFragment,
-    );
-    final node = declaration?.node;
-    if (node is! ConstructorDeclaration) {
-      log.warning(
-        'copy_with_extension_gen: Unable to resolve constructor node for '
-        '${constructor.enclosingElement.displayName}.${constructor.displayName}; '
-        'constructor field forwarding will be limited.',
-      );
-      return const {};
-    }
+  String? _resolveLocalField(String paramName) {
+    String? resolvedField;
 
-    final parameterNames =
-        constructor.formalParameters.map((p) => p.displayName).toSet();
-
-    final result = <String, String>{};
-
-    for (final initializer in node.initializers) {
-      if (initializer is ConstructorFieldInitializer) {
-        final fieldName = initializer.fieldName.name;
-        final paramNames = _extractForwardedParameters(
-          initializer.expression,
-          parameterNames,
-        );
-        for (final paramName in paramNames) {
-          result[paramName] = fieldName;
-        }
-      } else if (initializer is SuperConstructorInvocation) {
-        var positionalIndex = 0;
-        final superParams =
-            constructor.superConstructor?.formalParameters ?? const [];
-        for (final arg in initializer.argumentList.arguments) {
-          if (arg is NamedExpression) {
-            final paramNames = _extractForwardedParameters(
-              arg.expression,
-              parameterNames,
-            );
-            for (final paramName in paramNames) {
-              result[paramName] = arg.name.label.name;
-            }
-          } else {
-            final paramNames = _extractForwardedParameters(arg, parameterNames);
-            if (positionalIndex < superParams.length) {
-              final superParam = superParams[positionalIndex];
-              for (final paramName in paramNames) {
-                result[paramName] = superParam.displayName;
-              }
-            }
-            positionalIndex++;
-          }
-        }
+    for (final fieldName in _bindingGraph.fieldTargetsForSource(paramName)) {
+      if (_classElement.getField(fieldName) == null) {
+        continue;
       }
+      if (resolvedField != null && resolvedField != fieldName) {
+        return null;
+      }
+      resolvedField = fieldName;
     }
 
-    return result;
+    return resolvedField;
   }
 
-  /// Returns the names of all parameters from [parameterNames] referenced
-  /// within [expression].
-  static Iterable<String> _extractForwardedParameters(
-    Expression expression,
-    Set<String> parameterNames,
-  ) {
-    final visitor = _ForwardedParameterVisitor(parameterNames);
-    expression.accept(visitor);
-    return visitor.names;
-  }
-}
-
-class _ForwardedParameterVisitor extends RecursiveAstVisitor<void> {
-  _ForwardedParameterVisitor(this.candidates);
-
-  final Set<String> candidates;
-  final Set<String> names = {};
-
-  @override
-  void visitSimpleIdentifier(SimpleIdentifier node) {
-    final name = node.name;
-    if (candidates.contains(name)) {
-      names.add(name);
+  String? _resolveSuperField(String paramName) {
+    final superResolver = _superResolver;
+    if (superResolver == null) {
+      return null;
     }
-    super.visitSimpleIdentifier(node);
+
+    String? resolvedField;
+    for (final superParameter in _bindingGraph.superTargetsForSource(
+      paramName,
+    )) {
+      final candidate = superResolver.resolve(superParameter);
+      if (candidate == null) {
+        continue;
+      }
+      if (resolvedField != null && resolvedField != candidate) {
+        return null;
+      }
+      resolvedField = candidate;
+    }
+
+    return resolvedField;
   }
 }

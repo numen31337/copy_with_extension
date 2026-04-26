@@ -2,9 +2,9 @@ import 'dart:typed_data' as ns;
 
 import 'package:analyzer/dart/element/element.dart' show ClassElement;
 import 'package:copy_with_extension_gen/src/element_utils.dart';
-import 'package:source_gen_test/source_gen_test.dart'
-    show initializeLibraryReaderForDirectory;
 import 'package:test/test.dart';
+
+import 'helpers/source_gen_test_utils.dart';
 
 typedef LocalAlias<T> = List<T>;
 typedef LocalScalar = int;
@@ -28,7 +28,7 @@ void main() {
     late ClassElement fixture;
 
     setUpAll(() async {
-      final reader = await initializeLibraryReaderForDirectory(
+      final reader = await initializePackageLibraryReaderForDirectory(
         'test',
         'element_utils_test.dart',
       );

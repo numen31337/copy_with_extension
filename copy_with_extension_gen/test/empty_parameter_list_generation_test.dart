@@ -1,9 +1,10 @@
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
-import 'package:source_gen_test/source_gen_test.dart'
-    show generateForElement, initializeLibraryReaderForDirectory;
+import 'package:source_gen_test/source_gen_test.dart' show generateForElement;
 import 'package:test/test.dart';
+
+import 'helpers/source_gen_test_utils.dart';
 
 @CopyWith(immutableFields: true, copyWithNull: true)
 class Issue125Fixture {
@@ -24,7 +25,7 @@ class AllImmutableFixture {
 
 void main() {
   Future<String> generateOutput(String target) async {
-    final reader = await initializeLibraryReaderForDirectory(
+    final reader = await initializePackageLibraryReaderForDirectory(
       'test',
       'empty_parameter_list_generation_test.dart',
     );

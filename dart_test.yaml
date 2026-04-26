@@ -1,0 +1,11 @@
+# Default root test runs should execute package source tests, not generated
+# build-runner bootstrap suites under `.dart_tool/build/generated`.
+#
+# If passing an explicit path from the repo root, use:
+#   dart test copy_with_extension_gen/test
+# `dart test copy_with_extension_gen` recursively scans `.dart_tool/build/generated`
+# and may discover stale `*_test.dart` bootstrap files.
+paths:
+  - copy_with_extension_gen/test
+compilers:
+  - source

@@ -1,56 +1,44 @@
-import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
-import 'package:copy_with_extension_gen/src/constructor_utils.dart';
-
-import 'field_utils.dart';
+import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
 
 /// Generates the `copyWithNull` method.
-String copyWithNullTemplate(
-  String typeAnnotation,
-  List<ConstructorParameterInfo> fields,
-  String? constructor,
-  bool skipFields,
-) {
-  final uniqueFields = uniqueConstructorFields(fields);
-  final nullableMutableFields =
-      uniqueFields
-          .where(
-            (element) => element.nullable && !element.fieldAnnotation.immutable,
-          )
-          .toList();
+String copyWithNullTemplate(ResolvedCopyWithSpec spec) {
+  final nullableMutableFields = spec.uniqueNullableMutableFields;
   // Return an empty string when the class has no nullable mutable fields.
   if (nullableMutableFields.isEmpty) {
     return '';
   }
 
-  // Build the constructor parameter list. Only nullable and mutable fields need a boolean flag to specify nullification.
-  final nullConstructorInput = nullableMutableFields.fold<String>('', (r, v) {
-    final annotations = v.metadata.isEmpty ? '' : '${v.metadata.join(' ')} ';
-    return '$r ${annotations}bool ${v.name} = false,';
-  });
+  // Build the constructor parameter list. Only nullable and mutable fields
+  // need a boolean flag to specify nullification.
+  final nullConstructorInput = nullableMutableFields
+      .map((field) => '${field.annotationPrefix}bool ${field.name} = false,')
+      .join(' ');
 
   // Build the actual invocation parameters for the constructor call.
-  final nullParamsInput = fields.fold<String>('', (r, v) {
-    final prefix = v.isPositioned ? '' : '${v.constructorParamName}:';
-    if (v.fieldAnnotation.immutable || !v.nullable) {
-      return '$r $prefix ${v.name},';
-    } else {
-      return '$r $prefix ${v.name} == true ? null : this.${v.name},';
-    }
-  });
+  final nullParamsInput = spec.constructorFields
+      .map((field) => _constructorArg(field))
+      .join(' ');
 
   final description = '''
     /// Returns a copy of the object with the selected fields set to `null`.
-    /// A flag set to `false` leaves the field unchanged. Prefer `copyWith(field: null)`${skipFields ? '' : ' or `copyWith.fieldName(null)` for single-field updates'}.
+    /// A flag set to `false` leaves the field unchanged. Prefer `copyWith(field: null)`${spec.skipFields ? '' : ' or `copyWith.fieldName(null)` for single-field updates'}.
     ///
     /// Example:
     /// ```dart
-    /// $typeAnnotation(...).copyWithNull(firstField: true, secondField: true)
+    /// ${spec.typeAnnotation}(...).copyWithNull(firstField: true, secondField: true)
     /// ```''';
 
   return '''
       $description
-      $typeAnnotation copyWithNull({$nullConstructorInput}) {
-        return ${ConstructorUtils.constructorFor(typeAnnotation, constructor)}($nullParamsInput);
+      ${spec.typeAnnotation} copyWithNull({$nullConstructorInput}) {
+        return ${spec.constructorReference}($nullParamsInput);
       }
      ''';
+}
+
+String _constructorArg(ResolvedCopyWithField field) {
+  if (!field.supportsCopyWithNull) {
+    return '${field.constructorArgPrefix}${field.name},';
+  }
+  return '${field.constructorArgPrefix}${field.name} == true ? null : this.${field.name},';
 }

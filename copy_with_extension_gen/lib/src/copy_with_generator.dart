@@ -1,15 +1,10 @@
 // ignore_for_file: experimental_member_use
 
-import 'package:analyzer/dart/element/element.dart'
-    show ClassElement, ConstructorElement, Element;
+import 'package:analyzer/dart/element/element.dart' show ClassElement, Element;
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/annotation_utils.dart';
-import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
-import 'package:copy_with_extension_gen/src/constructor_utils.dart';
-import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
-import 'package:copy_with_extension_gen/src/element_utils.dart';
-import 'package:copy_with_extension_gen/src/inheritance.dart';
+import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:copy_with_extension_gen/src/templates/extension_template.dart';
 import 'package:source_gen/source_gen.dart'
@@ -27,69 +22,24 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
   /// parameters and user provided settings, and returns the source code for
   /// the extension as a string.
   @override
-  String generateForAnnotatedElement(
+  Future<String> generateForAnnotatedElement(
     Element element,
     ConstantReader annotation,
     BuildStep buildStep,
-  ) {
+  ) async {
     final classElement = _expectClassElement(element);
     final classAnnotation = AnnotationUtils.readClassAnnotation(
       settings,
       annotation,
     );
-    final className = classElement.displayName;
-    var superInfo = _findSuperInfo(classElement, classAnnotation);
-    final fields = ConstructorUtils.constructorFields(
-      classElement,
-      classAnnotation.constructor,
-      annotatedSuper: superInfo?.element,
-      annotations: settings.annotations,
-      immutableFields: classAnnotation.immutableFields,
-    );
-    superInfo = _validateSuperFields(superInfo, fields);
-    _validateFieldNullability(fields, classElement);
+    final spec =
+        await CopyWithGenerationContext(
+          classElement: classElement,
+          annotation: classAnnotation,
+          settings: settings,
+        ).resolve();
 
-    final typeParametersAnnotation = ElementUtils.typeParametersString(
-      classElement,
-      false,
-    );
-    final typeParametersNames = ElementUtils.typeParametersString(
-      classElement,
-      true,
-    );
-
-    final generateCopyWithNull = _shouldGenerateCopyWithNull(
-      classAnnotation.copyWithNull,
-      superInfo,
-      fields,
-    );
-
-    var resolvedConstructorName = classAnnotation.constructor;
-    final targetConstructor =
-        classAnnotation.constructor != null
-            ? classElement.getNamedConstructor(classAnnotation.constructor!)
-            : classElement.unnamedConstructor;
-    if (targetConstructor is ConstructorElement) {
-      final resolved = ConstructorUtils.resolveRedirects(
-        classElement,
-        targetConstructor,
-      );
-      final name = resolved.name;
-      resolvedConstructorName = name == 'new' ? null : name;
-    }
-
-    return extensionTemplate(
-      isPrivate: classElement.isPrivate,
-      className: className,
-      typeParametersAnnotation: typeParametersAnnotation,
-      typeParametersNames: typeParametersNames,
-      fields: fields,
-      skipFields: classAnnotation.skipFields,
-      copyWithNull: generateCopyWithNull,
-      constructor: resolvedConstructorName,
-      settings: settings,
-      superInfo: superInfo,
-    );
+    return extensionTemplate(spec);
   }
 
   ClassElement _expectClassElement(Element element) {
@@ -100,67 +50,5 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       'The @CopyWith annotation is only supported on classes. "$element" is not a class.',
       element: element,
     );
-  }
-
-  AnnotatedCopyWithSuper? _findSuperInfo(
-    ClassElement element,
-    CopyWithAnnotation annotation,
-  ) {
-    var superInfo = findAnnotatedSuper(element, settings);
-    if (annotation.skipFields &&
-        superInfo != null &&
-        element.supertype?.element != superInfo.element) {
-      superInfo = null;
-    }
-    return superInfo;
-  }
-
-  AnnotatedCopyWithSuper? _validateSuperFields(
-    AnnotatedCopyWithSuper? superInfo,
-    List<ConstructorParameterInfo> fields,
-  ) {
-    if (superInfo != null) {
-      final superFields =
-          ConstructorUtils.constructorFields(
-                superInfo.element,
-                superInfo.constructor,
-                annotations: settings.annotations,
-                immutableFields: superInfo.immutableFields,
-              )
-              .where((f) => !f.fieldAnnotation.immutable)
-              .map((f) => f.name)
-              .toSet();
-      final fieldNames = fields.map((e) => e.name).toSet();
-      if (!fieldNames.containsAll(superFields)) {
-        return null;
-      }
-    }
-    return superInfo;
-  }
-
-  void _validateFieldNullability(
-    List<ConstructorParameterInfo> fields,
-    ClassElement classElement,
-  ) {
-    for (final field in fields) {
-      if (field.classField != null &&
-          field.nullable == false &&
-          field.classFieldNullable) {
-        throw InvalidGenerationSourceError(
-          'Constructor parameter "${field.name}" is non-nullable, but the corresponding class field is nullable. Make both nullable or both non-nullable.',
-          element: classElement,
-        );
-      }
-    }
-  }
-
-  bool _shouldGenerateCopyWithNull(
-    bool copyWithNull,
-    AnnotatedCopyWithSuper? superInfo,
-    List<ConstructorParameterInfo> fields,
-  ) {
-    if (copyWithNull) return true;
-    return superInfo?.copyWithNull == true &&
-        fields.any((f) => f.nullable && !f.fieldAnnotation.immutable);
   }
 }
