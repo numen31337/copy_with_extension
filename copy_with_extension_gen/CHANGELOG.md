@@ -1,3 +1,6 @@
+## 15.0.1
+* [Fix](https://github.com/numen31337/copy_with_extension/issues/131) Support analyzer 13 named argument AST changes.
+
 ## 15.0.0
 * **BREAKING** Constructor parameter resolution now requires an alias-safe binding. Parameters used only in derived initializer expressions, such as `super(a: b + 1)` or `field = normalize(input)`, are rejected instead of being treated as direct field aliases. The previous behavior was unsound because `copyWith` only has stored field values, not original constructor arguments or inverse logic for computed values.
 * Refactor internal implementation structure to improve maintainability and prepare future changes.
