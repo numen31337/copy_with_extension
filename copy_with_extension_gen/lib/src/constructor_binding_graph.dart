@@ -7,7 +7,6 @@ import 'package:analyzer/dart/ast/ast.dart'
         ConstructorDeclaration,
         ConstructorFieldInitializer,
         Expression,
-        NamedExpression,
         ParenthesizedExpression,
         SimpleIdentifier,
         SuperConstructorInvocation;
@@ -311,27 +310,71 @@ class _ConstructorBindingGraphBuilder {
         _constructor.superConstructor?.formalParameters ?? const [];
 
     for (final argument in initializer.argumentList.arguments) {
-      if (argument is NamedExpression) {
-        _recordBindings(
-          expressionAnalyzer,
-          target: SuperParameterBindingTarget(argument.name.label.name),
-          expression: argument.expression,
-        );
+      // Analyzer 13 split named arguments out of Expression; keep this path
+      // compatible with both NamedExpression and NamedArgument AST shapes.
+      final Object argumentNode = argument;
+      final parameter = _correspondingParameter(argumentNode);
+      final isNamed = parameter?.isNamed ?? argumentNode is! Expression;
+      final targetName =
+          isNamed
+              ? parameter?.displayName
+              : positionalIndex < superParameters.length
+              ? superParameters[positionalIndex].displayName
+              : null;
+      if (targetName == null) {
         continue;
       }
 
-      if (positionalIndex >= superParameters.length) {
-        continue;
-      }
-
-      final superParameter = superParameters[positionalIndex];
       _recordBindings(
         expressionAnalyzer,
-        target: SuperParameterBindingTarget(superParameter.displayName),
-        expression: argument,
+        target: SuperParameterBindingTarget(targetName),
+        expression: _argumentExpression(argumentNode, isNamed: isNamed),
       );
-      positionalIndex++;
+      if (!isNamed) {
+        positionalIndex++;
+      }
     }
+  }
+
+  FormalParameterElement? _correspondingParameter(Object argument) {
+    final dynamic dynamicArgument = argument;
+    final parameter = dynamicArgument.correspondingParameter;
+    if (parameter is FormalParameterElement) {
+      return parameter;
+    }
+    return null;
+  }
+
+  Expression _argumentExpression(Object argument, {required bool isNamed}) {
+    if (!isNamed && argument is Expression) {
+      return argument;
+    }
+
+    final dynamic dynamicArgument = argument;
+    if (isNamed) {
+      try {
+        final expression = dynamicArgument.expression;
+        if (expression is Expression) {
+          return expression;
+        }
+      } on NoSuchMethodError {
+        // Analyzer 13 replaced NamedExpression.expression with
+        // NamedArgument.argumentExpression.
+      }
+    }
+
+    try {
+      final expression = dynamicArgument.argumentExpression;
+      if (expression is Expression) {
+        return expression;
+      }
+    } on NoSuchMethodError {
+      // Analyzer 12 positional arguments are already Expression nodes.
+    }
+
+    throw StateError(
+      'Unsupported analyzer argument node: ${argument.runtimeType}',
+    );
   }
 
   void _recordBindings(
