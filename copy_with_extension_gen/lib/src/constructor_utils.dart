@@ -70,6 +70,12 @@ class ConstructorUtils {
       fieldLookup: fieldLookup,
     );
     final fields = <ConstructorParameterInfo>[];
+    // A positional parameter that was dropped because it doesn't bind to an
+    // accessible field. Generated invocations emit surviving fields positionally
+    // in order, so emitting any *later* positional argument would silently shift
+    // it into this gap. The next emitted positional must therefore throw instead
+    // of producing misaligned arguments.
+    FormalParameterElement? droppedPositional;
 
     for (final parameter in parameters) {
       final paramName = parameter.displayName;
@@ -79,6 +85,9 @@ class ConstructorUtils {
             parameter.isRequired ||
             fieldLookup.exists(paramName)) {
           _throwUnresolvedFieldParameter(element, parameter);
+        }
+        if (parameter.isPositional) {
+          droppedPositional ??= parameter;
         }
         continue;
       }
@@ -97,7 +106,12 @@ class ConstructorUtils {
         _throwUnresolvedFieldParameter(element, parameter);
       }
       if (isAccessible) {
+        if (parameter.isPositional && droppedPositional != null) {
+          _throwUnresolvedFieldParameter(element, droppedPositional);
+        }
         fields.add(field);
+      } else if (parameter.isPositional) {
+        droppedPositional ??= parameter;
       }
     }
 
