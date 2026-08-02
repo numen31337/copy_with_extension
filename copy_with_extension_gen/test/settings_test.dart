@@ -780,33 +780,36 @@ void main() {
       );
     });
 
-    test('rejects dropping a positional before a surviving positional', () async {
-      final reader = await initializePackageLibraryReaderForDirectory(
-        'test',
-        'settings_test.dart',
-      );
+    test(
+      'rejects dropping a positional before a surviving positional',
+      () async {
+        final reader = await initializePackageLibraryReaderForDirectory(
+          'test',
+          'settings_test.dart',
+        );
 
-      await expectLater(
-        generateForElement(
-          CopyWithGenerator(
-            Settings(
-              copyWithNull: false,
-              skipFields: false,
-              immutableFields: false,
+        await expectLater(
+          generateForElement(
+            CopyWithGenerator(
+              Settings(
+                copyWithNull: false,
+                skipFields: false,
+                immutableFields: false,
+              ),
+            ),
+            reader,
+            'PositionalShift',
+          ),
+          throwsA(
+            isA<InvalidGenerationSourceError>().having(
+              (error) => error.message,
+              'message',
+              contains('Constructor parameter "b" in class PositionalShift'),
             ),
           ),
-          reader,
-          'PositionalShift',
-        ),
-        throwsA(
-          isA<InvalidGenerationSourceError>().having(
-            (error) => error.message,
-            'message',
-            contains('Constructor parameter "b" in class PositionalShift'),
-          ),
-        ),
-      );
-    });
+        );
+      },
+    );
 
     test('allows dropping a trailing positional', () async {
       final reader = await initializePackageLibraryReaderForDirectory(

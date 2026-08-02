@@ -12,7 +12,11 @@ import 'package:analyzer/dart/ast/ast.dart'
         SuperConstructorInvocation;
 import 'package:analyzer/dart/ast/visitor.dart' show RecursiveAstVisitor;
 import 'package:analyzer/dart/element/element.dart'
-    show ConstructorElement, FormalParameterElement;
+    show
+        ConstructorElement,
+        FieldFormalParameterElement,
+        FormalParameterElement,
+        SuperFormalParameterElement;
 import 'package:build/build.dart' show log;
 
 /// Explicit constructor parameter bindings derived from initializer semantics.
@@ -276,7 +280,7 @@ class _ConstructorBindingGraphBuilder {
   void _recordFormalParameterBindings() {
     for (final parameter in _constructor.formalParameters) {
       final sourceParameter = parameter.displayName;
-      if (parameter.isInitializingFormal) {
+      if (parameter is FieldFormalParameterElement) {
         _bindingsBySource
             .putIfAbsent(sourceParameter, () => <ConstructorBinding>[])
             .add(
@@ -287,7 +291,7 @@ class _ConstructorBindingGraphBuilder {
               ),
             );
       }
-      if (parameter.isSuperFormal) {
+      if (parameter is SuperFormalParameterElement) {
         _bindingsBySource
             .putIfAbsent(sourceParameter, () => <ConstructorBinding>[])
             .add(

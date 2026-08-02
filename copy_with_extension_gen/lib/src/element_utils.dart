@@ -20,9 +20,10 @@ class ElementUtils {
   static String typeParametersString(ClassElement classElement, bool nameOnly) {
     final names = classElement.typeParameters
         .map(
-          (e) => nameOnly
-              ? e.displayName
-              : _typeParameterWithPrefix(classElement.library, e),
+          (e) =>
+              nameOnly
+                  ? e.displayName
+                  : _typeParameterWithPrefix(classElement.library, e),
         )
         .join(', ');
     return names.isNotEmpty ? '<$names>' : '';
