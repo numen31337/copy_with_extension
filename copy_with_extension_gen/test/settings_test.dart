@@ -193,6 +193,26 @@ class PositionalDerivedSuper extends PositionalDerivedSuperBase {
 }
 
 @CopyWith()
+class PositionalShift {
+  // `b` is a non-trailing optional positional with no field binding (the assert
+  // is not a field initializer), so it is dropped during resolution. Emitting
+  // `c` positionally afterwards would shift its value into `b`'s slot.
+  PositionalShift(this.a, [int? b, this.c]) : assert(b == null || b > 0);
+
+  final int a;
+  final int? c;
+}
+
+@CopyWith()
+class TrailingDroppedPositional {
+  // Only the *trailing* optional positional is dropped, so the surviving
+  // positionals keep their slots and generation succeeds.
+  TrailingDroppedPositional(this.a, [int? b]) : assert(b == null || b > 0);
+
+  final int a;
+}
+
+@CopyWith()
 abstract mixin class FactoryFallbackMixin {
   factory FactoryFallbackMixin({required int id}) = _FactoryFallbackMixinImpl;
 
@@ -758,6 +778,59 @@ void main() {
           ),
         ),
       );
+    });
+
+    test(
+      'rejects dropping a positional before a surviving positional',
+      () async {
+        final reader = await initializePackageLibraryReaderForDirectory(
+          'test',
+          'settings_test.dart',
+        );
+
+        await expectLater(
+          generateForElement(
+            CopyWithGenerator(
+              Settings(
+                copyWithNull: false,
+                skipFields: false,
+                immutableFields: false,
+              ),
+            ),
+            reader,
+            'PositionalShift',
+          ),
+          throwsA(
+            isA<InvalidGenerationSourceError>().having(
+              (error) => error.message,
+              'message',
+              contains('Constructor parameter "b" in class PositionalShift'),
+            ),
+          ),
+        );
+      },
+    );
+
+    test('allows dropping a trailing positional', () async {
+      final reader = await initializePackageLibraryReaderForDirectory(
+        'test',
+        'settings_test.dart',
+      );
+
+      final output = await generateForElement(
+        CopyWithGenerator(
+          Settings(
+            copyWithNull: false,
+            skipFields: false,
+            immutableFields: false,
+          ),
+        ),
+        reader,
+        'TrailingDroppedPositional',
+      );
+
+      expect(output, contains('a('));
+      expect(output, isNot(contains('b(')));
     });
 
     test('uses same-name fallback for factory constructors', () async {

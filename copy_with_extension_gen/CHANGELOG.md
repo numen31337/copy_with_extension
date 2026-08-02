@@ -1,3 +1,8 @@
+## 16.0.0
+* Expand `analyzer` compatibility to `>=8.1.1 <15.0.0`.
+* Fix silent argument shift when a non-trailing optional positional parameter is dropped from `copyWith` generation.
+* Preserve import prefixes on type-parameter bounds in generated proxies.
+
 ## 15.0.1
 * [Fix](https://github.com/numen31337/copy_with_extension/issues/131) Support analyzer 13 named argument AST changes.
 

@@ -19,7 +19,12 @@ class ElementUtils {
   /// `<T extends String, Y>`.
   static String typeParametersString(ClassElement classElement, bool nameOnly) {
     final names = classElement.typeParameters
-        .map((e) => nameOnly ? e.displayName : e.displayString())
+        .map(
+          (e) =>
+              nameOnly
+                  ? e.displayName
+                  : _typeParameterWithPrefix(classElement.library, e),
+        )
         .join(', ');
     return names.isNotEmpty ? '<$names>' : '';
   }
