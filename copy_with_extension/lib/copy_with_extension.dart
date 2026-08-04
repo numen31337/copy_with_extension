@@ -17,7 +17,7 @@ class CopyWith {
     this.immutableFields,
   });
 
-  /// Set `copyWithNull` to `true` if you want to use `copyWithNull` function that allows you to nullify the fields. E.g. `myInstance.copyWithNull(id: true, name: true)`. Default is `false`.
+  /// Set `copyWithNull` to `true` if you want to use `copyWithNull` function that allows you to nullify the fields. E.g. `myInstance.copyWithNull(id: true, name: true)`. Enable it on every subclass that needs it. Default is `false`.
   final bool? copyWithNull;
 
   /// Prevent the library from generating `copyWith` functions for individual fields e.g. `instance.copyWith.id("123")`, including inherited fields. If you want to use only copyWith(...) function. Default is `false`.

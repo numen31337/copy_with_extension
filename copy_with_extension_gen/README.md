@@ -16,8 +16,8 @@ myInstance.copyWithNull(fieldName: true, anotherField: true) // Nullify multiple
 ## Usage
 
 #### In your `pubspec.yaml` file
-- Add to `dependencies` section `copy_with_extension: ^13.0.0`
-- Add to `dev_dependencies` section `copy_with_extension_gen: ^13.0.0`
+- Add to `dependencies` section `copy_with_extension: ^17.0.0`
+- Add to `dev_dependencies` section `copy_with_extension_gen: ^17.0.0`
 - Add to `dev_dependencies` section `build_runner: ^2.10.0`
 - Set `environment` to at least Dart `3.7.0` version like so: `">=3.7.0 <4.0.0"`
 
@@ -29,12 +29,12 @@ environment:
 
 dependencies:
   ...
-  copy_with_extension: ^13.0.0
+  copy_with_extension: ^17.0.0
   
 dev_dependencies:
   ...
   build_runner: ^2.10.0
-  copy_with_extension_gen: ^13.0.0
+  copy_with_extension_gen: ^17.0.0
 ```
 
 #### Annotate your class with `CopyWith` annotation
@@ -132,7 +132,7 @@ class SimpleObject {
 
 Inherited fields are included in the generated `copyWith`. Annotation parameters apply only to the class they are written on and are not inherited — use `build.yaml` to configure them globally.
 
-Generated members are resolved from the static type of the receiver, and any member a subclass does not generate falls back to the superclass extension. This matters for `copyWithNull`: a subclass that does not enable it silently returns the superclass type and drops subclass fields. Generation fails with an explanatory error for the subclasses where `17.0.0` introduced that fallback, but it is not prevented in every inheritance shape. Enable `copyWithNull` on each subclass that needs it, or set `copy_with_null` globally in `build.yaml`.
+Generated members resolve from the static type of the receiver, and any member a subclass does not generate falls back to the superclass extension. This matters for `copyWithNull`: a subclass that does not enable it returns the superclass type and drops subclass fields. Generation fails with an explanatory error in most such cases, but not all — enable `copyWithNull` on every subclass that needs it, or set `copy_with_null` globally in `build.yaml`.
 
 #### `build.yaml` configuration
 
