@@ -200,17 +200,17 @@ void main() {
     },
   );
 
-  test(
-    'Superclass field methods return subclass type when subclass skips fields',
-    () {
-      final child = ChildWithSkip(1, extra: 'foo');
+  test('Subclass with skipFields exposes no field methods, only copyWith', () {
+    final child = ChildWithSkip(1, extra: 'foo');
 
-      final result = child.copyWith.value(2);
-      expect(result, isA<ChildWithSkip>());
-      expect(result.value, 2);
-      expect(result.extra, 'foo');
-    },
-  );
+    final result = child.copyWith(value: 2);
+    expect(result, isA<ChildWithSkip>());
+    expect(result.value, 2);
+    expect(result.extra, 'foo');
+
+    final dynamic proxy = child.copyWith;
+    expect(() => proxy.value(3), throwsNoSuchMethodError);
+  });
 
   test(
     'Subclass omitting optional super field does not inherit parent proxy',

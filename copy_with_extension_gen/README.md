@@ -117,7 +117,7 @@ class SimpleObjectPrivateConstructor {
 
 #### Skipping generation of `copyWith` functionality for individual fields
 
-Set `skipFields` to prevent the library from generating `copyWith` functions for individual fields (e.g. `instance.copyWith.id("123")`). Use this per class with `@CopyWith(skipFields: true)` or configure it globally via `build.yaml` if you only want the `copyWith(...)` method.
+Set `skipFields` to prevent the library from generating `copyWith` functions for individual fields (e.g. `instance.copyWith.id("123")`), including fields inherited from superclasses. Use this per class with `@CopyWith(skipFields: true)` or configure it globally via `build.yaml` if you only want the `copyWith(...)` method.
 ```dart
 @CopyWith(skipFields: true)
 class SimpleObject {
@@ -127,6 +127,10 @@ class SimpleObject {
   const SimpleObject({required this.id, this.intValue});
 }
 ```
+
+#### Inheritance
+
+Inherited fields are included in the generated `copyWith`. Annotation parameters (`copyWithNull`, `skipFields`, `immutableFields`) apply only to the class they are written on and are not inherited — use `build.yaml` to configure them globally. Note that `copyWith` is resolved from the static type of the receiver, so a variable typed as the superclass uses the superclass's extension.
 
 #### `build.yaml` configuration
 

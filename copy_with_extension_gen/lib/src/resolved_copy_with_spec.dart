@@ -6,7 +6,6 @@ import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:copy_with_extension_gen/src/field_resolution_config.dart';
-import 'package:copy_with_extension_gen/src/inheritance.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
 
@@ -25,36 +24,22 @@ class CopyWithGenerationContext {
   final CopyWithAnnotation annotation;
   final Settings settings;
 
-  /// Resolves constructor, inheritance, and per-field generation behavior into
-  /// a single spec consumed by the templates.
+  /// Resolves constructor and per-field generation behavior into a single
+  /// spec consumed by the templates.
   Future<ResolvedCopyWithSpec> resolve() async {
-    var superInfo = _findSuperInfo();
     final result = await ConstructorUtils.constructorFields(
       classElement,
       annotation.constructor,
       FieldResolutionConfig(
         annotations: settings.annotations,
         immutableDefault: annotation.immutableFields,
-        annotatedSuper: superInfo?.element,
       ),
     );
     final fields = result.fields;
-    superInfo = await _validateSuperFields(superInfo, fields);
     _validateFieldNullability(fields);
 
-    final shouldExtendSuperProxy =
-        superInfo != null &&
-        superInfo.element.library == superInfo.originLibrary;
     final resolvedFields = fields
-        .map(
-          (field) => ResolvedCopyWithField.from(
-            field,
-            delegatesToSuper:
-                shouldExtendSuperProxy &&
-                field.isInherited &&
-                hasNonSkippedFieldProxy(field.classField, settings),
-          ),
-        )
+        .map(ResolvedCopyWithField.from)
         .toList(growable: false);
     final categorized = _CategorizedFields.from(
       resolvedFields,
@@ -74,54 +59,13 @@ class CopyWithGenerationContext {
       ),
       constructorName: result.constructorName,
       skipFields: annotation.skipFields,
-      generatesCopyWithNull:
-          annotation.copyWithNull ||
-          (superInfo?.annotation.copyWithNull == true &&
-              categorized.uniqueNullableMutableFields.isNotEmpty),
-      superInfo: superInfo,
-      shouldExtendSuperProxy: shouldExtendSuperProxy,
+      generatesCopyWithNull: annotation.copyWithNull,
       constructorFields: resolvedFields,
       uniqueFields: categorized.uniqueFields,
       uniqueMutableFields: categorized.uniqueMutableFields,
       uniqueNullableMutableFields: categorized.uniqueNullableMutableFields,
       proxyMethodFields: categorized.proxyMethodFields,
     );
-  }
-
-  AnnotatedCopyWithSuper? _findSuperInfo() {
-    var superInfo = findAnnotatedSuper(classElement, settings);
-    if (annotation.skipFields &&
-        superInfo != null &&
-        classElement.supertype?.element != superInfo.element) {
-      superInfo = null;
-    }
-    return superInfo;
-  }
-
-  Future<AnnotatedCopyWithSuper?> _validateSuperFields(
-    AnnotatedCopyWithSuper? superInfo,
-    List<ConstructorParameterInfo> fields,
-  ) async {
-    if (superInfo != null) {
-      final superResult = await ConstructorUtils.constructorFields(
-        superInfo.element,
-        superInfo.annotation.constructor,
-        FieldResolutionConfig(
-          annotations: settings.annotations,
-          immutableDefault: superInfo.annotation.immutableFields,
-        ),
-      );
-      final superFields =
-          superResult.fields
-              .where((field) => !field.fieldAnnotation.immutable)
-              .map((field) => field.name)
-              .toSet();
-      final fieldNames = fields.map((field) => field.name).toSet();
-      if (!fieldNames.containsAll(superFields)) {
-        return null;
-      }
-    }
-    return superInfo;
   }
 
   void _validateFieldNullability(List<ConstructorParameterInfo> fields) {
@@ -140,9 +84,9 @@ class CopyWithGenerationContext {
 
 /// Resolved field model used by the templates.
 ///
-/// Built from a [ConstructorParameterInfo] plus a spec-level [delegatesToSuper]
-/// flag. Stores only the data the spec actually exposes; resolution-only
-/// details (like the class field element) stay on [ConstructorParameterInfo].
+/// Built from a [ConstructorParameterInfo]. Stores only the data the spec
+/// actually exposes; resolution-only details (like the class field element)
+/// stay on [ConstructorParameterInfo].
 class ResolvedCopyWithField {
   const ResolvedCopyWithField._({
     required this.name,
@@ -152,15 +96,10 @@ class ResolvedCopyWithField {
     required this.isPositioned,
     required this.constructorParamName,
     required this.metadata,
-    required this.delegatesToSuper,
   });
 
-  /// Projects a [ConstructorParameterInfo] and its resolved super-delegation
-  /// flag into the spec-level view.
-  factory ResolvedCopyWithField.from(
-    ConstructorParameterInfo parameter, {
-    required bool delegatesToSuper,
-  }) {
+  /// Projects a [ConstructorParameterInfo] into the spec-level view.
+  factory ResolvedCopyWithField.from(ConstructorParameterInfo parameter) {
     return ResolvedCopyWithField._(
       name: parameter.name,
       type: parameter.type,
@@ -169,7 +108,6 @@ class ResolvedCopyWithField {
       isPositioned: parameter.isPositioned,
       constructorParamName: parameter.constructorParamName,
       metadata: parameter.metadata,
-      delegatesToSuper: delegatesToSuper,
     );
   }
 
@@ -180,7 +118,6 @@ class ResolvedCopyWithField {
   final bool isPositioned;
   final String constructorParamName;
   final List<String> metadata;
-  final bool delegatesToSuper;
 
   bool get supportsCopyWithNull => nullable && isMutable;
 
@@ -214,8 +151,6 @@ class ResolvedCopyWithSpec {
     required this.constructorName,
     required this.skipFields,
     required this.generatesCopyWithNull,
-    required this.superInfo,
-    required this.shouldExtendSuperProxy,
     required List<ResolvedCopyWithField> constructorFields,
     required List<ResolvedCopyWithField> uniqueFields,
     required List<ResolvedCopyWithField> uniqueMutableFields,
@@ -245,15 +180,9 @@ class ResolvedCopyWithSpec {
     bool skipFields = false,
     bool? generatesCopyWithNull,
     List<ConstructorParameterInfo> fields = const <ConstructorParameterInfo>[],
-    Set<String> delegatedFieldNames = const <String>{},
   }) {
     final resolvedFields = fields
-        .map(
-          (field) => ResolvedCopyWithField.from(
-            field,
-            delegatesToSuper: delegatedFieldNames.contains(field.name),
-          ),
-        )
+        .map(ResolvedCopyWithField.from)
         .toList(growable: false);
     final categorized = _CategorizedFields.from(
       resolvedFields,
@@ -270,8 +199,6 @@ class ResolvedCopyWithSpec {
       generatesCopyWithNull:
           generatesCopyWithNull ??
           categorized.uniqueNullableMutableFields.isNotEmpty,
-      superInfo: null,
-      shouldExtendSuperProxy: delegatedFieldNames.isNotEmpty,
       constructorFields: resolvedFields,
       uniqueFields: categorized.uniqueFields,
       uniqueMutableFields: categorized.uniqueMutableFields,
@@ -287,8 +214,6 @@ class ResolvedCopyWithSpec {
   final String? constructorName;
   final bool skipFields;
   final bool generatesCopyWithNull;
-  final AnnotatedCopyWithSuper? superInfo;
-  final bool shouldExtendSuperProxy;
   final List<ResolvedCopyWithField> constructorFields;
   final List<ResolvedCopyWithField> uniqueFields;
   final List<ResolvedCopyWithField> uniqueMutableFields;
@@ -335,20 +260,6 @@ class ResolvedCopyWithSpec {
   /// classes.
   String get extensionName =>
       '$privacyPrefix\$${className}CopyWith$typeParametersAnnotation';
-
-  // ── Inheritance clauses ───────────────────────────────────────────────
-
-  String get proxyExtendsClause => _superExtendsClause('CWProxy');
-  String get proxyImplExtendsClause => _superExtendsClause('CWProxyImpl');
-
-  String _superExtendsClause(String suffix) {
-    final superInfo = this.superInfo;
-    if (!shouldExtendSuperProxy || superInfo == null) {
-      return '';
-    }
-    return ' extends ${superInfo.prefix}_\$${superInfo.name}$suffix'
-        '${superInfo.typeArgumentsAnnotation()}';
-  }
 }
 
 /// Pre-computed field categories derived from a flat resolved field list.
@@ -383,9 +294,8 @@ class _CategorizedFields {
       uniqueNullableMutableFields: uniqueMutableFields
           .where((field) => field.supportsCopyWithNull)
           .toList(growable: false),
-      proxyMethodFields: uniqueMutableFields
-          .where((field) => !skipFields || field.delegatesToSuper)
-          .toList(growable: false),
+      proxyMethodFields:
+          skipFields ? const <ResolvedCopyWithField>[] : uniqueMutableFields,
     );
   }
 
