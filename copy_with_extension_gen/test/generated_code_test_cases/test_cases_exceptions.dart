@@ -57,7 +57,7 @@ class CopyNullSuper {
 }
 
 @ShouldThrow(
-  'Class "CopyNullSubclass" has nullable fields and extends a class annotated with `@CopyWith(copyWithNull: true)`, but does not enable `copyWithNull` itself. Annotation options are not inherited. Add `@CopyWith(copyWithNull: true)` to this class, or enable `copy_with_null` globally in `build.yaml`.',
+  'Class "CopyNullSubclass" has nullable fields that `copyWithNull` would nullify and extends a class annotated with `@CopyWith(copyWithNull: true)`, but does not enable `copyWithNull` itself. Annotation options are not inherited. Add `@CopyWith(copyWithNull: true)` to this class, enable `copy_with_null` globally in `build.yaml`, remove `copyWithNull: true` from the superclass, or mark those fields `@CopyWithField(immutable: true)`.',
 )
 @CopyWith()
 class CopyNullSubclass extends CopyNullSuper {

@@ -2,10 +2,15 @@ import 'package:analyzer/dart/element/element.dart' show FieldElement;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
+import 'package:copy_with_extension_gen/src/copy_with_generator.dart';
 import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
+import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:copy_with_extension_gen/src/templates/copy_with_null_template.dart';
 import 'package:copy_with_extension_gen/src/templates/copy_with_values_template.dart';
+import 'package:source_gen_test/source_gen_test.dart' show generateForElement;
 import 'package:test/test.dart';
+
+import 'helpers/source_gen_test_utils.dart';
 
 part 'gen_nullability_test.g.dart';
 
@@ -97,6 +102,49 @@ class ChildOptsIntoCopyNull extends ParentWithCopyNull {
   const ChildOptsIntoCopyNull({super.a, this.b});
 
   final String? b;
+}
+
+// Both shapes below already generated no `copyWithNull` before annotation
+// options stopped being inherited, so the inheritance guard must stay silent
+// for them. They are compiled fixtures so a fired guard breaks the build.
+
+/// Guard suppressor 1: `skipFields` with an annotated ancestor that is not the
+/// direct supertype.
+@CopyWith(copyWithNull: true)
+class SkipGuardBase {
+  const SkipGuardBase({this.base});
+
+  final int? base;
+}
+
+class SkipGuardMiddle extends SkipGuardBase {
+  const SkipGuardMiddle({super.base, this.middle});
+
+  final int? middle;
+}
+
+@CopyWith(skipFields: true)
+class SkipGuardLeaf extends SkipGuardMiddle {
+  const SkipGuardLeaf({super.base, super.middle, this.leaf});
+
+  final String? leaf;
+}
+
+/// Guard suppressor 2: the subclass constructor omits a mutable field of the
+/// annotated super constructor.
+@CopyWith(copyWithNull: true)
+class PartialGuardParent {
+  const PartialGuardParent({this.first, this.second});
+
+  final String? first;
+  final int? second;
+}
+
+@CopyWith()
+class PartialGuardChild extends PartialGuardParent {
+  const PartialGuardChild({super.first, this.extra});
+
+  final bool? extra;
 }
 
 class _FakeConstructorParameterInfo implements ConstructorParameterInfo {
@@ -245,11 +293,29 @@ void main() {
     expect(result.c, 3);
   });
 
-  test('copyWithNull does not exist on the subclass without copyWithNull', () {
-    final child = ChildNoNullable(1);
-    final result = (child as dynamic);
-    expect(() => result.copyWithNull(), throwsNoSuchMethodError);
-  });
+  test(
+    'copyWithNull is not generated for a subclass with no nullable fields',
+    () async {
+      final reader = await initializePackageLibraryReaderForDirectory(
+        'test',
+        'gen_nullability_test.dart',
+      );
+      final generator = CopyWithGenerator(
+        Settings(
+          copyWithNull: false,
+          skipFields: false,
+          immutableFields: false,
+        ),
+      );
+
+      final output = await generateForElement(
+        generator,
+        reader,
+        'ChildNoNullable',
+      );
+      expect(output, isNot(contains('copyWithNull')));
+    },
+  );
 
   test(
     'copyWithNull returns the subclass type when the subclass enables it',
@@ -291,6 +357,21 @@ void main() {
       expect(updated.nullable, isNull);
       expect(updated.id, 1);
     });
+  });
+
+  test('inherited copyWithNull suppressors do not trip the guard', () async {
+    final reader = await initializePackageLibraryReaderForDirectory(
+      'test',
+      'gen_nullability_test.dart',
+    );
+    final generator = CopyWithGenerator(
+      Settings(copyWithNull: false, skipFields: false, immutableFields: false),
+    );
+
+    for (final className in ['SkipGuardLeaf', 'PartialGuardChild']) {
+      final output = await generateForElement(generator, reader, className);
+      expect(output, isNot(contains('copyWithNull')), reason: className);
+    }
   });
 
   test('copyWithNullTemplate keeps current value for non-nullable fields', () {

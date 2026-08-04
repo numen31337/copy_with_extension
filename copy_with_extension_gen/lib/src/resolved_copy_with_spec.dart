@@ -14,6 +14,11 @@ import 'package:source_gen/source_gen.dart'
 
 const _copyWithChecker = TypeChecker.typeNamed(CopyWith);
 
+/// The nearest `@CopyWith` annotated superclass paired with its resolved
+/// annotation values.
+typedef _AnnotatedSuper =
+    ({ClassElement element, CopyWithAnnotation annotation});
+
 /// Builds the fully resolved generator model for a single `@CopyWith` target.
 ///
 /// This context owns the one-time resolution and validation step so templates
@@ -50,7 +55,7 @@ class CopyWithGenerationContext {
       resolvedFields,
       skipFields: annotation.skipFields,
     );
-    _validateCopyWithNullInheritance(categorized.uniqueNullableMutableFields);
+    await _validateCopyWithNullInheritance(categorized);
 
     return ResolvedCopyWithSpec._(
       isPrivate: classElement.isPrivate,
@@ -79,36 +84,92 @@ class CopyWithGenerationContext {
   /// extension instead of failing: the call keeps compiling but returns the
   /// superclass type and drops subclass fields. Annotation options are not
   /// inherited, so fail the build rather than let that happen silently.
-  void _validateCopyWithNullInheritance(
-    List<ResolvedCopyWithField> nullableMutableFields,
-  ) {
-    if (annotation.copyWithNull || nullableMutableFields.isEmpty) return;
-    if (!_annotatedSuperEnablesCopyWithNull()) return;
+  ///
+  /// Only classes that previously *did* get an inherited `copyWithNull` can
+  /// regress this way. Releases that inherited the flag suppressed it in two
+  /// cases, so those are replicated below and must not fail the build: nothing
+  /// about their generated output changed. The second suppressor is checked
+  /// last because it resolves the super constructor, which is far too
+  /// expensive to run for every annotated class.
+  Future<void> _validateCopyWithNullInheritance(
+    _CategorizedFields categorized,
+  ) async {
+    if (annotation.copyWithNull ||
+        categorized.uniqueNullableMutableFields.isEmpty) {
+      return;
+    }
+
+    final annotatedSuper = _nearestAnnotatedSuper();
+    if (annotatedSuper == null || !annotatedSuper.annotation.copyWithNull) {
+      return;
+    }
+
+    // Suppressor 1: `skipFields` dropped the super link entirely unless the
+    // annotated ancestor was also the direct supertype.
+    if (annotation.skipFields &&
+        classElement.supertype?.element != annotatedSuper.element) {
+      return;
+    }
+
+    // Suppressor 2: the super link was dropped when this constructor did not
+    // re-declare every mutable field of the super constructor.
+    if (!await _redeclaresSuperMutableFields(annotatedSuper, categorized)) {
+      return;
+    }
 
     throw InvalidGenerationSourceError(
-      'Class "${classElement.displayName}" has nullable fields and extends a class annotated with `@CopyWith(copyWithNull: true)`, but does not enable `copyWithNull` itself. Annotation options are not inherited. Add `@CopyWith(copyWithNull: true)` to this class, or enable `copy_with_null` globally in `build.yaml`.',
+      'Class "${classElement.displayName}" has nullable fields that `copyWithNull` would nullify and extends a class annotated with `@CopyWith(copyWithNull: true)`, but does not enable `copyWithNull` itself. Annotation options are not inherited. Add `@CopyWith(copyWithNull: true)` to this class, enable `copy_with_null` globally in `build.yaml`, remove `copyWithNull: true` from the superclass, or mark those fields `@CopyWithField(immutable: true)`.',
       element: classElement,
     );
   }
 
-  /// Whether the nearest `@CopyWith` annotated superclass enables
-  /// `copyWithNull`.
-  bool _annotatedSuperEnablesCopyWithNull() {
+  /// The nearest `@CopyWith` annotated superclass, or `null` when the
+  /// superclass chain has none or is interrupted by a non-class supertype.
+  _AnnotatedSuper? _nearestAnnotatedSuper() {
     var supertype = classElement.supertype;
     while (supertype != null) {
       final element = supertype.element;
-      if (element is! ClassElement) return false;
+      if (element is! ClassElement) return null;
 
       final annotation = _copyWithChecker.firstAnnotationOf(element);
       if (annotation != null) {
-        return AnnotationUtils.readClassAnnotation(
-          settings,
-          ConstantReader(annotation),
-        ).copyWithNull;
+        return (
+          element: element,
+          annotation: AnnotationUtils.readClassAnnotation(
+            settings,
+            ConstantReader(annotation),
+          ),
+        );
       }
       supertype = element.supertype;
     }
-    return false;
+    return null;
+  }
+
+  /// Whether this class' constructor exposes every mutable field of
+  /// [annotatedSuper]'s constructor.
+  Future<bool> _redeclaresSuperMutableFields(
+    _AnnotatedSuper annotatedSuper,
+    _CategorizedFields categorized,
+  ) async {
+    final superResult = await ConstructorUtils.constructorFields(
+      annotatedSuper.element,
+      annotatedSuper.annotation.constructor,
+      FieldResolutionConfig(
+        annotations: settings.annotations,
+        immutableDefault: annotatedSuper.annotation.immutableFields,
+      ),
+    );
+    final superMutableFieldNames =
+        superResult.fields
+            .where((field) => !field.fieldAnnotation.immutable)
+            .map((field) => field.name)
+            .toSet();
+
+    return categorized.uniqueFields
+        .map((field) => field.name)
+        .toSet()
+        .containsAll(superMutableFieldNames);
   }
 
   void _validateFieldNullability(List<ConstructorParameterInfo> fields) {
