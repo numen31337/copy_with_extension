@@ -23,7 +23,6 @@ class _$ChildWithPrivateSuperCWProxyImpl
   ChildWithPrivateSuper childField(int childField) =>
       call(childField: childField);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `ChildWithPrivateSuper(...).copyWith.fieldName(value)`.
   ///
@@ -31,6 +30,7 @@ class _$ChildWithPrivateSuperCWProxyImpl
   /// ```dart
   /// ChildWithPrivateSuper(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   ChildWithPrivateSuper call({
     Object? childField = const $CopyWithPlaceholder(),
   }) {

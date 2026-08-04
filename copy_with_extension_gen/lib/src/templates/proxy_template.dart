@@ -48,7 +48,6 @@ String copyWithProxyTemplate(ResolvedCopyWithSpec spec) {
 
         $nonNullableFunctions
 
-        @override
         ${copyWithValuesTemplate(spec, isAbstract: false)}
       }
     ''';

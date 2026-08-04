@@ -34,7 +34,7 @@ String copyWithValuesTemplate(
         /// ```dart
         /// ${spec.typeAnnotation}(...).copyWith(id: 12, name: "My name")
         /// ```
-        ${spec.typeAnnotation} call($callParameters) $constructorBody
+        ${isAbstract ? '' : '@override\n        '}${spec.typeAnnotation} call($callParameters) $constructorBody
     ''';
 }
 
