@@ -130,7 +130,9 @@ class SimpleObject {
 
 #### Inheritance
 
-Inherited fields are included in the generated `copyWith`. Annotation parameters (`copyWithNull`, `skipFields`, `immutableFields`) apply only to the class they are written on and are not inherited — use `build.yaml` to configure them globally. Note that `copyWith` is resolved from the static type of the receiver, so a variable typed as the superclass uses the superclass's extension.
+Inherited fields are included in the generated `copyWith`. Annotation parameters apply only to the class they are written on and are not inherited — use `build.yaml` to configure them globally.
+
+Generated members are resolved from the static type of the receiver, and any member a subclass does not generate falls back to the superclass extension. This matters for `copyWithNull`: a subclass that does not enable it would silently return the superclass type, so generation fails with an explanatory error instead. Add `@CopyWith(copyWithNull: true)` to each subclass that needs it.
 
 #### `build.yaml` configuration
 

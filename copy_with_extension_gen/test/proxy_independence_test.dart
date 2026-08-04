@@ -108,8 +108,14 @@ void main() {
     test('covariant narrowed field generates a compilable proxy', () async {
       final output = await generate('CovariantChild');
 
-      expect(output, contains('CovariantChild value(int value)'));
-      expect(output, contains('call(value: value)'));
+      // Previously the interface extended `_$CovariantParentCWProxy`, so
+      // `CovariantChild value(int value)` narrowed the inherited
+      // `CovariantParent value(num value)` parameter, which Dart rejects.
+      expect(output, isNot(contains('_\$CovariantParentCWProxy')));
+      expect(
+        output,
+        contains('CovariantChild value(int value) => call(value: value);'),
+      );
     });
 
     test(
@@ -127,6 +133,9 @@ void main() {
       () async {
         final output = await generate('LockedChild');
 
+        // Previously the interface extended `_$OpenParentCWProxy`, so the
+        // parameterless `call()` was an invalid override of `call({int a})`.
+        expect(output, isNot(contains('_\$OpenParentCWProxy')));
         expect(output, contains('LockedChild call()'));
         expect(output, isNot(contains('LockedChild a(')));
       },

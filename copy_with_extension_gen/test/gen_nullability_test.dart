@@ -58,7 +58,7 @@ class ChildNull extends ParentNull {
   final bool? d;
 }
 
-@CopyWith(skipFields: true)
+@CopyWith(skipFields: true, copyWithNull: true)
 class ChildNullSkip extends ParentNull {
   const ChildNullSkip({super.a, super.b, required this.c});
 
@@ -92,9 +92,9 @@ class SkipFieldsWithCopyNull<T extends Iterable<int>> {
   final int id;
 }
 
-@CopyWith()
-class ChildInheritsCopyNull extends ParentWithCopyNull {
-  const ChildInheritsCopyNull({super.a, this.b});
+@CopyWith(copyWithNull: true)
+class ChildOptsIntoCopyNull extends ParentWithCopyNull {
+  const ChildOptsIntoCopyNull({super.a, this.b});
 
   final String? b;
 }
@@ -235,11 +235,14 @@ void main() {
     expect(result.d, isNull);
   });
 
-  test('copyWithNull is not inherited from an annotated superclass', () {
+  test('copyWithNull nullifies inherited field and preserves child type', () {
     final child = ChildNullSkip(a: 'a', b: 1, c: 3);
 
-    final result = (child as dynamic);
-    expect(() => result.copyWithNull(a: true), throwsNoSuchMethodError);
+    final result = child.copyWithNull(a: true);
+    expect(result, isA<ChildNullSkip>());
+    expect(result.a, isNull);
+    expect(result.b, 1);
+    expect(result.c, 3);
   });
 
   test('copyWithNull does not exist on the subclass without copyWithNull', () {
@@ -248,15 +251,24 @@ void main() {
     expect(() => result.copyWithNull(), throwsNoSuchMethodError);
   });
 
-  test('copyWithNull requires the annotation on the class itself', () {
-    final original = ChildInheritsCopyNull(a: 1, b: 'b');
+  test(
+    'copyWithNull returns the subclass type when the subclass enables it',
+    () {
+      final original = ChildOptsIntoCopyNull(a: 1, b: 'b');
 
-    final result = (original as dynamic);
-    expect(() => result.copyWithNull(b: true), throwsNoSuchMethodError);
+      // Regression guard: `copyWithNull` lives on the extension, so a subclass
+      // that does not generate it silently resolves to the superclass extension
+      // and returns the superclass type instead of failing to compile.
+      final updated = original.copyWithNull(b: true);
+      expect(updated, isA<ChildOptsIntoCopyNull>());
+      expect(updated.a, 1);
+      expect(updated.b, isNull);
 
-    final parent = ParentWithCopyNull(a: 1);
-    expect(parent.copyWithNull(a: true).a, isNull);
-  });
+      final unchanged = original.copyWithNull();
+      expect(unchanged.a, 1);
+      expect(unchanged.b, 'b');
+    },
+  );
 
   group('skipFields + copyWithNull on the same class', () {
     test('call updates values while keeping nullable field', () {

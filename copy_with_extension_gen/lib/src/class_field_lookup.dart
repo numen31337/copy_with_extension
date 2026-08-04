@@ -25,18 +25,13 @@ class ClassFieldLookup {
 
     return null;
   }
-
-  /// Returns `true` when [fieldName] exists in [classElement] or its supertypes.
-  static bool exists(ClassElement classElement, String fieldName) {
-    return find(classElement, fieldName) != null;
-  }
 }
 
 /// Per-class cache for field resolution across the inheritance hierarchy.
 ///
 /// Analyzer field walks can be repeated many times while resolving constructor
-/// parameters, annotations, and generated proxy policy. Keeping one cache per
-/// generation step ensures every caller observes the same resolved element.
+/// parameters and annotations. Keeping one cache per generation step ensures
+/// every caller observes the same resolved element.
 class ClassFieldLookupCache {
   ClassFieldLookupCache(this._classElement);
 

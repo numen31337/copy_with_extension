@@ -1,13 +1,18 @@
 // ignore_for_file: experimental_member_use
 
 import 'package:analyzer/dart/element/element.dart' show ClassElement;
+import 'package:copy_with_extension/copy_with_extension.dart';
+import 'package:copy_with_extension_gen/src/annotation_utils.dart';
 import 'package:copy_with_extension_gen/src/constructor_parameter_info.dart';
 import 'package:copy_with_extension_gen/src/constructor_utils.dart';
 import 'package:copy_with_extension_gen/src/copy_with_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:copy_with_extension_gen/src/field_resolution_config.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
-import 'package:source_gen/source_gen.dart' show InvalidGenerationSourceError;
+import 'package:source_gen/source_gen.dart'
+    show ConstantReader, InvalidGenerationSourceError, TypeChecker;
+
+const _copyWithChecker = TypeChecker.typeNamed(CopyWith);
 
 /// Builds the fully resolved generator model for a single `@CopyWith` target.
 ///
@@ -45,6 +50,7 @@ class CopyWithGenerationContext {
       resolvedFields,
       skipFields: annotation.skipFields,
     );
+    _validateCopyWithNullInheritance(categorized.uniqueNullableMutableFields);
 
     return ResolvedCopyWithSpec._(
       isPrivate: classElement.isPrivate,
@@ -66,6 +72,43 @@ class CopyWithGenerationContext {
       uniqueNullableMutableFields: categorized.uniqueNullableMutableFields,
       proxyMethodFields: categorized.proxyMethodFields,
     );
+  }
+
+  /// `copyWithNull` is generated on the extension rather than the proxy, so a
+  /// subclass that does not generate it resolves the call to the superclass
+  /// extension instead of failing: the call keeps compiling but returns the
+  /// superclass type and drops subclass fields. Annotation options are not
+  /// inherited, so fail the build rather than let that happen silently.
+  void _validateCopyWithNullInheritance(
+    List<ResolvedCopyWithField> nullableMutableFields,
+  ) {
+    if (annotation.copyWithNull || nullableMutableFields.isEmpty) return;
+    if (!_annotatedSuperEnablesCopyWithNull()) return;
+
+    throw InvalidGenerationSourceError(
+      'Class "${classElement.displayName}" has nullable fields and extends a class annotated with `@CopyWith(copyWithNull: true)`, but does not enable `copyWithNull` itself. Annotation options are not inherited. Add `@CopyWith(copyWithNull: true)` to this class, or enable `copy_with_null` globally in `build.yaml`.',
+      element: classElement,
+    );
+  }
+
+  /// Whether the nearest `@CopyWith` annotated superclass enables
+  /// `copyWithNull`.
+  bool _annotatedSuperEnablesCopyWithNull() {
+    var supertype = classElement.supertype;
+    while (supertype != null) {
+      final element = supertype.element;
+      if (element is! ClassElement) return false;
+
+      final annotation = _copyWithChecker.firstAnnotationOf(element);
+      if (annotation != null) {
+        return AnnotationUtils.readClassAnnotation(
+          settings,
+          ConstantReader(annotation),
+        ).copyWithNull;
+      }
+      supertype = element.supertype;
+    }
+    return false;
   }
 
   void _validateFieldNullability(List<ConstructorParameterInfo> fields) {

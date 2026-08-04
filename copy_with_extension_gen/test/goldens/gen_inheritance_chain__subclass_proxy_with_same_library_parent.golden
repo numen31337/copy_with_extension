@@ -1,0 +1,59 @@
+abstract class _$CopyBCWProxy<T> {
+  CopyB<T> a(String a);
+
+  CopyB<T> b(T? b);
+
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CopyB<T>(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// CopyB<T>(...).copyWith(id: 12, name: "My name")
+  /// ```
+  CopyB<T> call({String a, T? b});
+}
+
+/// Callable proxy for `copyWith` functionality.
+/// Use as `instanceOfCopyB.copyWith(...)` or call `instanceOfCopyB.copyWith.fieldName(value)` for a single field.
+class _$CopyBCWProxyImpl<T> implements _$CopyBCWProxy<T> {
+  const _$CopyBCWProxyImpl(this._value);
+
+  final CopyB<T> _value;
+
+  @override
+  CopyB<T> a(String a) => call(a: a);
+
+  @override
+  CopyB<T> b(T? b) => call(b: b);
+
+  @override
+  /// Creates a new instance with the provided field values.
+  /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `CopyB<T>(...).copyWith.fieldName(value)`.
+  ///
+  /// Example:
+  /// ```dart
+  /// CopyB<T>(...).copyWith(id: 12, name: "My name")
+  /// ```
+  CopyB<T> call({
+    Object? a = const $CopyWithPlaceholder(),
+    Object? b = const $CopyWithPlaceholder(),
+  }) {
+    return CopyB<T>(
+      a: a == const $CopyWithPlaceholder() || a == null
+          ? _value.a
+          // ignore: cast_nullable_to_non_nullable
+          : a as String,
+      b: b == const $CopyWithPlaceholder()
+          ? _value.b
+          // ignore: cast_nullable_to_non_nullable
+          : b as T?,
+    );
+  }
+}
+
+extension $CopyBCopyWith<T> on CopyB<T> {
+  /// Returns a callable class used to build a new instance with modified fields.
+  /// Example: `instanceOfCopyB.copyWith(...)` or `instanceOfCopyB.copyWith.fieldName(...)`.
+  // ignore: library_private_types_in_public_api
+  _$CopyBCWProxy<T> get copyWith => _$CopyBCWProxyImpl<T>(this);
+}
