@@ -6,7 +6,6 @@ import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
 String copyWithValuesTemplate(
   ResolvedCopyWithSpec spec, {
   required bool isAbstract,
-  bool addOverride = false,
 }) {
   // Build the parameter list for the generated function or abstract interface.
   // Immutable fields are excluded entirely.
@@ -35,7 +34,7 @@ String copyWithValuesTemplate(
         /// ```dart
         /// ${spec.typeAnnotation}(...).copyWith(id: 12, name: "My name")
         /// ```
-${addOverride ? '        @override\n' : ''}        ${spec.typeAnnotation} call($callParameters) $constructorBody
+        ${isAbstract ? '' : '@override\n        '}${spec.typeAnnotation} call($callParameters) $constructorBody
     ''';
 }
 

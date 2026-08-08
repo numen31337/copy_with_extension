@@ -9,7 +9,6 @@ import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
 import 'package:copy_with_extension_gen/src/element_utils.dart';
 import 'package:copy_with_extension_gen/src/field_resolution_config.dart';
-import 'package:copy_with_extension_gen/src/inheritance.dart';
 import 'package:source_gen/source_gen.dart' show ConstantReader, TypeChecker;
 
 /// Represents a single class field with the additional metadata needed for code generation.
@@ -24,7 +23,6 @@ class ConstructorParameterInfo {
     required this.classField,
     required this.classFieldNullable,
     required this.metadata,
-    required this.isInherited,
   });
 
   /// Name of the parameter as declared in the constructor.
@@ -57,12 +55,6 @@ class ConstructorParameterInfo {
   /// be reflected in generated `copyWith` methods.
   final List<String> metadata;
 
-  /// `true` if this field is supplied by the generated superclass proxy.
-  ///
-  /// Fields introduced by unannotated intermediate classes are generated
-  /// locally because the proxy only extends the nearest annotated superclass.
-  final bool isInherited;
-
   @override
   String toString() {
     return 'type:$type name:$name fieldAnnotation:$fieldAnnotation nullable:$nullable';
@@ -70,20 +62,17 @@ class ConstructorParameterInfo {
 }
 
 /// Builds [ConstructorParameterInfo] instances while sharing per-generation
-/// field and inherited-field resolution.
+/// field resolution.
 class ConstructorParameterInfoFactory {
   ConstructorParameterInfoFactory({
     required ClassElement classElement,
     required FieldResolutionConfig config,
     ClassFieldLookupCache? fieldLookup,
-  }) : _classElement = classElement,
-       _config = config,
+  }) : _config = config,
        _fieldLookup = fieldLookup ?? ClassFieldLookupCache(classElement);
 
-  final ClassElement _classElement;
   final FieldResolutionConfig _config;
   final ClassFieldLookupCache _fieldLookup;
-  final Map<String, bool> _inheritedByFieldName = <String, bool>{};
 
   ConstructorParameterInfo create(
     FormalParameterElement element, {
@@ -107,39 +96,8 @@ class ConstructorParameterInfoFactory {
       classField: classField,
       classFieldNullable: classField != null && _isNullable(classField.type),
       metadata: _readFieldMetadata(classField, _config.annotations),
-      isInherited: _isInheritedCached(resolvedFieldName),
     );
   }
-
-  bool _isInheritedCached(String fieldName) {
-    return _inheritedByFieldName.putIfAbsent(
-      fieldName,
-      () => _isFieldInherited(fieldName, _classElement, _config.annotatedSuper),
-    );
-  }
-}
-
-/// Determines whether [fieldName] is inherited through the generated proxy
-/// superclass.
-bool _isFieldInherited(
-  String fieldName,
-  ClassElement classElement,
-  ClassElement? annotatedSuper,
-) {
-  if (classElement.getField(fieldName) != null) return false;
-
-  final declaredAboveClass = InheritanceTraversal.declaresField(
-    classElement,
-    fieldName,
-    includeSelf: false,
-  );
-  if (!declaredAboveClass) {
-    return false;
-  }
-
-  if (annotatedSuper == null) return true;
-
-  return InheritanceTraversal.declaresField(annotatedSuper, fieldName);
 }
 
 /// Returns full type name including namespace for all nested type arguments.

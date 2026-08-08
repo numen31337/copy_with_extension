@@ -1,4 +1,4 @@
-abstract class _$ChildCWProxy extends _$ParentCWProxy {
+abstract class _$ChildCWProxy {
   Child a(int a);
 
   Child b(int b);
@@ -10,17 +10,15 @@ abstract class _$ChildCWProxy extends _$ParentCWProxy {
   /// ```dart
   /// Child(...).copyWith(id: 12, name: "My name")
   /// ```
-  @override
   Child call({int a, int b});
 }
 
 /// Callable proxy for `copyWith` functionality.
 /// Use as `instanceOfChild.copyWith(...)` or call `instanceOfChild.copyWith.fieldName(value)` for a single field.
-class _$ChildCWProxyImpl extends _$ParentCWProxyImpl implements _$ChildCWProxy {
-  const _$ChildCWProxyImpl(Child super._value);
+class _$ChildCWProxyImpl implements _$ChildCWProxy {
+  const _$ChildCWProxyImpl(this._value);
 
-  @override
-  Child get _value => super._value as Child;
+  final Child _value;
 
   @override
   Child a(int a) => call(a: a);
@@ -28,7 +26,6 @@ class _$ChildCWProxyImpl extends _$ParentCWProxyImpl implements _$ChildCWProxy {
   @override
   Child b(int b) => call(b: b);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `Child(...).copyWith.fieldName(value)`.
   ///
@@ -36,6 +33,7 @@ class _$ChildCWProxyImpl extends _$ParentCWProxyImpl implements _$ChildCWProxy {
   /// ```dart
   /// Child(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   Child call({
     Object? a = const $CopyWithPlaceholder(),
     Object? b = const $CopyWithPlaceholder(),

@@ -1,3 +1,9 @@
+## 17.0.0 - Independent Proxies
+* **BREAKING** Generated proxies no longer extend the superclass proxy; each one is generated independently. Regenerate all `.g.dart` files.
+* **BREAKING** `skipFields: true` no longer generates field-specific methods for inherited fields either. Use `copyWith(field: value)`.
+* **BREAKING** `copyWithNull` is no longer inherited from an annotated superclass. Enable it per class or globally via `build.yaml`; affected classes fail generation with an explanatory error.
+* Fix invalid generated code when a subclass narrows an inherited field type, or when parent and child differ in `immutableFields`.
+
 ## 16.0.0
 * Expand `analyzer` compatibility to `>=8.1.1 <15.0.0`.
 * Fix silent argument shift when a non-trailing optional positional parameter is dropped from `copyWith` generation.

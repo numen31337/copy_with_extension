@@ -21,7 +21,6 @@ class _$GoldenAliasNamesCWProxyImpl implements _$GoldenAliasNamesCWProxy {
   @override
   GoldenAliasNames value(GoldenList<GoldenInt> value) => call(value: value);
 
-  @override
   /// Creates a new instance with the provided field values.
   /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored. To update a single field use `GoldenAliasNames(...).copyWith.fieldName(value)`.
   ///
@@ -29,6 +28,7 @@ class _$GoldenAliasNamesCWProxyImpl implements _$GoldenAliasNamesCWProxy {
   /// ```dart
   /// GoldenAliasNames(...).copyWith(id: 12, name: "My name")
   /// ```
+  @override
   GoldenAliasNames call({Object? value = const $CopyWithPlaceholder()}) {
     return GoldenAliasNames(
       value: value == const $CopyWithPlaceholder() || value == null

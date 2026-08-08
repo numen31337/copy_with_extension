@@ -63,7 +63,7 @@ class ChildSkip extends ParentSkip {
 void main() {
   group('skipFields with inheritance', () {
     test(
-      'inherited field methods omit @override when superclass skips fields',
+      'child proxy is generated independently when superclass skips fields',
       () async {
         await expectGeneratedCodeMatchesGolden(
           sourceDirectory: 'test',
@@ -86,19 +86,15 @@ void main() {
       expect(() => proxy.a(5), throwsNoSuchMethodError);
     });
 
-    test(
-      'Ancestor field methods retain type when parent and child skip fields',
-      () {
-        const child = ChildSkip(a: 1, b: 2, c: 3);
+    test('skipFields suppresses ancestor field methods on the child proxy', () {
+      const child = ChildSkip(a: 1, b: 2, c: 3);
 
-        final viaCall = child.copyWith(a: 4);
-        expect(viaCall, isA<ChildSkip>());
-        expect(viaCall.a, 4);
+      final viaCall = child.copyWith(a: 4);
+      expect(viaCall, isA<ChildSkip>());
+      expect(viaCall.a, 4);
 
-        final proxy = child.copyWith;
-        expect(proxy.a, isA<ChildSkip Function(int)>());
-        expect(proxy.a(5), isA<ChildSkip>());
-      },
-    );
+      final dynamic proxy = child.copyWith;
+      expect(() => proxy.a(5), throwsNoSuchMethodError);
+    });
   });
 }

@@ -4,6 +4,7 @@ import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:test/test.dart';
 
 import 'helpers/gen_cross_library_parent.dart' as cross_lib;
+import 'helpers/golden_test_utils.dart';
 
 part 'gen_inheritance_chain_test.g.dart';
 
@@ -41,6 +42,27 @@ class CopyD extends NoCopyC {
 
   final bool d;
   final ns.Uint16List? data;
+}
+
+@CopyWith()
+class ImmutableFieldParent {
+  const ImmutableFieldParent({required this.locked, required this.open});
+
+  @CopyWithField(immutable: true)
+  final int locked;
+
+  final String open;
+}
+
+@CopyWith()
+class ImmutableFieldChild extends ImmutableFieldParent {
+  const ImmutableFieldChild({
+    required super.locked,
+    required super.open,
+    required this.extra,
+  });
+
+  final bool extra;
 }
 
 @CopyWith()
@@ -131,6 +153,30 @@ class B extends A {
 }
 
 void main() {
+  test('subclass proxy is generated independently of its superclass', () async {
+    await expectGeneratedCodeMatchesGolden(
+      sourceDirectory: 'test',
+      sourceFile: 'gen_inheritance_chain_test.dart',
+      elementName: 'CopyB',
+      goldenFilePath:
+          'test/goldens/gen_inheritance_chain__subclass_proxy_with_same_library_parent.golden',
+    );
+  });
+
+  test('@CopyWithField(immutable: true) applies to inherited fields', () {
+    const child = ImmutableFieldChild(locked: 1, open: 'a', extra: false);
+
+    final result = child.copyWith(open: 'b', extra: true);
+    expect(result, isA<ImmutableFieldChild>());
+    expect(result.locked, 1);
+    expect(result.open, 'b');
+    expect(result.extra, true);
+
+    final dynamic proxy = child.copyWith;
+    expect(() => proxy.locked(2), throwsNoSuchMethodError);
+    expect(proxy.open('c').open, 'c');
+  });
+
   test(
     'Deep chain preserves subclass fields, generics, namespaces and private constructor params',
     () {
@@ -200,17 +246,17 @@ void main() {
     },
   );
 
-  test(
-    'Superclass field methods return subclass type when subclass skips fields',
-    () {
-      final child = ChildWithSkip(1, extra: 'foo');
+  test('Subclass with skipFields exposes no field methods, only copyWith', () {
+    final child = ChildWithSkip(1, extra: 'foo');
 
-      final result = child.copyWith.value(2);
-      expect(result, isA<ChildWithSkip>());
-      expect(result.value, 2);
-      expect(result.extra, 'foo');
-    },
-  );
+    final result = child.copyWith(value: 2);
+    expect(result, isA<ChildWithSkip>());
+    expect(result.value, 2);
+    expect(result.extra, 'foo');
+
+    final dynamic proxy = child.copyWith;
+    expect(() => proxy.value(3), throwsNoSuchMethodError);
+  });
 
   test(
     'Subclass omitting optional super field does not inherit parent proxy',
