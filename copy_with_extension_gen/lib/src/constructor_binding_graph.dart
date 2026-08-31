@@ -4,9 +4,11 @@ import 'package:analyzer/dart/analysis/results.dart' show ResolvedLibraryResult;
 import 'package:analyzer/dart/ast/ast.dart'
     show
         BinaryExpression,
+        ClassDeclaration,
         ConstructorDeclaration,
         ConstructorFieldInitializer,
         Expression,
+        FieldDeclaration,
         ParenthesizedExpression,
         SimpleIdentifier,
         SuperConstructorInvocation;
@@ -92,19 +94,25 @@ class ConstructorBindingGraph {
       constructor.firstFragment,
     );
     final node = declaration?.node;
-    if (node is! ConstructorDeclaration) {
-      log.warning(
-        'copy_with_extension_gen: Unable to resolve constructor node for '
-        '${constructor.enclosingElement.displayName}.${constructor.displayName}; '
-        'constructor binding analysis will be limited.',
-      );
-      return ConstructorBindingGraph._(
-        const <String, List<ConstructorBinding>>{},
-        isResolved: false,
-      );
+    final builder = _ConstructorBindingGraphBuilder(constructor);
+    if (node is ConstructorDeclaration) {
+      return builder.build(node);
     }
 
-    return _ConstructorBindingGraphBuilder(constructor).build(node);
+    final enclosingNode = node?.parent;
+    if (enclosingNode is ClassDeclaration) {
+      return builder.buildPrimary(enclosingNode);
+    }
+
+    log.warning(
+      'copy_with_extension_gen: Unable to resolve constructor node for '
+      '${constructor.enclosingElement.displayName}.${constructor.displayName}; '
+      'constructor binding analysis will be limited.',
+    );
+    return ConstructorBindingGraph._(
+      const <String, List<ConstructorBinding>>{},
+      isResolved: false,
+    );
   }
 
   /// Returns every binding whose source is [sourceParameter].
@@ -266,6 +274,21 @@ class _ConstructorBindingGraphBuilder {
       }
     }
 
+    return _buildGraph();
+  }
+
+  ConstructorBindingGraph buildPrimary(ClassDeclaration node) {
+    _recordFormalParameterBindings();
+
+    final expressionAnalyzer = _BindingExpressionAnalyzer(
+      _parameterNamesByElement,
+    );
+    node.accept(_PrimaryConstructorBindingVisitor(this, expressionAnalyzer));
+
+    return _buildGraph();
+  }
+
+  ConstructorBindingGraph _buildGraph() {
     return ConstructorBindingGraph._(
       Map<String, List<ConstructorBinding>>.unmodifiable(
         _bindingsBySource.map(
@@ -398,6 +421,46 @@ class _ConstructorBindingGraphBuilder {
             ),
           );
     }
+  }
+}
+
+class _PrimaryConstructorBindingVisitor extends RecursiveAstVisitor<void> {
+  _PrimaryConstructorBindingVisitor(this._builder, this._expressionAnalyzer);
+
+  final _ConstructorBindingGraphBuilder _builder;
+  final _BindingExpressionAnalyzer _expressionAnalyzer;
+
+  @override
+  void visitFieldDeclaration(FieldDeclaration node) {
+    if (!node.isStatic && !node.fields.isLate) {
+      for (final field in node.fields.variables) {
+        final initializer = field.initializer;
+        if (initializer != null) {
+          _builder._recordBindings(
+            _expressionAnalyzer,
+            target: FieldBindingTarget(field.name.lexeme),
+            expression: initializer,
+          );
+        }
+      }
+    }
+    super.visitFieldDeclaration(node);
+  }
+
+  @override
+  void visitConstructorFieldInitializer(ConstructorFieldInitializer node) {
+    _builder._recordBindings(
+      _expressionAnalyzer,
+      target: FieldBindingTarget(node.fieldName.name),
+      expression: node.expression,
+    );
+    super.visitConstructorFieldInitializer(node);
+  }
+
+  @override
+  void visitSuperConstructorInvocation(SuperConstructorInvocation node) {
+    _builder._recordSuperBindings(_expressionAnalyzer, node);
+    super.visitSuperConstructorInvocation(node);
   }
 }
 

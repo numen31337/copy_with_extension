@@ -1,3 +1,6 @@
+## 17.1.0 - Dart 3.13 Primary Constructors
+* Support Dart 3.13 primary constructors, including field aliases and super parameters.
+
 ## 17.0.0 - Independent Proxies
 * **BREAKING** Generated proxies no longer extend the superclass proxy; each one is generated independently. Regenerate all `.g.dart` files.
 * **BREAKING** `skipFields: true` no longer generates field-specific methods for inherited fields either. Use `copyWith(field: value)`.
