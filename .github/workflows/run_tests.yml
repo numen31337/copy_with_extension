@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - master
+      - main
   pull_request:
   schedule:
     - cron: "0 0 1 * *" # Run Monthly
@@ -142,16 +142,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Package score
-        id: package_score
-        uses: axel-op/dart-package-analyzer@v3
+      - name: Install Dart
+        uses: dart-lang/setup-dart@v1
         with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          relativePath: ${{ matrix.package }}
+          sdk: stable
 
-      - name: Annotate package score
-        if: ${{ steps.package_score.outputs.total < steps.package_score.outputs.total_max }}
-        run: |
-          msg="Package score for ${{ matrix.package }} is ${{ steps.package_score.outputs.total }}/${{ steps.package_score.outputs.total_max }}"
-          echo "${msg}"
-          echo "::warning ::${msg}"
+      - name: Install Pana
+        run: dart pub global activate pana 0.23.19
+
+      - name: Package score
+        run: dart pub global run pana:pana --project-root . --exit-code-threshold 0 ${{ matrix.package }}
