@@ -37,7 +37,7 @@ jobs:
       ${{ matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest' &&
           format('Upper Bounds + Coverage - Dart {0} - {1}', matrix.sdk, matrix.os) ||
           format('Upper Bounds - Dart {0} - {1}', matrix.sdk, matrix.os) }}
-    timeout-minutes: 10
+    timeout-minutes: ${{ matrix.sdk == 'stable' && matrix.os == 'ubuntu-latest' && 30 || 20 }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
