@@ -11,12 +11,15 @@ String copyWithNullTemplate(ResolvedCopyWithSpec spec) {
   // Build the constructor parameter list. Only nullable and mutable fields
   // need a boolean flag to specify nullification.
   final nullConstructorInput = nullableMutableFields
-      .map((field) => '${field.annotationPrefix}bool ${field.name} = false,')
+      .map(
+        (field) =>
+            '${field.annotationPrefix}${spec.clearFlagType} ${field.name} = false,',
+      )
       .join(' ');
 
   // Build the actual invocation parameters for the constructor call.
   final nullParamsInput = spec.constructorFields
-      .map((field) => _constructorArg(field))
+      .map((field) => _constructorArg(field, isRecord: spec.isRecord))
       .join(' ');
 
   final description = '''
@@ -25,20 +28,20 @@ String copyWithNullTemplate(ResolvedCopyWithSpec spec) {
     ///
     /// Example:
     /// ```dart
-    /// ${spec.typeAnnotation}(...).copyWithNull(firstField: true, secondField: true)
+    /// ${spec.exampleReceiver}.copyWithNull(firstField: true, secondField: true)
     /// ```''';
 
   return '''
       $description
       ${spec.typeAnnotation} copyWithNull({$nullConstructorInput}) {
-        return ${spec.constructorReference}($nullParamsInput);
+        return ${spec.reconstruct(nullParamsInput)};
       }
      ''';
 }
 
-String _constructorArg(ResolvedCopyWithField field) {
+String _constructorArg(ResolvedCopyWithField field, {required bool isRecord}) {
   if (!field.supportsCopyWithNull) {
-    return '${field.constructorArgPrefix}${field.name},';
+    return '${field.constructorArgPrefix}${isRecord ? 'this.' : ''}${field.name},';
   }
   return '${field.constructorArgPrefix}${field.name} == true ? null : this.${field.name},';
 }

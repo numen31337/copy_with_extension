@@ -20,21 +20,20 @@ String copyWithValuesTemplate(
       .join(' ');
 
   final constructorBody =
-      isAbstract
-          ? ''
-          : '{ return ${spec.constructorReference}($paramsInput); }';
+      isAbstract ? '' : '{ return ${spec.reconstruct(paramsInput)}; }';
   final callParameters =
       constructorInput.trim().isEmpty ? '' : '{$constructorInput}';
 
   return '''
         /// Creates a new instance with the provided field values.
-        /// Passing `null` to a nullable field nullifies it, while `null` for a non-nullable field is ignored.${spec.skipFields ? '' : ' To update a single field use `${spec.typeAnnotation}(...).copyWith.fieldName(value)`.'}
+        /// Omitted fields keep their values; explicit `null` clears nullable fields.
+        /// The public API rejects `null` for non-nullable fields.${spec.skipFields ? '' : ' To update a single field use `${spec.exampleReceiver}.copyWith.fieldName(value)`.'}
         ///
         /// Example:
         /// ```dart
-        /// ${spec.typeAnnotation}(...).copyWith(id: 12, name: "My name")
+        /// ${spec.exampleReceiver}.copyWith(id: 12, name: "My name")
         /// ```
-        ${isAbstract ? '' : '@override\n        '}${spec.typeAnnotation} call($callParameters) $constructorBody
+        ${isAbstract ? '' : '@${spec.overrideAnnotation}\n        '}${spec.typeAnnotation} call($callParameters) $constructorBody
     ''';
 }
 
@@ -46,7 +45,7 @@ String _callParameter(ResolvedCopyWithField field, {required bool isAbstract}) {
   }
   // The implementation uses [$CopyWithPlaceholder] to detect whether a
   // parameter was passed.
-  return '${field.annotationPrefix}Object? ${field.name} = const \$CopyWithPlaceholder(),';
+  return '${field.annotationPrefix}${field.inputType} ${field.name} = const ${field.placeholderType}(),';
 }
 
 /// Builds a single argument for the constructor invocation inside `call`.
@@ -57,6 +56,6 @@ String _constructorArg(ResolvedCopyWithField field) {
 
   return '''${field.constructorArgPrefix}${field.placeholderCheckExpression}
         ? _value.${field.name}
-        // ignore: cast_nullable_to_non_nullable
-        : ${field.name} as ${field.type},''';
+        ${field.requiresCast ? '// ignore: cast_nullable_to_non_nullable' : ''}
+        : ${field.replacementExpression},''';
 }

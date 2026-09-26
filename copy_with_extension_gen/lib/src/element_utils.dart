@@ -3,7 +3,22 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:analyzer/dart/element/nullability_suffix.dart';
 import 'package:analyzer/dart/element/type.dart'
-    show DartType, FunctionType, ParameterizedType, RecordType;
+    show
+        DartType,
+        FunctionType,
+        ParameterizedType,
+        RecordType,
+        TypeParameterType,
+        NeverType;
+
+/// Resolves named types in their surrounding function-type binder scope.
+/// Built-in types such as `Never` have no declaration element.
+typedef TypeReference =
+    String Function(
+      String name,
+      Element? element,
+      Set<String> localTypeParameters,
+    );
 
 /// Utilities for working with analyzer elements and types.
 class ElementUtils {
@@ -17,13 +32,21 @@ class ElementUtils {
   ///
   /// If [nameOnly] is `false`: `class MyClass<T extends String, Y>` returns
   /// `<T extends String, Y>`.
-  static String typeParametersString(ClassElement classElement, bool nameOnly) {
+  static String typeParametersString(
+    TypeParameterizedElement classElement,
+    bool nameOnly, {
+    TypeReference? reference,
+  }) {
     final names = classElement.typeParameters
         .map(
           (e) =>
               nameOnly
                   ? e.displayName
-                  : _typeParameterWithPrefix(classElement.library, e),
+                  : _typeParameterWithPrefix(
+                    classElement.library,
+                    e,
+                    reference,
+                  ),
         )
         .join(', ');
     return names.isNotEmpty ? '<$names>' : '';
@@ -31,7 +54,11 @@ class ElementUtils {
 
   /// Recursively builds the display name for [type] including any import
   /// prefixes required to reference symbols from other libraries.
-  static String typeNameWithPrefix(LibraryElement library, DartType type) {
+  static String typeNameWithPrefix(
+    LibraryElement library,
+    DartType type, {
+    TypeReference? reference,
+  }) {
     final nullability =
         type.nullabilitySuffix == NullabilitySuffix.question ? '?' : '';
 
@@ -39,10 +66,11 @@ class ElementUtils {
     if (alias != null) {
       final aliasElement = alias.element;
       final aliasName =
+          reference?.call(aliasElement.displayName, aliasElement, const {}) ??
           '${libraryImportPrefix(library, aliasElement.library)}${aliasElement.name}';
       if (alias.typeArguments.isNotEmpty) {
         final args = alias.typeArguments
-            .map((t) => typeNameWithPrefix(library, t))
+            .map((t) => typeNameWithPrefix(library, t, reference: reference))
             .join(', ');
         return '$aliasName<$args>$nullability';
       }
@@ -50,23 +78,24 @@ class ElementUtils {
     }
 
     if (type is FunctionType) {
-      return '${_functionTypeNameWithPrefix(library, type)}$nullability';
+      return '${_functionTypeNameWithPrefix(library, type, reference)}$nullability';
     }
 
     if (type is RecordType) {
-      return '${_recordTypeNameWithPrefix(library, type)}$nullability';
+      return '${_recordTypeNameWithPrefix(library, type, reference)}$nullability';
     }
 
     if (type is ParameterizedType) {
       final element = type.element;
       final name =
           element != null
-              ? '${libraryImportPrefix(library, element.library)}${element.name}'
+              ? reference?.call(element.displayName, element, const {}) ??
+                  '${libraryImportPrefix(library, element.library)}${element.name}'
               : displayStringWithoutNullability(type);
 
       if (type.typeArguments.isNotEmpty) {
         final args = type.typeArguments
-            .map((t) => typeNameWithPrefix(library, t))
+            .map((t) => typeNameWithPrefix(library, t, reference: reference))
             .join(', ');
         return '$name<$args>$nullability';
       }
@@ -74,22 +103,42 @@ class ElementUtils {
     }
 
     final displayName = displayStringWithoutNullability(type);
+    if (reference != null && (type is TypeParameterType || type is NeverType)) {
+      return '${reference(displayName, type is NeverType ? null : type.element, const {})}$nullability';
+    }
     return '${libraryImportPrefix(library, type.element?.library)}$displayName$nullability';
   }
 
   static String _functionTypeNameWithPrefix(
     LibraryElement library,
     FunctionType type,
+    TypeReference? reference,
   ) {
-    final returnType = typeNameWithPrefix(library, type.returnType);
+    final outerReference = reference;
+    if (outerReference != null) {
+      reference =
+          (name, element, innerParameters) => outerReference(name, element, {
+            ...innerParameters,
+            ...type.typeParameters.map((p) => p.displayName),
+          });
+    }
+    final returnType = typeNameWithPrefix(
+      library,
+      type.returnType,
+      reference: reference,
+    );
     final typeParameters = type.typeParameters
-        .map((parameter) => _typeParameterWithPrefix(library, parameter))
+        .map(
+          (parameter) =>
+              _typeParameterWithPrefix(library, parameter, reference),
+        )
         .join(', ');
     final typeParametersSuffix =
         typeParameters.isNotEmpty ? '<$typeParameters>' : '';
     final parameters = _functionParametersWithPrefix(
       library,
       type.formalParameters,
+      reference,
     );
 
     return '$returnType Function$typeParametersSuffix($parameters)';
@@ -98,24 +147,30 @@ class ElementUtils {
   static String _typeParameterWithPrefix(
     LibraryElement library,
     TypeParameterElement parameter,
+    TypeReference? reference,
   ) {
     final bound = parameter.bound;
     if (bound == null) {
       return parameter.displayName;
     }
-    return '${parameter.displayName} extends ${typeNameWithPrefix(library, bound)}';
+    return '${parameter.displayName} extends ${typeNameWithPrefix(library, bound, reference: reference)}';
   }
 
   static String _functionParametersWithPrefix(
     LibraryElement library,
     List<FormalParameterElement> parameters,
+    TypeReference? reference,
   ) {
     final requiredPositional = <String>[];
     final optionalPositional = <String>[];
     final named = <String>[];
 
     for (final parameter in parameters) {
-      final parameterType = typeNameWithPrefix(library, parameter.type);
+      final parameterType = typeNameWithPrefix(
+        library,
+        parameter.type,
+        reference: reference,
+      );
       if (parameter.isNamed) {
         final required = parameter.isRequiredNamed ? 'required ' : '';
         named.add('$required$parameterType ${parameter.displayName}');
@@ -143,16 +198,20 @@ class ElementUtils {
   static String _recordTypeNameWithPrefix(
     LibraryElement library,
     RecordType type,
+    TypeReference? reference,
   ) {
     final positional =
         type.positionalFields
-            .map((field) => typeNameWithPrefix(library, field.type))
+            .map(
+              (field) =>
+                  typeNameWithPrefix(library, field.type, reference: reference),
+            )
             .toList();
     final named =
         type.namedFields
             .map(
               (field) =>
-                  '${typeNameWithPrefix(library, field.type)} ${field.name}',
+                  '${typeNameWithPrefix(library, field.type, reference: reference)} ${field.name}',
             )
             .toList();
 

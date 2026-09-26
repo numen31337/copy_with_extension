@@ -113,7 +113,7 @@ class CopyWithGenerationContext {
 
     // Suppressor 2: the super link was dropped when this constructor did not
     // re-declare every mutable field of the super constructor.
-    if (!await _redeclaresSuperMutableFields(annotatedSuper, categorized)) {
+    if (!await _hasUnsafeInheritedCopyWithNull(annotatedSuper, categorized)) {
       return;
     }
 
@@ -146,9 +146,9 @@ class CopyWithGenerationContext {
     return null;
   }
 
-  /// Whether this class' constructor exposes every mutable field of
-  /// [annotatedSuper]'s constructor.
-  Future<bool> _redeclaresSuperMutableFields(
+  /// Whether the legacy inheritance conditions apply and a supertype actually
+  /// generates a `copyWithNull` method that could discard this class' fields.
+  Future<bool> _hasUnsafeInheritedCopyWithNull(
     _AnnotatedSuper annotatedSuper,
     _CategorizedFields categorized,
   ) async {
@@ -166,10 +166,48 @@ class CopyWithGenerationContext {
             .map((field) => field.name)
             .toSet();
 
-    return categorized.uniqueFields
+    if (!categorized.uniqueFields
         .map((field) => field.name)
         .toSet()
-        .containsAll(superMutableFieldNames);
+        .containsAll(superMutableFieldNames)) {
+      return false;
+    }
+
+    if (superResult.fields.any(
+      (field) => field.nullable && !field.fieldAnnotation.immutable,
+    )) {
+      return true;
+    }
+
+    // A generic parent may enable the option without emitting a method.
+    // Farther ancestors and implemented interfaces can still supply one.
+    for (final supertype in classElement.allSupertypes) {
+      final element = supertype.element;
+      if (element is! ClassElement || element == annotatedSuper.element) {
+        continue;
+      }
+      final value = _copyWithChecker.firstAnnotationOf(element);
+      if (value == null) continue;
+      final annotation = AnnotationUtils.readClassAnnotation(
+        settings,
+        ConstantReader(value),
+      );
+      if (!annotation.copyWithNull) continue;
+      final result = await ConstructorUtils.constructorFields(
+        element,
+        annotation.constructor,
+        FieldResolutionConfig(
+          annotations: settings.annotations,
+          immutableDefault: annotation.immutableFields,
+        ),
+      );
+      if (result.fields.any(
+        (field) => field.nullable && !field.fieldAnnotation.immutable,
+      )) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void _validateFieldNullability(List<ConstructorParameterInfo> fields) {
@@ -196,11 +234,14 @@ class ResolvedCopyWithField {
     required this.name,
     required this.type,
     required this.nullable,
+    required this.requiresRuntimeNullCheck,
     required this.isMutable,
     required this.isPositioned,
     required this.constructorParamName,
     required this.metadata,
-  });
+  }) : recordPlaceholderType = null,
+       inputType = 'Object?',
+       requiresCast = true;
 
   /// Projects a [ConstructorParameterInfo] into the spec-level view.
   factory ResolvedCopyWithField.from(ConstructorParameterInfo parameter) {
@@ -208,6 +249,7 @@ class ResolvedCopyWithField {
       name: parameter.name,
       type: parameter.type,
       nullable: parameter.nullable,
+      requiresRuntimeNullCheck: parameter.requiresRuntimeNullCheck,
       isMutable: !parameter.fieldAnnotation.immutable,
       isPositioned: parameter.isPositioned,
       constructorParamName: parameter.constructorParamName,
@@ -215,23 +257,49 @@ class ResolvedCopyWithField {
     );
   }
 
+  ResolvedCopyWithField.record({
+    required this.name,
+    required this.type,
+    required this.nullable,
+    required this.isMutable,
+    required this.isPositioned,
+    required String placeholderType,
+    required this.inputType,
+    required this.requiresCast,
+  }) : constructorParamName = name,
+       metadata = const [],
+       requiresRuntimeNullCheck = false,
+       recordPlaceholderType = placeholderType;
+
   final String name;
   final String type;
   final bool nullable;
+  final bool requiresRuntimeNullCheck;
   final bool isMutable;
   final bool isPositioned;
   final String constructorParamName;
   final List<String> metadata;
+  final String? recordPlaceholderType;
+  final String inputType;
+  final bool requiresCast;
+
+  String get replacementExpression => requiresCast ? '$name as $type' : name;
+
+  String get placeholderType =>
+      recordPlaceholderType ?? r'$CopyWithPlaceholder';
 
   bool get supportsCopyWithNull => nullable && isMutable;
 
   /// The conditional expression that tests whether the parameter was
-  /// explicitly supplied by the caller. Non-nullable fields include an
-  /// additional `|| $name == null` guard so that passing `null` for a
-  /// non-nullable parameter is treated as "not supplied".
+  /// explicitly supplied by the caller. Classes ignore null supplied for a
+  /// non-nullable parameter; generic parameters check their instantiated type.
   String get placeholderCheckExpression =>
-      nullable
+      recordPlaceholderType != null
+          ? 'const $recordPlaceholderType() == $name'
+          : nullable
           ? '$name == const \$CopyWithPlaceholder()'
+          : requiresRuntimeNullCheck
+          ? '$name == const \$CopyWithPlaceholder() || ($name == null && null is! $type)'
           : '$name == const \$CopyWithPlaceholder() || $name == null';
 
   /// Metadata annotations formatted as a prefix for generated parameters.
@@ -255,6 +323,9 @@ class ResolvedCopyWithSpec {
     required this.constructorName,
     required this.skipFields,
     required this.generatesCopyWithNull,
+    this.isRecord = false,
+    this.clearFlagType = 'bool',
+    this.overrideAnnotation = 'override',
     required List<ResolvedCopyWithField> constructorFields,
     required List<ResolvedCopyWithField> uniqueFields,
     required List<ResolvedCopyWithField> uniqueMutableFields,
@@ -273,6 +344,39 @@ class ResolvedCopyWithSpec {
        proxyMethodFields = List<ResolvedCopyWithField>.unmodifiable(
          proxyMethodFields,
        );
+
+  factory ResolvedCopyWithSpec.record({
+    required String name,
+    required bool isPrivate,
+    required String typeParametersAnnotation,
+    required String typeParametersNames,
+    required CopyWithAnnotation annotation,
+    required List<ResolvedCopyWithField> fields,
+    required String clearFlagType,
+    required String overrideAnnotation,
+  }) {
+    final categorized = _CategorizedFields.from(
+      fields,
+      skipFields: annotation.skipFields,
+    );
+    return ResolvedCopyWithSpec._(
+      isPrivate: isPrivate,
+      className: name,
+      typeParametersAnnotation: typeParametersAnnotation,
+      typeParametersNames: typeParametersNames,
+      constructorName: null,
+      skipFields: annotation.skipFields,
+      generatesCopyWithNull: annotation.copyWithNull,
+      isRecord: true,
+      clearFlagType: clearFlagType,
+      overrideAnnotation: overrideAnnotation,
+      constructorFields: fields,
+      uniqueFields: categorized.uniqueFields,
+      uniqueMutableFields: categorized.uniqueMutableFields,
+      uniqueNullableMutableFields: categorized.uniqueNullableMutableFields,
+      proxyMethodFields: categorized.proxyMethodFields,
+    );
+  }
 
   /// Lightweight constructor for template-focused tests.
   factory ResolvedCopyWithSpec.testing({
@@ -318,6 +422,9 @@ class ResolvedCopyWithSpec {
   final String? constructorName;
   final bool skipFields;
   final bool generatesCopyWithNull;
+  final bool isRecord;
+  final String clearFlagType;
+  final String overrideAnnotation;
   final List<ResolvedCopyWithField> constructorFields;
   final List<ResolvedCopyWithField> uniqueFields;
   final List<ResolvedCopyWithField> uniqueMutableFields;
@@ -326,6 +433,18 @@ class ResolvedCopyWithSpec {
 
   String get typeAnnotation => '$className$typeParametersNames';
   String get privacyPrefix => isPrivate ? '_' : '';
+
+  String reconstruct(String arguments) =>
+      isRecord
+          ? constructorFields.isEmpty
+              ? '_value'
+              : '($arguments)'
+          : '$constructorReference($arguments)';
+
+  String get recordDeclarationPrefix =>
+      isRecord ? '// copy_with_extension_gen: record $className\n' : '';
+
+  String get exampleReceiver => isRecord ? 'record' : '$typeAnnotation(...)';
 
   /// Fully qualified constructor invocation target, e.g. `Foo<T>` for the
   /// unnamed constructor or `Foo<T>.named` for a named constructor.

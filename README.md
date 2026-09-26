@@ -2,7 +2,7 @@
 [![Pub Package - copy\_with\_extension\_gen](https://img.shields.io/pub/v/copy_with_extension_gen?label=copy_with_extension_gen)](https://pub.dev/packages/copy_with_extension_gen)
 [![CI](https://github.com/numen31337/copy_with_extension/actions/workflows/run_tests.yml/badge.svg?branch=main)](https://github.com/numen31337/copy_with_extension/actions/workflows/run_tests.yml)
 
-Provides [Dart Build System](https://pub.dev/packages/build) builder for generating `copyWith` extensions for classes annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension).
+Provides a [Dart Build System](https://pub.dev/packages/build) builder for generating `copyWith` extensions for classes and direct record typedefs annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension).
 
 For usage details, see [copy_with_extension_gen](https://pub.dev/packages/copy_with_extension_gen).
 

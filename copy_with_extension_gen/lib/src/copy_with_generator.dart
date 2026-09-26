@@ -1,9 +1,11 @@
 // ignore_for_file: experimental_member_use
 
-import 'package:analyzer/dart/element/element.dart' show ClassElement, Element;
+import 'package:analyzer/dart/element/element.dart'
+    show ClassElement, Element, TypeAliasElement;
 import 'package:build/build.dart' show BuildStep;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/annotation_utils.dart';
+import 'package:copy_with_extension_gen/src/record_resolution_context.dart';
 import 'package:copy_with_extension_gen/src/resolved_copy_with_spec.dart';
 import 'package:copy_with_extension_gen/src/settings.dart';
 import 'package:copy_with_extension_gen/src/templates/extension_template.dart';
@@ -27,11 +29,20 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) async {
-    final classElement = _expectClassElement(element);
     final classAnnotation = AnnotationUtils.readClassAnnotation(
       settings,
       annotation,
     );
+    if (element is TypeAliasElement) {
+      return extensionTemplate(
+        await RecordResolutionContext(
+          element,
+          classAnnotation,
+          buildStep,
+        ).resolve(),
+      );
+    }
+    final classElement = _expectClassElement(element);
     final spec =
         await CopyWithGenerationContext(
           classElement: classElement,
@@ -47,7 +58,7 @@ class CopyWithGenerator extends GeneratorForAnnotation<CopyWith> {
       return element;
     }
     throw InvalidGenerationSourceError(
-      'The @CopyWith annotation is only supported on classes. "$element" is not a class.',
+      'The @CopyWith annotation is only supported on classes or direct record typedefs. "$element" is not a supported target.',
       element: element,
     );
   }

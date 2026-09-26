@@ -17,7 +17,7 @@ String copyWithProxyTemplate(ResolvedCopyWithSpec spec) {
   final nonNullableFunctions = spec.proxyMethodFields
       .map((field) {
         return '''
-    @override
+    @${spec.overrideAnnotation}
     ${_proxyMethodSignature(field, spec.typeAnnotation)} => call(${field.name}: ${field.name});
     ''';
       })
@@ -33,13 +33,13 @@ String copyWithProxyTemplate(ResolvedCopyWithSpec spec) {
       .join('\n');
 
   return '''
-      abstract class ${spec.proxyInterfaceName} {
+      ${spec.recordDeclarationPrefix}abstract class ${spec.proxyInterfaceName} {
         $nonNullableFunctionsInterface
 
         ${copyWithValuesTemplate(spec, isAbstract: true)};
       }
 
-      /// Callable proxy for `copyWith` functionality.
+      ${spec.recordDeclarationPrefix}/// Callable proxy for `copyWith` functionality.
       /// Use as `instanceOf${spec.className}.copyWith(...)`${spec.skipFields ? '' : ' or call `instanceOf${spec.className}.copyWith.fieldName(value)` for a single field'}.
       class ${spec.proxyImplName} implements ${spec.proxyInterfaceRef} {
         const ${spec.proxyImplBaseName}(this._value);
