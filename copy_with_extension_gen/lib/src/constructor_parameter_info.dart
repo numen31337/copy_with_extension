@@ -2,8 +2,8 @@
 
 import 'package:analyzer/dart/constant/value.dart' show DartObject;
 import 'package:analyzer/dart/element/element.dart';
-import 'package:analyzer/dart/element/nullability_suffix.dart';
-import 'package:analyzer/dart/element/type.dart' show DartType, DynamicType;
+import 'package:analyzer/dart/element/type.dart';
+import 'package:analyzer/dart/element/type_system.dart' show TypeSystem;
 import 'package:copy_with_extension/copy_with_extension.dart';
 import 'package:copy_with_extension_gen/src/class_field_lookup.dart';
 import 'package:copy_with_extension_gen/src/copy_with_field_annotation.dart';
@@ -17,6 +17,7 @@ class ConstructorParameterInfo {
     required this.constructorParamName,
     required this.name,
     required this.nullable,
+    required this.requiresRuntimeNullCheck,
     required this.type,
     required this.fieldAnnotation,
     required this.isPositioned,
@@ -31,9 +32,11 @@ class ConstructorParameterInfo {
   /// Parameter / field type.
   final String name;
 
-  /// If the type is nullable. `dynamic` lacks a nullability flag but accepts
-  /// `null`, so it's treated as nullable.
+  /// Whether the declared type accepts null for every type argument.
   final bool nullable;
+
+  /// Whether accepting null depends on the instantiated type arguments.
+  final bool requiresRuntimeNullCheck;
 
   /// Type name with nullability flag.
   final String type;
@@ -69,9 +72,11 @@ class ConstructorParameterInfoFactory {
     required FieldResolutionConfig config,
     ClassFieldLookupCache? fieldLookup,
   }) : _config = config,
+       _typeSystem = classElement.library.typeSystem,
        _fieldLookup = fieldLookup ?? ClassFieldLookupCache(classElement);
 
   final FieldResolutionConfig _config;
+  final TypeSystem _typeSystem;
   final ClassFieldLookupCache _fieldLookup;
 
   ConstructorParameterInfo create(
@@ -81,11 +86,16 @@ class ConstructorParameterInfoFactory {
   }) {
     final resolvedFieldName = fieldName ?? element.displayName;
     final classField = _fieldLookup.find(resolvedFieldName);
+    final nullable = _typeSystem.isNullable(element.type);
 
     return ConstructorParameterInfo._(
       constructorParamName: element.displayName,
       name: resolvedFieldName,
-      nullable: _isNullable(element.type),
+      nullable: nullable,
+      requiresRuntimeNullCheck:
+          !nullable &&
+          _typeSystem.isPotentiallyNullable(element.type) &&
+          _hasVariableNullability(element.type),
       type: _fullTypeName(element),
       fieldAnnotation: _readFieldAnnotation(
         classField,
@@ -94,10 +104,20 @@ class ConstructorParameterInfoFactory {
       ),
       isPositioned: isPositioned,
       classField: classField,
-      classFieldNullable: classField != null && _isNullable(classField.type),
+      classFieldNullable:
+          classField != null && _typeSystem.isNullable(classField.type),
       metadata: _readFieldMetadata(classField, _config.annotations),
     );
   }
+}
+
+// Only a type parameter (possibly inside FutureOr) can change nullability
+// between instantiations. Container type arguments do not make containers nullable.
+bool _hasVariableNullability(DartType type) {
+  if (type is TypeParameterType) return true;
+  return type is InterfaceType &&
+      type.isDartAsyncFutureOr &&
+      _hasVariableNullability(type.typeArguments.single);
 }
 
 /// Returns full type name including namespace for all nested type arguments.
@@ -142,11 +162,6 @@ CopyWithFieldAnnotation _readFieldAnnotation(
   final immutable = reader.peek('immutable')?.boolValue;
 
   return CopyWithFieldAnnotation(immutable: immutable ?? defaults.immutable);
-}
-
-bool _isNullable(DartType type) {
-  return type.nullabilitySuffix != NullabilitySuffix.none ||
-      type is DynamicType;
 }
 
 /// Restores metadata annotations for [field] that need to be transferred to

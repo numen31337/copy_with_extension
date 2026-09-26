@@ -1,6 +1,6 @@
 [![Pub Package](https://img.shields.io/pub/v/copy_with_extension_gen.svg)](https://pub.dev/packages/copy_with_extension_gen)
 
-This package provides a builder for the [Dart Build System](https://pub.dev/packages/build) that generates `copyWith` extensions for classes annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension). For a detailed explanation of how this package works, check out [my blog article](https://alexander-kirsch.com/blog/dart-extensions/).
+This package provides a builder for the [Dart Build System](https://pub.dev/packages/build) that generates `copyWith` extensions for classes and direct record typedefs annotated with [copy_with_extension](https://pub.dev/packages/copy_with_extension). For a detailed explanation of how this package works, check out [my blog article](https://alexander-kirsch.com/blog/dart-extensions/).
 
 This library lets you copy immutable objects and change individual fields as follows:
 
@@ -16,12 +16,6 @@ myInstance.copyWithNull(fieldName: true, anotherField: true) // Nullify multiple
 ## Usage
 
 #### In your `pubspec.yaml` file
-- Add to `dependencies` section `copy_with_extension: ^17.1.0`
-- Add to `dev_dependencies` section `copy_with_extension_gen: ^17.1.0`
-- Add to `dev_dependencies` section `build_runner: ^2.10.0`
-- Set `environment` to at least Dart `3.7.0` version like so: `">=3.7.0 <4.0.0"`
-
-Your `pubspec.yaml` should look like this:
 
 ```yaml
 environment:
@@ -29,12 +23,12 @@ environment:
 
 dependencies:
   ...
-  copy_with_extension: ^17.1.0
+  copy_with_extension: ^18.0.0
   
 dev_dependencies:
   ...
   build_runner: ^2.10.0
-  copy_with_extension_gen: ^17.1.0
+  copy_with_extension_gen: ^18.0.0
 ```
 
 #### Annotate your class with `CopyWith` annotation
@@ -73,11 +67,49 @@ final copiedTwo = result.copyWith(id: "foo", text: null); // Results in BasicCla
 
 ## Additional features
 
-#### Change Multiple Fields Simultaneously
-Modify several fields at once with the `copyWith()` function:
+#### Records
+
+Annotate a direct, non-nullable record typedef and generate its part file:
+
 ```dart
-myInstance.copyWith(fieldName: "test", anotherField: "test");
+import 'package:copy_with_extension/copy_with_extension.dart';
+
+part 'user.g.dart';
+
+@CopyWith(copyWithNull: true)
+typedef User = ({String name, String? note});
+
+void main() {
+  const User user = (name: 'Ada', note: 'old');
+  final User copy = user.copyWith(name: 'Grace', note: null);
+  final User single = user.copyWith.name('Grace');
+  final User cleared = user.copyWithNull(note: true);
+}
 ```
+
+Copies are shallow: omitted components keep their values, and nested values are replaced whole, not traversed. Explicit `null` clears nullable components; wrong types and non-nullable `null` are rejected by the public API.
+
+Named, positional, mixed, singleton, empty and generic records are supported. Positional components use `$1`, `$2`, etc.: `pair.copyWith($2: 3)` or `pair.copyWith.$1(4)`. Nullable receivers can use `record?.copyWith(...)`.
+
+Options work as for classes: `skipFields` removes single-component helpers; `immutableFields` exposes only `copyWith()`. When enabled, `copyWithNull` offers flags for always-nullable types such as `T?`, not bare `T`. A bare `T` instantiated as `String?` can still be cleared through `copyWith(value: null)`.
+
+Aliases with equal or overlapping record shapes can cause extension conflicts. Select the extension explicitly, also when a component is named `copyWith` or `copyWithNull`:
+
+```dart
+$UserCopyWith(user).copyWith(name: 'Grace');
+// With a prefixed import: models.$UserCopyWith(user).copyWith(...)
+```
+
+<details>
+<summary>Record limitations and edge cases</summary>
+
+- Only direct, non-nullable record typedefs are accepted, not alias chains. Component annotations (including `@CopyWithField`), non-null `constructor` options and immediate `void` components are unsupported; functions returning `void` are allowed.
+- A mutable component named `call` requires `skipFields: true`. Other conflicts with types, import prefixes or generated names require a rename or an unambiguous visible import. Generation reports detected conflicts; run analysis after generation to catch collisions with other builders.
+- Imports must expose both `CopyWith` and `$CopyWithPlaceholder`. Referenced types need an unconditional, non-deferred import/export route; no imports are added for you.
+- Record aliases are not distinct types. Import `show`/`hide` can also resolve [extension conflicts](https://dart.dev/language/extension-methods#api-conflicts).
+- Compare record values, not identity. Bypassing types with `dynamic` or passing the reserved omission placeholder as data is outside the copying contract.
+
+</details>
 
 #### Nullifying instance fields
 
@@ -170,8 +202,8 @@ This package is a lightweight alternative for those who only need the `copyWith`
 
 ## How it works
 
-The generated `*.g.dart` file creates an extension on your class that exposes a `copyWith` getter. Calling this getter returns a private proxy class that is both callable and provides methods for each mutable field when `skipFields` is not set.
+Generated extensions expose a typed `copyWith` API for classes and record typedefs. Arguments retain their declared types, so normal calls reject wrong values and `null` for non-nullable fields. Field helpers are omitted when `skipFields` is set.
 
-Each parameter of the proxy's `call` method is typed as `Object?` and defaults to a special constant `$CopyWithPlaceholder`. This sentinel value lets the proxy distinguish between a parameter that was **not** supplied and one that was set to `null`. Fields whose parameter equals `$CopyWithPlaceholder` retain their current value, while any other argument replaces the field value. This approach enables safe nullification of nullable fields without affecting non-nullable ones.
+The private implementation uses `Object?` parameters and `$CopyWithPlaceholder` to distinguish omission from explicit `null`: omitted fields keep their values, while nullable fields can be cleared. Calls through `dynamic` bypass the public type checks. Class callables may ignore `null` for non-nullable fields, but this fallback is not guaranteed for extension types used as type arguments.
 
-When `copyWithNull` is enabled, an additional `copyWithNull` method is generated to nullify fields by passing boolean flags. The proxy class used by `copyWith` internally invokes the appropriate constructor with the updated field values after resolving these placeholders.
+Copies are rebuilt using the selected class constructor or a record expression. When enabled, `copyWithNull` offers flags only for mutable fields whose declared types always accept `null`.

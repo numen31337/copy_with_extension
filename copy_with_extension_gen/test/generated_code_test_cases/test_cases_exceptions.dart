@@ -1,7 +1,7 @@
 part of 'source_gen_entrypoint.dart';
 
 @ShouldThrow(
-  'The @CopyWith annotation is only supported on classes. "Object wrongAnnotation" is not a class.',
+  'The @CopyWith annotation is only supported on classes or direct record typedefs. "Object wrongAnnotation" is not a supported target.',
 )
 // ignore: invalid_annotation_target
 @CopyWith()

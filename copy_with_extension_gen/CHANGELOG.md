@@ -1,3 +1,7 @@
+## 18.0.0 - Record Copying
+* Add shallow `copyWith` support for annotated record typedefs.
+* Fix explicit null clearing for nullable generic class fields, including `FutureOr`.
+
 ## 17.1.0 - Dart 3.13 Primary Constructors
 * Support Dart 3.13 primary constructors, including field aliases and super parameters.
 

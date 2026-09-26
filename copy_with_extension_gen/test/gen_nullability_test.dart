@@ -167,6 +167,8 @@ class _FakeConstructorParameterInfo implements ConstructorParameterInfo {
   @override
   final bool nullable;
   @override
+  bool get requiresRuntimeNullCheck => false;
+  @override
   final String type;
   @override
   final CopyWithFieldAnnotation fieldAnnotation;

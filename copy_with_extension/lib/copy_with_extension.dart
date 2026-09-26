@@ -3,12 +3,12 @@ library;
 
 import 'package:meta/meta_meta.dart';
 
-/// Annotation used to indicate that the `copyWith` extension should be generated for the given class.
+/// Generates a `copyWith` extension for a class or direct record typedef.
 ///
-/// Annotation parameters configure only the class they are written on and are
+/// Annotation parameters configure only the declaration they are written on and are
 /// never inherited from an annotated superclass. Inherited fields are still
 /// included in the generated `copyWith`.
-@Target({TargetKind.classType})
+@Target({TargetKind.classType, TargetKind.typedefType})
 class CopyWith {
   const CopyWith({
     this.copyWithNull,
@@ -23,11 +23,13 @@ class CopyWith {
   /// Prevent the library from generating `copyWith` functions for individual fields e.g. `instance.copyWith.id("123")`, including inherited fields. If you want to use only copyWith(...) function. Default is `false`.
   final bool? skipFields;
 
-  /// Set `constructor` if you want to use a named constructor. The generated fields will be derived from this constructor. If not set, the unnamed constructor is used.
+  /// Selects a named class constructor. Records do not support this option.
+  /// If not set, the unnamed class constructor is used.
   final String? constructor;
 
   /// Treats all fields as immutable by default when set to `true`.
-  /// Fields can still opt out using `@CopyWithField(immutable: false)`.
+  /// Class fields can still opt out using `@CopyWithField(immutable: false)`.
+  /// Record components do not support field annotations.
   /// Defaults to `false`.
   final bool? immutableFields;
 }
