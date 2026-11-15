@@ -6,9 +6,29 @@ import 'package:test/test.dart';
 
 import 'helpers/source_gen_test_utils.dart';
 
-// These tests compile and call generated public APIs. Source comparison is
-// deliberately limited to the separate existing class-output compatibility gate.
+// These tests exercise generated public APIs and consumer diagnostics.
+// Source comparison is deliberately limited to the existing class-output
+// compatibility checks.
 void main() {
+  test('consumer diagnostics support SDK error variants', () async {
+    final consumer = await _Consumer.create();
+    await consumer.write('lib/invalid.dart', '''
+import 'package:copy_with_extension/copy_with_extension.dart';
+class MissingMembers {}
+extension MissingExtension on MissingMembers {}
+void invalid(MissingMembers value) {
+  value.missing(); // error:UNDEFINED_METHOD
+  MissingExtension(value).missing(); // error:UNDEFINED_EXTENSION_METHOD
+  missingFunction(); // error:UNDEFINED_FUNCTION
+}
+@CopyWith(immutableFields: missingOption) // error:CONST_WITH_NON_CONSTANT_ARGUMENT error:UNDEFINED_IDENTIFIER
+class InvalidAnnotation {}
+''');
+    await consumer.get();
+    await consumer.diagnostics('lib/invalid.dart');
+    consumer.complete();
+  });
+
   test(
     'records work in a clean consumer and survive edits and removal',
     () async {
@@ -1021,11 +1041,22 @@ ${versions.entries.map((e) => '  ${e.key}: ${e.value}').join('\n')}
   Future<void> build() => success(['run', 'build_runner', 'build']);
 
   Future<void> diagnostics(String path) async {
+    // Match equivalent compiler diagnostics across SDK versions.
+    String normalizeCode(String code) => switch (code) {
+      'UNDEFINED_INSTANCE_MEMBER_READ' => 'UNDEFINED_METHOD',
+      'UNDEFINED_EXTENSION_MEMBER_READ' => 'UNDEFINED_EXTENSION_METHOD',
+      'UNDEFINED_UNQUALIFIED_NAME_READ' ||
+      'UNDEFINED_FUNCTION' => 'UNDEFINED_IDENTIFIER',
+      _ => code,
+    };
+
     final source = File('${directory.path}/$path').readAsLinesSync();
     final expected = <String>[];
     for (var i = 0; i < source.length; i++) {
       for (final marker in RegExp(r'error:(\w+)').allMatches(source[i])) {
-        expected.add('ERROR:COMPILE_TIME_ERROR:${i + 1}:${marker[1]}');
+        expected.add(
+          'ERROR:COMPILE_TIME_ERROR:${i + 1}:${normalizeCode(marker[1]!)}',
+        );
       }
     }
     final result = await run(['analyze', '--format=machine', path]);
@@ -1033,9 +1064,17 @@ ${versions.entries.map((e) => '  ${e.key}: ${e.value}').join('\n')}
     for (final line in '${result.stdout}\n${result.stderr}'.split('\n')) {
       final parts = line.split('|');
       if (parts.length < 8) continue;
+      // New SDKs omit the secondary constant error for an undefined name.
+      if (parts[2] == 'UNDEFINED_UNQUALIFIED_NAME_READ') {
+        expected.remove(
+          'ERROR:COMPILE_TIME_ERROR:${parts[4]}:CONST_WITH_NON_CONSTANT_ARGUMENT',
+        );
+      }
       // Include warnings and errors: an unrelated generated diagnostic is not
       // evidence that the intended invalid public call was rejected.
-      actual.add('${parts[0]}:${parts[1]}:${parts[4]}:${parts[2]}');
+      actual.add(
+        '${parts[0]}:${parts[1]}:${parts[4]}:${normalizeCode(parts[2])}',
+      );
       if (parts[3] != '${directory.path}/$path') _failed = true;
     }
     actual.sort();
