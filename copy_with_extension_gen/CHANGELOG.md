@@ -1,3 +1,6 @@
+## 18.0.1
+* Support `build` 5.0.0 and `build_runner` 2.17.x. Fixes [#137](https://github.com/numen31337/copy_with_extension/issues/137).
+
 ## 18.0.0 - Record Copying
 * Add shallow `copyWith` support for annotated record typedefs.
 * Fix explicit null clearing for nullable generic class fields, including `FutureOr`.
